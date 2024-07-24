@@ -1,0 +1,44 @@
+  spring:
+    application:
+      name: identity-service
+    datasource:
+      url: ${DBMS_CONNECTION}
+      driverClassName: "com.mysql.cj.jdbc.Driver"
+      username: ${DBMS_USERNAME}
+      password: ${DBMS_PASSWORD}
+    jpa:
+      hibernate:
+        ddl-auto: update
+      show-sql: true
+    kafka:
+      bootstrap-servers: localhost:9094
+      producer:
+        key-serializer: org.apache.kafka.common.serialization.StringSerializer
+        value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  server:
+    port: 7777
+    servlet:
+      context-path: /identity
+
+  jwt:
+    valid-duration: 6000 # in second
+    refreshtable-duration: 1200 # in seconds
+
+  outbound:
+    identity:
+      client-id: "SECRET"
+      client-secret: "SECRET"
+      redirect-uri: "SECRET"
+
+  app:
+    services:
+      profile: http://localhost:8081/profile
+      book: http://localhost:8084/book
+      payment: http://localhost:8085/payment
+
+  vnpay:
+    payment-url: "SECRET"
+    tmn-code: "SECRET"
+    hash-secret: "SECRET"
+

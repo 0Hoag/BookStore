@@ -1,0 +1,5 @@
+
+~
+java:S6813"BRemove this field injection and use constructor injection instead.(êæÄŞJ$9fb49666-6cd0-424e-96ba-f3b99526c8f0
+
+java:S3305"RInject this field value directly into "filterChain", the only method that uses it.(’„ÑJ$5b3f177a-de63-4d5b-9677-e6cf1e285d6f
