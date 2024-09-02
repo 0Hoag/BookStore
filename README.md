@@ -14,26 +14,26 @@ Bookteria là một mạng xã hội sáng tạo dành cho những người yêu
 <br>
 🚀 Bắt đầu<br>
 Yêu cầu tiên quyết<br>
-
+<br>
 Node.js (v14.0.0 trở lên)<br>
 npm (v6.0.0 trở lên)<br>
-
+<br>
 1. Clone repository:<br>
 git clone https://github.com/0Hoag/BookStore.git<br>
 <br>
 2. Di chuyển vào thư mục dự án:<br>
 cd bookteria<br>
-
+<br>
 3. Di chuyển vào thư mục web-app:<br>
 cd web-app<br>
-
+<br>
 4. Cài đặt dependencies:<br>
 npm install<br>
-
+<br>
 ⚠️ Quan trọng: Đảm bảo bạn chạy npm install trước khi tiến hành các bước tiếp theo.<br>
-
+<br>
 Chạy ứng dụng<br>
 Sau khi cài đặt dependencies, khởi động ứng dụng:<br>
 npm start<br>
-
+<br>
 Truy cập http://localhost:3000 trên trình duyệt để sử dụng Bookteria.<br>
