@@ -1,0 +1,182 @@
+/* Tạo hiệu ứng nền */
+.background {
+  position: relative;
+  overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Nền bầu trời đêm */
+.night-sky {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  overflow: hidden;
+  z-index: 0; /* Đặt z-index thấp hơn Card */
+}
+
+/* Container chứa thẻ login */
+.card-container {
+  position: relative;
+  z-index: 2; /* Đảm bảo Card ở trên cùng */
+}
+
+/* Mặt trời */
+.sun {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background-color: #f1c40f;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 30px 10px rgba(241, 196, 15, 0.8);
+  z-index: 1; /* Z-index cao hơn để hệ mặt trời không bị che khuất */
+}
+
+/* Sao băng */
+.shooting-star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background-color: #fff;
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: shoot 1s linear;
+}
+
+@keyframes shoot {
+  0% {
+    opacity: 1;
+    transform: translateX(0) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(100vw) translateY(100vh);
+  }
+}
+
+/* Ngôi sao lấp lánh */
+.twinkling-stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0; /* Đảm bảo các ngôi sao lấp lánh không che khuất các hành tinh */
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background-color: #fff;
+  border-radius: 50%;
+  opacity: 0.8;
+  animation: twinkle 1.5s infinite;
+}
+
+@keyframes twinkle {
+  0% {
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0.8;
+  }
+}
+
+/* Hành tinh và quỹ đạo của các hành tinh */
+.planet {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  transform-origin: center;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2; /* Đảm bảo hành tinh nằm trên quỹ đạo */
+  animation: rotate-planet 10s linear infinite;
+}
+
+.planet-inner {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Các quỹ đạo của hành tinh */
+.orbit-1, .orbit-2, .orbit-3, .orbit-4, .orbit-5 {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px dashed rgba(255, 255, 255, 0.5);
+  z-index: 1; /* Đặt z-index thấp hơn hành tinh */
+}
+
+.orbit-1 {
+  width: 150px;
+  height: 150px;
+}
+
+.orbit-2 {
+  width: 200px;
+  height: 200px;
+}
+
+.orbit-3 {
+  width: 250px;
+  height: 250px;
+}
+
+.orbit-4 {
+  width: 300px;
+  height: 300px;
+}
+
+.orbit-5 {
+  width: 350px;
+  height: 350px;
+}
+
+/* Màu sắc của các hành tinh */
+.planet-1 {
+  background-color: #3498db; /* Màu sắc của hành tinh 1 */
+}
+
+.planet-2 {
+  background-color: #e74c3c; /* Màu sắc của hành tinh 2 */
+}
+
+.planet-3 {
+  background-color: #f39c12; /* Màu sắc của hành tinh 3 */
+}
+
+.planet-4 {
+  background-color: #9b59b6; /* Màu sắc của hành tinh 4 */
+}
+
+.planet-5 {
+  background-color: #1abc9c; /* Màu sắc của hành tinh 5 */
+}
+
+/* Hiệu ứng quay của hành tinh */
+@keyframes rotate-planet {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}

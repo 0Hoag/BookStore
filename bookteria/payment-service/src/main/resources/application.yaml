@@ -1,0 +1,10 @@
+server:
+  port: 8085
+  servlet:
+    context-path: /payment
+
+spring:
+  data:
+    mongodb:
+      port: 27020
+      database: payment

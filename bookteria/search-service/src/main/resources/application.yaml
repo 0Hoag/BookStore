@@ -1,0 +1,10 @@
+server:
+  port: 8090
+  servlet:
+    context-path: /search
+
+spring:
+  data:
+    mongodb:
+      port: 27025
+      database: search

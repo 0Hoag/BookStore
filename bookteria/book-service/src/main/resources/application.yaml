@@ -1,0 +1,13 @@
+server:
+  port: 8084
+  servlet:
+    context-path: /book
+
+spring:
+  data:
+    mongodb:
+      port: 27017
+      database: bookstore
+
+dropbox:
+  accessToken: "ACCESS_TOKEN"

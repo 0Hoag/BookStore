@@ -4,9 +4,18 @@
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
-        <option value="$PROJECT_DIR$/profile-service/pom.xml" />
-        <option value="$PROJECT_DIR$/identity-service/pom.xml" />
-        <option value="$PROJECT_DIR$/api-gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/bookteria/api-gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/bookteria/profile-service/pom.xml" />
+        <option value="$PROJECT_DIR$/bookteria/identity-service/pom.xml" />
+        <option value="$PROJECT_DIR$/bookteria/book-service/pom.xml" />
+        <option value="$PROJECT_DIR$/bookteria/post-service/pom.xml" />
+        <option value="$PROJECT_DIR$/bookteria/notification-service/pom.xml" />
+        <option value="$PROJECT_DIR$/bookteria/payment-service/pom.xml" />
+        <option value="$PROJECT_DIR$/bookteria/friend-service/pom.xml" />
+        <option value="$PROJECT_DIR$/bookteria/comment-service/pom.xml" />
+        <option value="$PROJECT_DIR$/bookteria/interaction-service/pom.xml" />
+        <option value="$PROJECT_DIR$/bookteria/search-service/pom.xml" />
+        <option value="$PROJECT_DIR$/bookteria/messaging-service/pom.xml" />
       </list>
     </option>
   </component>

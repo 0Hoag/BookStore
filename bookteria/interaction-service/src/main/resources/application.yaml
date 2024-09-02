@@ -1,0 +1,10 @@
+server:
+  port: 8089
+  servlet:
+    context-path: /interaction
+
+spring:
+  data:
+    mongodb:
+      port: 27024
+      database: interaction

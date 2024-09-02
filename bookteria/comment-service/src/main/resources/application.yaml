@@ -1,0 +1,10 @@
+server:
+  port: 8088
+  servlet:
+    context-path: /comment
+
+spring:
+  data:
+    mongodb:
+      port: 27023
+      database: comment
