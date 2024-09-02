@@ -18,10 +18,10 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete';
 import Scene from '../Scene';
 import { Link, useNavigate } from 'react-router-dom';
-import { getMyInfo } from '../../services/userService';
 import cartItemService from '../../services/cartItemService';
 import selectedProductService from '../../services/selectedProductService';
 import ordersService from '../../services/ordersService';
+import userService from '../../services/userService';
 
 const ShoppingCart = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -35,7 +35,7 @@ const ShoppingCart = () => {
   useEffect(() => {
     const fetchCartItems = async () => {
       try {
-        const userInfo = await getMyInfo();
+        const userInfo = await userService.getMyInfo();
         const cartItemsFromBackend = userInfo.data.result.cartItem;
         setCartItems(cartItemsFromBackend);
 
@@ -123,7 +123,7 @@ const ShoppingCart = () => {
 
   const handleRemoveFromCart = async (cartItem) => {
     try {
-      const userInfo = await getMyInfo();
+      const userInfo = await userService.getMyInfo();
       const userId = userInfo.data.result.userId;
       const orderId = userInfo.data.result.orders.orderId;
       const cartItemId = cartItem?.cartItemId;
@@ -154,7 +154,7 @@ const ShoppingCart = () => {
   
   const handleSelectItem = async (itemId) => {
     try {
-      const userInfo = await getMyInfo();
+      const userInfo = await userService.getMyInfo();
       const userId = userInfo.data.result.userId;
       const selectedItem = cartItems.find((item) => item.cartItemId === itemId);
   
@@ -187,7 +187,6 @@ const ShoppingCart = () => {
     }
   };
   
-
   const handleCheckout = async () => {
     if (selectedItems.length === 0) {
       showError('Vui lòng chọn ít nhất một sản phẩm để thanh toán.');
@@ -195,7 +194,7 @@ const ShoppingCart = () => {
     }
 
     try {
-      const userInfo = await getMyInfo();
+      const userInfo = await userService.getMyInfo();
       const userId = userInfo.data.result.userId;
 
       const order = {
@@ -221,8 +220,8 @@ const ShoppingCart = () => {
       await ordersService.createOrders(order);
       showSuccess('Đơn hàng được tạo thành công!');
       
-      const cartItemIdsToRemove = selectedItems;
-      await cartItemService.removeCartItem(userId, cartItemIdsToRemove);
+      // const cartItemIdsToRemove = selectedItems;
+      // await cartItemService.removeCartItem(userId, cartItemIdsToRemove);
 
       // Cập nhật trạng thái giỏ hàng và các mục đã chọn
       const updatedCartItems = cartItems.filter((item) => !selectedItems.includes(item.cartItemId));
@@ -302,14 +301,14 @@ const ShoppingCart = () => {
                 ))}
                 <TableRow>
                   <TableCell colSpan={2}>
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={handleCheckout}
-                      disabled={selectedItems.length === 0}
-                    >
-                      Thanh toán
-                    </Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={handleCheckout}
+                    disabled={selectedItems.length === 0}
+                  >
+                    Thanh toán
+                  </Button>
                   </TableCell>
                   <TableCell align="right" colSpan={2}>
                     <Typography variant="h6">Tổng tiền:</Typography>

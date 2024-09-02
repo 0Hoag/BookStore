@@ -1,27 +1,36 @@
 export const OAuthConfig = {
-  clientId: "280704717040-7k4j2dd5boefu14h1opsr74i92bdjrn6.apps.googleusercontent.com",
-  redirectUri: "http://localhost:3000/authenticate",
-  authUri: "https://accounts.google.com/o/oauth2/auth",
+  clientId: "YOUR_CLIENT_ID",
+  redirectUri: "YOUR_REDIRECT_URI",
+  authUri: "YOUR_AUTH_URI",
 };
 
 export const CONFIG = {
-  API_GATEWAY: "http://localhost:8888/api/v1",
+  API_GATEWAY: "YOUR_API_GATEWAY",
 };
 
 export const API = {
   //user-service
   LOGIN: "/identity/auth/token",
   MY_INFO: "/identity/users/my-info",
-  MY_PROFILE: "/profile/users",
+
+  // MY_PROFILE: "/profile/users",
+  GET_USER: "/identity/users",
   CREATE_PASSWORD: "/identity/users/create-password",
   CHANGE_PASSWORD: "/identity/users/change-password",
   VERIFY_PASSWORD: "/identity/users/verify-password", 
-  UPDATE_USER_INFO: "/identity/users/update-info", 
+  UPDATE_USER_INFO: "/identity/users/update-info",
+  GET_ALL_USER: "/identity/users/getAllUserInformationBasic",
   FRIENDS: "/",
   REGISTRATION: "/identity/users/registration",
 
+  //profile-service
+  CREATE_PROFILE: "/register",
+  MY_PROFILE: "/my-profile",
+
   //user-service(profile-service)
-  UPDATE_PROFILE: "/profile/users",
+  CREATE_PROFILE: "/profile/register",
+  GET_ALL_PROFILE: "/profile/profiles",
+  DELETE_PROFILE: "/profile",
 
   //user-service(CartItem-service)
   CREATE_CART_ITEM: "/identity/cartItem/registration",
@@ -65,5 +74,57 @@ export const API = {
   ADD_CHAPTER: "/book/addChapter",
   REMOVE_CHAPTER: "/book/removeChapter",
   GET_CHAPTER: "/book/truyen/chapter",
-  GET_ALL_CHAPTER: "/book/truyen/chapter/getAll"
+  GET_ALL_CHAPTER: "/book/truyen/chapter/getAll",
+
+  //friend-service
+  GET_USER_RELATION_SHIP: "/friend/relationship",
+  GET_REQUEST: "/friend/getFriend",
+  GET_ALL_REQUEST: "/friend/Request/getAllFriend",
+  CREATE_FRIEND_REQUEST: "/friend/Request/Registration",
+  CREATE_FRIEND_SHIP: "/friend/ship/Registration",
+  CREATE_BLOCK_LIST: "/friend/blockList/registration",
+
+  REMOVE_REQUEST_FRIEND: "/friend/Request/deleteFriendRequest",
+  UPDATE_REQUEST_STATUS: "/friend/Request/updateFriendRequest",
+
+  UNFRIEND: "/friend/ship/removeFriendShip",
+  
+  //post-service
+  CREATE_POST: "/post/registration",
+  MY_POST: "/post/my-posts",
+  GET_POST: "/post/activity",
+  GET_POST_WITH_USERID: "/post/activity/getPostWithUser",
+  GET_ALL_POST: "/post/activity",
+  UPDATE_POST: "/post/activity/update",
+  DELETE_POST: "/post/activity",
+  GET_TOKEN_BLACK_BLAZE: "/post/getToken",
+
+  ADD_LIKE_TO_POST: "/post/addLikeToPost",
+  REMOVE_LIKE_TO_POST: "/post/removeLikeToPost",
+
+  ADD_COMMENT_TO_POST: "/post/addCommentToPost",
+  REMOVE_COMMENT_TO_POST: "/post/removeCommentToPost",
+  UPDATE_COMMENT: "/post/comments/activity/updateComment",
+
+  //Comment-service
+  CREATE_COMMENT: "/comment/comments/registration",
+  GET_COMMENT: "/comment/comments/activity",
+
+  //Interaction-service
+  CREATE_LIKE: "/interaction/like/registration",
+  GET_LIKE: "/interaction/like//activity",
+
+  //Messenger-service
+  GET_USER_CONVERSATIONS: "/messaging/mess/getUserConversations",
+  CREATE_CONVERSATION: "/messaging/mess/registration",
+  SEND_MESSAGE: "/messaging/messenger/registration",
+  GET_MESSAGE_FOR_CONVERSATION: "/messaging/messenger/getMessageForConversation",
+  GET_USER_CONVERSATIONS_LIST: "/messaging/messenger/getUserConversationList",
+  GET_PARTICIPANTS_CONVERSATION: "/messaging/participant/getParticipantIds",
+};
+
+export const KEYCLOACK_CONFIG = {
+  url: "YOUR_URL",
+  realm: "YOUR_REALM",
+  clientId: "YOUR_CLIENT_ID",
 };

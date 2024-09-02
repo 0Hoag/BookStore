@@ -7,7 +7,7 @@ spring:
     name: notification-service
   data:
     mongodb:
-      uri: YOU-URI
+      uri: YOUR_MONGODB_URI
   kafka:
     bootstrap-servers: localhost:9094
     consumer:
@@ -18,4 +18,4 @@ spring:
       properties:
         spring.json.trusted.packages: "*"
 jwt:
-  apiKey: "YOU-APIKEY"
+  apiKey: YOUR_API_KEY

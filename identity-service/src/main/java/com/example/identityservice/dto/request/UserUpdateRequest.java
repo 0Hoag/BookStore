@@ -4,9 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-import com.example.identityservice.dto.request.response.CartItemResponse;
-import com.example.identityservice.dto.request.response.OrdersResponse.OrdersResponse;
-import com.example.identityservice.dto.request.response.SelectedProductResponse;
 import jakarta.validation.constraints.Size;
 
 import com.example.identityservice.validator.DobConstraint;
@@ -22,6 +19,7 @@ import lombok.experimental.FieldDefaults;
 public class UserUpdateRequest {
     @Size(min = 6, message = "INVALID_PASSWORD")
     String password;
+
     String email;
 
     @DobConstraint(min = 10, message = "INVALID_DOB")

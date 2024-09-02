@@ -1,21 +1,22 @@
 package com.example.identityservice.controller;
 
+import java.util.Map;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import com.example.identityservice.dto.request.ApiResponse;
 import com.example.identityservice.dto.request.vn_pay.VNPayDTO;
 import com.example.identityservice.dto.request.vn_pay.VNPayResponseDTO;
 import com.example.identityservice.entity.Orders;
 import com.example.identityservice.service.OrdersService;
 import com.example.identityservice.service.VNPayService;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/vnpay")
@@ -26,17 +27,16 @@ public class VNPayController {
     private final OrdersService ordersService;
 
     @PostMapping("/create-payment")
-    public ResponseEntity<ApiResponse<VNPayDTO>> createPayment(@RequestParam String orderId, HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<VNPayDTO>> createPayment(
+            @RequestParam String orderId, HttpServletRequest request) {
         log.info("Received create payment request for order: {}", orderId);
         try {
             Orders order = ordersService.getOrderId(orderId);
             String ipAddress = vnPayService.getClientIpAddress(request);
             VNPayDTO vnpayment = vnPayService.createPaymentUrl(order, ipAddress);
 
-            ApiResponse<VNPayDTO> response = ApiResponse.<VNPayDTO>builder()
-                    .code(1000)
-                    .result(vnpayment)
-                    .build();
+            ApiResponse<VNPayDTO> response =
+                    ApiResponse.<VNPayDTO>builder().code(1000).result(vnpayment).build();
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -51,12 +51,12 @@ public class VNPayController {
 
     @GetMapping("/payment-return")
     public ResponseEntity<ApiResponse<VNPayResponseDTO>> handlePaymentReturn(
-            @RequestParam Map<String, String> queryParams
-    ) {
+            @RequestParam Map<String, String> queryParams) {
         try {
             VNPayResponseDTO responseDTO = vnPayService.processReturnUrl(queryParams);
 
-            boolean isSuccess = "00".equals(responseDTO.getResponseCode()) && "00".equals(responseDTO.getTransactionStatus());
+            boolean isSuccess =
+                    "00".equals(responseDTO.getResponseCode()) && "00".equals(responseDTO.getTransactionStatus());
             String statusMessage = isSuccess ? "PAYMENT_SUCCESS" : "PAYMENT_FAILED";
 
             // Cập nhật thông tin thanh toán vào đơn hàng

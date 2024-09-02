@@ -1,6 +1,7 @@
 import { getToken, removeToken, setToken } from "./localStorageService";
 import httpClient from "../configurations/httpClient";
 import { API } from "../configurations/configuration";
+import keycloak from "./keycloak";
 
 export const logIn = async (username, password) => {
   const response = await httpClient.post(API.LOGIN, {
@@ -12,6 +13,10 @@ export const logIn = async (username, password) => {
 
   return response;
 };
+
+// export const logOut = () => {
+//   keycloak.logout();
+// };
 
 export const logOut = () => {
   removeToken();

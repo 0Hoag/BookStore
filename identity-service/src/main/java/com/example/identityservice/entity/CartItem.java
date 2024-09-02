@@ -1,7 +1,9 @@
 package com.example.identityservice.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,12 +17,12 @@ public class CartItem {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String cartItemId;
+
     int quantity;
     String bookId;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonBackReference
-    private User user;
-
+    User user;
 }

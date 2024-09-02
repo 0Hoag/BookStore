@@ -1,7 +1,7 @@
 package com.example.post_service.exception;
 
 import com.example.post_service.dto.response.ApiResponse;
-import com.example.post_service.entity.PostStatusBook;
+import com.example.post_service.entity.Post;
 import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +17,7 @@ import java.util.Objects;
 public class GlobalException {
     private static final String MIN_ATTRIBUTES = "min";
 
-    PostStatusBook postStatusBook;
+    Post postStatusBook;
 
     @ExceptionHandler(value = Exception.class)
     ResponseEntity<ApiResponse> handRuntimeException(RuntimeException exception) {

@@ -59,7 +59,7 @@ class userServiceTest {
                 .build();
 
         response = UserResponse.builder()
-                .id("b611c63db22c")
+                .userId("b611c63db22c")
                 .username("Harry Potter")
                 .build();
 
@@ -78,7 +78,7 @@ class userServiceTest {
         var response = userService.createUser(request);
 
         // THEN
-        Assertions.assertThat(response.getId()).isEqualTo("b611c63db22c");
+        Assertions.assertThat(response.getUserId()).isEqualTo("b611c63db22c");
         Assertions.assertThat(response.getUsername()).isEqualTo("Harry Potter");
     }
 
@@ -118,7 +118,7 @@ class userServiceTest {
         var userResponse = userService.getMyInfo();
         // THEN
         Assertions.assertThat(userResponse.getUsername()).isEqualTo(user.getUsername());
-        Assertions.assertThat(userResponse.getId()).isEqualTo(user.getUserId());
+        Assertions.assertThat(userResponse.getUserId()).isEqualTo(user.getUserId());
     }
 
     @Test

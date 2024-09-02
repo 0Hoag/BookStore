@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -79,7 +78,6 @@ class AuthenticationCotrollerTest {
                 // Missing . . .
                 .andReturn();
     }
-
 
     @Test
     void introspect_validRequest_success() throws Exception {

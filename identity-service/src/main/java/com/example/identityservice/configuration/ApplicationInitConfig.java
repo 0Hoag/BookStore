@@ -2,22 +2,22 @@ package com.example.identityservice.configuration;
 
 import java.util.HashSet;
 
-import com.example.identityservice.constant.PredefinedRole;
-import com.example.identityservice.entity.Role;
-import com.example.identityservice.repository.RoleRepositoty;
-import lombok.experimental.NonFinal;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.example.identityservice.constant.PredefinedRole;
+import com.example.identityservice.entity.Role;
 import com.example.identityservice.entity.User;
+import com.example.identityservice.repository.RoleRepositoty;
 import com.example.identityservice.repository.UserRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 
 @Configuration
@@ -25,7 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class ApplicationInitConfig {
-// setting is (14/6)
+    // setting is (14/6)
     PasswordEncoder passwordEncoder;
 
     @NonFinal

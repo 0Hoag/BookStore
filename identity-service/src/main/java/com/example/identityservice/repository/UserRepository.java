@@ -10,6 +10,6 @@ import com.example.identityservice.entity.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, String> {
     boolean existsByUsername(String username);
-
+    //    Optional<UserInformationBasicResponse> findByUserInfomation(List<String> userIds);
     Optional<User> findByUsername(String username);
 }

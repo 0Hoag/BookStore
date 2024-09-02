@@ -11,7 +11,11 @@ public enum ErrorCode {
 
     INVALID_DOB(1002, "YOU AGE MUST BE AT least {min}", HttpStatus.BAD_REQUEST),
     INVALID_KEY(1003, "INVALID MESSAGE KEY", HttpStatus.BAD_REQUEST),
-    UNAUTHORIZATION(1004, "YOU DON'T HAVE PERMISSION", HttpStatus.FORBIDDEN);
+    UNAUTHORIZATION(1004, "YOU DON'T HAVE PERMISSION", HttpStatus.FORBIDDEN),
+    USER_NOT_EXISTED(1005, "USER_NOT_EXISTED", HttpStatus.NOT_FOUND),
+    LIKE_NOT_EXISTED(1006, "LIKE_NOT_EXISTED", HttpStatus.BAD_REQUEST),
+    COMMENT_NOT_EXISTED(1007, "COMMENT_NOT_EXISTED", HttpStatus.BAD_REQUEST),
+    ;
     private int code;
     private String message;
     private HttpStatusCode statusCode;

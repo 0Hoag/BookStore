@@ -1,11 +1,17 @@
 package com.example.identityservice.service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import com.example.identityservice.dto.request.*;
 import com.example.identityservice.dto.request.response.BookResponse;
-import com.example.identityservice.dto.request.response.CartItemResponse;
 import com.example.identityservice.dto.request.response.SelectedProductResponse;
-import com.example.identityservice.entity.CartItem;
-import com.example.identityservice.entity.Orders;
 import com.example.identityservice.entity.SelectedProduct;
 import com.example.identityservice.entity.User;
 import com.example.identityservice.exception.AppException;
@@ -19,19 +25,12 @@ import com.example.identityservice.repository.httpclient.BookClient;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -54,7 +53,8 @@ public class SelectedProductService {
     protected String signerKey;
 
     public SelectedProductResponse createSelectedProduct(SelectedProductRequest request) {
-        var user = userRepository.findById(request.getUserId())
+        var user = userRepository
+                .findById(request.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         SelectedProduct selectedProduct = selectedProductMapper.toSelectedProduct(request);
@@ -63,32 +63,35 @@ public class SelectedProductService {
         selectedProduct.setBookId(bookResponse.getBookId());
         selectedProductRepository.save(selectedProduct);
 
-        SelectedProductResponse selectedProductResponse = selectedProductMapper.toSelectedProductResponse(selectedProduct);
+        SelectedProductResponse selectedProductResponse =
+                selectedProductMapper.toSelectedProductResponse(selectedProduct);
         selectedProductResponse.setBookId(bookResponse);
         return selectedProductResponse;
     }
 
     public SelectedProductResponse updateSelectedProduct(String selectedId, UpdateSelectedProductRequest request) {
-        SelectedProduct selectedProduct = selectedProductRepository.findById(selectedId)
+        SelectedProduct selectedProduct = selectedProductRepository
+                .findById(selectedId)
                 .orElseThrow(() -> new AppException(ErrorCode.SELECTED_PRODUCT_NOT_EXISTED));
         selectedProductMapper.updateSelectedProduct(selectedProduct, request);
         return selectedProductMapper.toSelectedProductResponse(selectedProductRepository.save(selectedProduct));
     }
 
     public void addSelectedProductWithUser(String orderId, AddSelectedProductRequest request) {
-        var orders = ordersRepository.findById(orderId)
-                .orElseThrow(() -> new AppException(ErrorCode.ORDERS_NOT_EXISTED));
-        Set<SelectedProduct> selectedProducts = selectedProductRepository.findAllById(request.getSelectedId())
-                .stream().collect(Collectors.toSet());
+        var orders =
+                ordersRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDERS_NOT_EXISTED));
+        Set<SelectedProduct> selectedProducts = selectedProductRepository.findAllById(request.getSelectedId()).stream()
+                .collect(Collectors.toSet());
         orders.getSelectedProducts().addAll(selectedProducts);
         ordersRepository.save(orders);
     }
 
     public void removeSelectedProductWithUser(String orderId, RemoveSelectedProductRequest request) {
-        var orders = ordersRepository.findById(orderId)
-                .orElseThrow(() -> new AppException(ErrorCode.ORDERS_NOT_EXISTED));
-        Set<SelectedProduct> selectedProductSet = selectedProductRepository.findAllById(request.getSelectedId())
-                .stream().collect(Collectors.toSet());
+        var orders =
+                ordersRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDERS_NOT_EXISTED));
+        Set<SelectedProduct> selectedProductSet =
+                selectedProductRepository.findAllById(request.getSelectedId()).stream()
+                        .collect(Collectors.toSet());
         orders.getSelectedProducts().removeAll(selectedProductSet);
         selectedProductRepository.deleteAll(selectedProductSet);
     }
@@ -98,12 +101,15 @@ public class SelectedProductService {
     }
 
     public SelectedProductResponse getSelectedProduct(String selectedId) {
-        SelectedProduct selectedProduct = selectedProductRepository.findById(selectedId)
+        SelectedProduct selectedProduct = selectedProductRepository
+                .findById(selectedId)
                 .orElseThrow(() -> new AppException(ErrorCode.SELECTED_PRODUCT_NOT_EXISTED));
-        User user = userRepository.findById(selectedProduct.getUser().getUserId())
+        User user = userRepository
+                .findById(selectedProduct.getUser().getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         String token = generateToken(user);
-        SelectedProductResponse selectedProductResponse = selectedProductMapper.toSelectedProductResponse(selectedProduct);
+        SelectedProductResponse selectedProductResponse =
+                selectedProductMapper.toSelectedProductResponse(selectedProduct);
         BookResponse bookResponse = fetchBookResponse(selectedProduct.getBookId(), token);
         selectedProductResponse.setBookId(bookResponse);
 
@@ -111,19 +117,23 @@ public class SelectedProductService {
     }
 
     public List<SelectedProductResponse> getAllSelectProduct() {
-        return selectedProductRepository.findAll()
-                .stream().map(selectedProduct -> {
-                    SelectedProduct selectedProduct1 = selectedProductRepository.findById(selectedProduct.getSelectedId())
+        return selectedProductRepository.findAll().stream()
+                .map(selectedProduct -> {
+                    SelectedProduct selectedProduct1 = selectedProductRepository
+                            .findById(selectedProduct.getSelectedId())
                             .orElseThrow(() -> new AppException(ErrorCode.SELECTED_PRODUCT_NOT_EXISTED));
-                    User user = userRepository.findById(selectedProduct1.getUser().getUserId())
+                    User user = userRepository
+                            .findById(selectedProduct1.getUser().getUserId())
                             .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
                     String token = generateToken(user);
-                    SelectedProductResponse selectedProductResponse = selectedProductMapper.toSelectedProductResponse(selectedProduct);
+                    SelectedProductResponse selectedProductResponse =
+                            selectedProductMapper.toSelectedProductResponse(selectedProduct);
                     BookResponse bookResponse = fetchBookResponse(selectedProduct.getBookId(), token);
                     selectedProductResponse.setBookId(bookResponse);
 
                     return selectedProductResponse;
-                }).collect(Collectors.toList());
+                })
+                .collect(Collectors.toList());
     }
 
     public void deleteSelectedProduct(String selectedId) {
@@ -172,5 +182,4 @@ public class SelectedProductService {
         ApiResponse<BookResponse> apiResponse = bookClient.getBook(bookId, "Bearer " + token);
         return apiResponse.getResult();
     }
-
 }

@@ -1,17 +1,20 @@
 package com.example.identityservice.controller;
 
+import java.util.List;
+
+import jakarta.validation.Valid;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.example.identityservice.dto.request.*;
 import com.example.identityservice.dto.request.response.CartItemResponse;
 import com.example.identityservice.dto.request.response.UserResponse;
 import com.example.identityservice.service.CartItemService;
-import jakarta.validation.Valid;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/cartItem")
@@ -39,7 +42,8 @@ public class CartItemController {
     }
 
     @DeleteMapping("/removeCart/{userId}")
-    public ApiResponse<UserResponse> removeCart(@PathVariable String userId, @RequestBody RemoveCartItemRequest request) {
+    public ApiResponse<UserResponse> removeCart(
+            @PathVariable String userId, @RequestBody RemoveCartItemRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .code(1000)
                 .result(cartItemService.removeCartItemToUser(userId, request))
@@ -72,7 +76,8 @@ public class CartItemController {
     }
 
     @PutMapping("/updateCartItem/{cartItemId}")
-    public ApiResponse<CartItemResponse> updateCartItem(@PathVariable String cartItemId, @RequestBody UpdateCartItemRequest request) {
+    public ApiResponse<CartItemResponse> updateCartItem(
+            @PathVariable String cartItemId, @RequestBody UpdateCartItemRequest request) {
         return ApiResponse.<CartItemResponse>builder()
                 .code(1000)
                 .result(cartItemService.updateCartItem(cartItemId, request))

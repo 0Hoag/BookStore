@@ -9,7 +9,7 @@ import com.example.identityservice.dto.request.response.ExchangeTokenResponse;
 
 import feign.QueryMap;
 
-@FeignClient(name = "outbound-identity", url = "YOU-URL")
+@FeignClient(name = "outbound-identity", url = "YOU_URL")
 public interface OutboundIdentityClient {
     @PostMapping(value = "/token", produces = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     ExchangeTokenResponse exchangeToken(@QueryMap ExchangeTokenRequest request);

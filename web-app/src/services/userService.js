@@ -1,115 +1,55 @@
 import httpClient from "../configurations/httpClient";
 import { API } from "../configurations/configuration";
 import { getToken } from "./localStorageService";
+import keycloak from "./keycloak";
 
-export const getMyInfo = async () => {
-  return await httpClient.get(API.MY_INFO, {
+const userService = {
+  getMyInfo: () => httpClient.get(API.MY_INFO, getAuthHeader()),
+
+  registerUser: (userDetails) => httpClient.post(API.REGISTRATION, userDetails, getContentTypeHeader()),
+
+  getUser: (userId) => httpClient.get(`${API.GET_USER}/${userId}`, getAuthHeader()),
+
+  getAllUser: () => httpClient.get(API.GET_ALL_USER, getAuthHeader()),
+
+  createPassword: (password) => httpClient.post(API.CREATE_PASSWORD, { password }, getAuthHeader()),
+
+  changePassword: (oldPassword, newPassword) => 
+    httpClient.put(API.CHANGE_PASSWORD, { oldPassword, newPassword }, getAuthHeader()),
+
+  updateUserInfo: (userInfo) => httpClient.put(API.UPDATE_USER_INFO, userInfo, getAuthHeader()),
+
+  verifyPassword: (password) => httpClient.put(API.VERIFY_PASSWORD, { password }, getAuthHeader()),
+
+  postReview: (content) => httpClient.post(API.POST_REVIEW, { content }, getAuthHeader()),
+
+  getFriends: () => httpClient.get(API.FRIENDS, getAuthHeader()),
+
+  getMyProfile: () => httpClient.get(API.MY_PROFILE, getAuthHeaderProfile()),
+};
+
+function getAuthHeader() {
+  return {
     headers: {
       Authorization: `Bearer ${getToken()}`,
+      'Content-Type': 'application/json',
     },
-  });
-};
+  };
+}
 
-export const registerUser = async (userDetails) => {
-  try {
-    const response = await httpClient.post(API.REGISTRATION, userDetails, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-
-export const createPassword = async (password) => {
-  return await httpClient.post(API.CREATE_PASSWORD, { password }, {
+function getContentTypeHeader() {
+  return {
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${getToken()}`,
     },
-  });
-};
+  };
+}
 
-export const changePassword = async (oldPassword, newPassword) => {
-  try {
-    const response = await httpClient.put(
-      API.CHANGE_PASSWORD,
-      { oldPassword, newPassword },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    throw error;
+function getAuthHeaderProfile() {
+  return {
+    headers : {
+      Authorization: "Bearer " + keycloak.token
+    }
   }
-};
-
-// Cập nhật thông tin người dùng
-export const updateUserInfo = async (userInfo) => {
-  try {
-    const response = await httpClient.put(
-      API.UPDATE_USER_INFO,
-      userInfo,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const verifyPassword = async (password) => {
-  try {
-    const response = await httpClient.put(
-      API.VERIFY_PASSWORD,
-      { password },  // Send the password as the payload
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const postReview = async (content) => {
-  try {
-    const response = await httpClient.post(
-      API.POST_REVIEW,
-      { content },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getToken()}`,
-        },
-      }
-    );
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
-
-export const getFriends = async () => {
-  return await httpClient.get(API.FRIENDS, {
-    headers: {
-      Authorization: `Bearer ${getToken()}`,
-    },
-  });
-};
+}
+export default userService;

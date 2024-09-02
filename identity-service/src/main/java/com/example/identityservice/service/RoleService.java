@@ -3,12 +3,12 @@ package com.example.identityservice.service;
 import java.util.HashSet;
 import java.util.List;
 
-import com.example.identityservice.exception.AppException;
-import com.example.identityservice.exception.ErrorCode;
 import org.springframework.stereotype.Service;
 
 import com.example.identityservice.dto.request.RoleRequest;
 import com.example.identityservice.dto.request.response.RoleResponse;
+import com.example.identityservice.exception.AppException;
+import com.example.identityservice.exception.ErrorCode;
 import com.example.identityservice.mapper.RoleMapper;
 import com.example.identityservice.repository.PermissionRepository;
 import com.example.identityservice.repository.RoleRepositoty;
@@ -30,7 +30,6 @@ public class RoleService {
     public RoleResponse create(RoleRequest request) {
         log.info("Service create role");
         var role = roleMapper.toRole(request);
-
         var permissions = permissionRepository.findAllById(request.getPermissions());
         role.setPermissions(new HashSet<>(permissions));
 
@@ -39,8 +38,8 @@ public class RoleService {
     }
 
     public RoleResponse getRole(String role) {
-        return roleMapper.toRoleResponse(roleRepository.findById(role)
-                .orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_FOUND)));
+        return roleMapper.toRoleResponse(
+                roleRepository.findById(role).orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_FOUND)));
     }
 
     public List<RoleResponse> getAll() {

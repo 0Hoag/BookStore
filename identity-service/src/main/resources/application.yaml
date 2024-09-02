@@ -11,7 +11,7 @@
         ddl-auto: update
       show-sql: true
     kafka:
-      bootstrap-servers: localhost:9094
+      bootstrap-servers: YOU_URL
       producer:
         key-serializer: org.apache.kafka.common.serialization.StringSerializer
         value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -22,23 +22,24 @@
       context-path: /identity
 
   jwt:
+    signerKey: "YOU_SIGNER_KEY"
     valid-duration: 6000 # in second
     refreshtable-duration: 1200 # in seconds
 
   outbound:
     identity:
-      client-id: "SECRET"
-      client-secret: "SECRET"
-      redirect-uri: "SECRET"
+      client-id: "YOU_CLIENT_ID"
+      client-secret: "YOU_CLIENT_SECRET"
+      redirect-uri: "YOU_REDIRECT_URI"
 
   app:
     services:
-      profile: http://localhost:8081/profile
-      book: http://localhost:8084/book
-      payment: http://localhost:8085/payment
+      profile: YOU_PROFILE_URL
+      book: YOU_BOOK_URL
+      payment: YOU_PAYMENT_URL
 
   vnpay:
-    payment-url: "SECRET"
-    tmn-code: "SECRET"
-    hash-secret: "SECRET"
+    payment-url: "YOU_PAYMENT_URL"
+    tmn-code: "YOU_TMN_CODE"
+    hash-secret: "YOU_HASH_SECRET"
 

@@ -5,8 +5,5 @@ import org.springframework.stereotype.Repository;
 
 import com.example.identityservice.entity.Permission;
 
-import java.util.Optional;
-
 @Repository
-public interface PermissionRepository extends JpaRepository<Permission, String> {
-}
+public interface PermissionRepository extends JpaRepository<Permission, String> {}

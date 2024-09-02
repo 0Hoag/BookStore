@@ -3,6 +3,7 @@ package com.example.identityservice.dto.request.response;
 import java.util.Set;
 
 import com.example.identityservice.dto.request.response.OrdersResponse.OrdersResponse;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -23,6 +24,6 @@ public class UserResponse {
 
     Set<RoleResponse> roles;
     Set<CartItemResponse> cartItem;
-//    Set<SelectedProductResponse> selectedProducts;
+    //    Set<SelectedProductResponse> selectedProducts;
     Set<OrdersResponse> orders;
 }

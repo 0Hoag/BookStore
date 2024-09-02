@@ -1,12 +1,12 @@
 package com.example.identityservice.dto.request.response.OrdersResponse;
 
-import com.example.identityservice.dto.request.response.SelectedProductResponse;
-import com.example.identityservice.entity.User;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-
 import java.math.BigDecimal;
 import java.util.Set;
+
+import com.example.identityservice.dto.request.response.SelectedProductResponse;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
@@ -37,5 +37,5 @@ public class OrdersResponse {
 
     Set<SelectedProductResponse> selectedProducts;
 
-    String paymentUrl;  // Thêm trường này cho URL thanh toán VNPay
+    String paymentUrl; // Thêm trường này cho URL thanh toán VNPay
 }

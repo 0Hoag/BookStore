@@ -1,9 +1,9 @@
 package com.example.identityservice.dto.request.vn_pay;
 
+import java.math.BigDecimal;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
 
 @Data
 @Builder

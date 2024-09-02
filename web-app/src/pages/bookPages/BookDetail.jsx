@@ -5,7 +5,7 @@ import { FavoriteBorderOutlined, FavoriteOutlined, BookmarkBorderOutlined, Bookm
 import bookService from "../../services/bookService";
 import Scene from "../Scene";
 import { useNavigate } from "react-router-dom";
-import { getMyInfo } from "../../services/userService";
+import userService from '../../services/userService';
 import cartItemService from "../../services/cartItemService";
 
 const BookDetail = () => {
@@ -26,7 +26,7 @@ const BookDetail = () => {
         const response = await bookService.getBookById(bookId);
         if (response) {
           setBook(response);
-          const userInfo = await getMyInfo();
+          const userInfo = await userService.getMyInfo();
           const roles = userInfo.data?.result?.roles || [];
           const isAdminUser = roles.some(role => role.name === 'ADMIN');
           setIsAdmin(isAdminUser);
@@ -75,7 +75,7 @@ const BookDetail = () => {
   const handleBuyNow = async (event) => {
     event.preventDefault();
     try {
-      const response = await getMyInfo();
+      const response = await userService.getMyInfo();
       const data = response.data;
 
       const existingCartItem = data.result.cartItem.find(cartItem => cartItem.bookId.bookId === bookId);
@@ -144,8 +144,9 @@ const BookDetail = () => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          minHeight: '100vh', // Set minHeight to ensure the box fills the viewport height
-          bgcolor: '#f0f2f5',
+          minHeight: '100vh',
+          bgcolor: '#1e1e1e', // Dark background consistent with Friend component
+          color: '#e0e0e0', // Light text color
           p: 3,
         }}
       >
@@ -180,26 +181,25 @@ const BookDetail = () => {
               <Typography variant="body1" sx={{ mt: 2 }}>
                 Quantity: {book.quantity}
               </Typography>
-              {/* Action Buttons */}
               <Box sx={{ mt: 2 }}>
-                <Button onClick={handleReadFirstChapter} variant="contained" color="primary" sx={{ ml: 2 }}>
+                <Button onClick={() => handleChapterClick(sortedChapters[0]?.chapterId)} variant="contained" color="primary" sx={{ backgroundColor: '#3f51b5', '&:hover': { backgroundColor: '#303f9f' } }}>
                   Đọc ngay
                 </Button>
-                <IconButton onClick={handleFavoriteToggle} sx={{ mr: 2 }}>
-                  {isFavorite ? <FavoriteOutlined /> : <FavoriteBorderOutlined />}
+                <IconButton onClick={handleFavoriteToggle} sx={{ ml: 2 }}>
+                  {isFavorite ? <FavoriteOutlined sx={{ color: '#e0e0e0' }} /> : <FavoriteBorderOutlined sx={{ color: '#e0e0e0' }} />}
                 </IconButton>
-                <IconButton onClick={handleBookmarkToggle} sx={{ mr: 2 }}>
-                  {isBookmarked ? <BookmarkOutlined /> : <BookmarkBorderOutlined />}
+                <IconButton onClick={handleBookmarkToggle} sx={{ ml: 2 }}>
+                  {isBookmarked ? <BookmarkOutlined sx={{ color: '#e0e0e0' }} /> : <BookmarkBorderOutlined sx={{ color: '#e0e0e0' }} />}
                 </IconButton>
-                <IconButton onClick={handleFollowToggle} sx={{ mr: 2 }}>
-                  {isFollowing ? "Following" : "Follow"}
+                <IconButton onClick={handleFollowToggle} sx={{ ml: 2 }}>
+                  {isFollowing ? <Typography sx={{ color: '#e0e0e0' }}>Following</Typography> : <Typography sx={{ color: '#e0e0e0' }}>Follow</Typography>}
                 </IconButton>
                 {!isUnlocked && (
-                  <Button onClick={handleUnlock} variant="contained" color="secondary" sx={{ ml: 2 }}>
-                    <LockOpenOutlined /> Unlock
+                  <Button onClick={handleUnlock} variant="contained" color="secondary" sx={{ ml: 2, backgroundColor: '#f50057', '&:hover': { backgroundColor: '#c51162' } }}>
+                    <LockOpenOutlined sx={{ color: '#e0e0e0' }} /> Unlock
                   </Button>
                 )}
-                <Button onClick={handleBuyNow} variant="contained" color="primary" startIcon={<ShoppingBasketOutlined />} sx={{ ml: 2 }}>
+                <Button onClick={handleBuyNow} variant="contained" color="primary" startIcon={<ShoppingBasketOutlined sx={{ color: '#e0e0e0' }} />} sx={{ ml: 2, backgroundColor: '#3f51b5', '&:hover': { backgroundColor: '#303f9f' } }}>
                   Mua ngay
                 </Button>
               </Box>
@@ -234,17 +234,13 @@ const BookDetail = () => {
                 <Button
                   component={Link}
                   to={`/books/${book.bookId}/add-chapter`}
-                  variant="contained"
-                  color="primary"
-                  sx={{ mr: 2 }}
-                >
+                  variant="contained" color="primary" sx={{ backgroundColor: '#3f51b5', '&:hover': { backgroundColor: '#303f9f' } }}>
                   Thêm chương
                 </Button>
                 <Button
                   onClick={handleOpenDeleteDialog}
-                  variant="contained"
-                  color="secondary"
-                >
+                  variant="contained" color="secondary" sx={{ ml: 2, backgroundColor: '#f50057', '&:hover': { backgroundColor: '#c51162' } }}>
+                    <LockOpenOutlined sx={{ color: '#e0e0e0' }} />
                   Xóa chương
                 </Button>
               </Box>
@@ -277,10 +273,10 @@ const BookDetail = () => {
                 </Box>
               </DialogContent>
               <DialogActions>
-                <Button onClick={handleCloseDeleteDialog} color="primary">
+                <Button onClick={handleCloseDeleteDialog} variant="contained" color="primary" sx={{ backgroundColor: '#3f51b5', '&:hover': { backgroundColor: '#303f9f' } }}>
                   Hủy
                 </Button>
-                <Button onClick={handleDeleteChapters} color="secondary" autoFocus>
+                <Button onClick={handleDeleteChapters} variant="contained" color="primary" sx={{ backgroundColor: '#3f51b5', '&:hover': { backgroundColor: '#303f9f' } }} autoFocus>
                   Xóa
                 </Button>
               </DialogActions>

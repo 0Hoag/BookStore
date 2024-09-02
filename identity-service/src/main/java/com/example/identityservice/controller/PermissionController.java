@@ -30,6 +30,7 @@ public class PermissionController {
                 .result(permissionService.create(request))
                 .build();
     }
+
     @GetMapping("/{permission}")
     ApiResponse<PermissionResponse> getPermision(@PathVariable String permission) {
         return ApiResponse.<PermissionResponse>builder()

@@ -1,14 +1,21 @@
 server:
-  port: 8081
+  port: 8080
   servlet:
     context-path: /profile
-
 spring:
   application:
     name: profile-service
+  data:
+    mongodb:
+      uri: YOUR_MONGODB_URI
 
-  neo4j:
-    uri: bolt://localhost:7687
-    authentication:
-      username: USERNAME
-      password: PASSWORD
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: YOUR_ISSUER_URI
+
+idp:
+  url: YOUR_URL
+  client-id: YOUR_CLIENT_ID
+  client-secret: YOUR_CLIENT_SECRET

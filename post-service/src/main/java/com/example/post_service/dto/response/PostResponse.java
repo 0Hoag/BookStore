@@ -2,9 +2,10 @@ package com.example.post_service.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.neo4j.core.schema.Property;
 
-import java.time.LocalDate;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -13,9 +14,13 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PostResponse {
     String postId;
-    UserProfileResponse profile;
-    String activityType;
-    String activityContent;
-    LocalDate createdAt;
-    BookResponse book;
+    UserResponse userId;
+    String content;
+    Set<String> imageUrls;
+    Set<String> videoUrls;
+    String created;
+    Instant createdAt;
+    Instant updatedAt;
+    Set<LikeResponse> likes; // Danh sách ID của người dùng đã thích bài viết
+    Set<CommentResponse> comments; // Danh sách ID của người dùng đã comment bài viết
 }

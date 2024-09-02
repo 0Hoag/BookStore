@@ -10,4 +10,4 @@ spring:
       database: bookstore
 
 dropbox:
-  accessToken: "YOU-TOKEN"
+  accessToken: "ACCESS_TOKEN"

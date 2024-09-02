@@ -13,9 +13,9 @@ import {
   CircularProgress,
   Grid,
 } from '@mui/material';
-import { getMyInfo } from '../../services/userService';
 import Scene from '../Scene';
 import { Link } from 'react-router-dom';
+import userService from '../../services/userService';
 
 const OrderDetails = () => {
   const [loading, setLoading] = useState(true);
@@ -25,7 +25,7 @@ const OrderDetails = () => {
   useEffect(() => {
     const fetchOrderDetails = async () => {
       try {
-        const response = await getMyInfo();
+        const response = await userService.getMyInfo();
         if (response.data.code === 1000) {
           const foundOrder = response.data.result.orders.find(
             (o) => o.orderId === orderId
@@ -61,7 +61,7 @@ const OrderDetails = () => {
   if (!order) {
     return (
       <Scene>
-        <Box sx={{ p: 3 }}>
+        <Box sx={{ p: 3, bgcolor: '#303030', color: '#e0e0e0' }}>
           <Typography variant="h4">Đơn hàng không tồn tại</Typography>
         </Box>
       </Scene>
@@ -70,7 +70,7 @@ const OrderDetails = () => {
 
   return (
     <Scene>
-      <Box sx={{ p: 3 }}>
+      <Box sx={{ p: 3, bgcolor: '#303030', color: '#e0e0e0' }}>
         <Typography variant="h4" gutterBottom>
           Chi tiết đơn hàng: {order.orderId}
         </Typography>
@@ -91,35 +91,35 @@ const OrderDetails = () => {
           </Grid>
         </Grid>
         <Typography variant="h6" sx={{ mt: 3, mb: 2 }}>Chi tiết sản phẩm</Typography>
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} sx={{ bgcolor: '#424242' }}>
           <Table>
             <TableHead>
               <TableRow>
-              <TableCell>Hình ảnh</TableCell>
-                <TableCell>Sản phẩm</TableCell>
-                <TableCell align="right">Số lượng</TableCell>
-                <TableCell align="right">Giá</TableCell>
-                <TableCell align="right">Tổng</TableCell>
+                <TableCell sx={{ color: '#e0e0e0' }}>Hình ảnh</TableCell>
+                <TableCell sx={{ color: '#e0e0e0' }}>Sản phẩm</TableCell>
+                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Số lượng</TableCell>
+                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Giá</TableCell>
+                <TableCell align="right" sx={{ color: '#e0e0e0' }}>Tổng</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {order.selectedProducts.map((product) => (
                 <TableRow key={product.selectedId}>
-                <TableCell>
-                  <Link to={`/books/${product.bookId.bookId}`}>
-                    <img
-                      src={product.bookId.image.replace("?raw=1", "?dl=0")}
-                      height="200"
-                      style={{ cursor: 'pointer' }}
-                    />
-                  </Link>
-                </TableCell>
-                  <TableCell component="th" scope="row">
+                  <TableCell>
+                    <Link to={`/books/${product.bookId.bookId}`}>
+                      <img
+                        src={product.bookId.image.replace("?raw=1", "?dl=0")}
+                        height="200"
+                        style={{ cursor: 'pointer' }}
+                      />
+                    </Link>
+                  </TableCell>
+                  <TableCell component="th" scope="row" sx={{ color: '#e0e0e0' }}>
                     {product.bookId.bookTitle}
                   </TableCell>
-                  <TableCell align="right">{product.quantity}</TableCell>
-                  <TableCell align="right">{product.bookId.price.toLocaleString()} VND</TableCell>
-                  <TableCell align="right">
+                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{product.quantity}</TableCell>
+                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{product.bookId.price.toLocaleString()} VND</TableCell>
+                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>
                     {(product.quantity * product.bookId.price).toLocaleString()} VND
                   </TableCell>
                 </TableRow>

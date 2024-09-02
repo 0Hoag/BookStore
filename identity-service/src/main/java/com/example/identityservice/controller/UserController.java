@@ -2,12 +2,13 @@ package com.example.identityservice.controller;
 
 import java.util.List;
 
-import com.example.identityservice.dto.request.*;
 import jakarta.validation.Valid;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.identityservice.dto.request.*;
+import com.example.identityservice.dto.request.response.UserInformationBasicResponse;
 import com.example.identityservice.dto.request.response.UserResponse;
 import com.example.identityservice.service.UserService;
 
@@ -80,6 +81,22 @@ public class UserController {
                 .build();
     }
 
+    @GetMapping("/getAllUserInformationBasic")
+    ApiResponse<List<UserInformationBasicResponse>> getAllUserInformationBasic() {
+        return ApiResponse.<List<UserInformationBasicResponse>>builder()
+                .code(1000)
+                .result(userService.getAllUserInformationBasic())
+                .build();
+    }
+
+    @GetMapping("/getUserInformationBasic/{userId}")
+    ApiResponse<UserInformationBasicResponse> getUserInformationBasic(@PathVariable String userId) {
+        return ApiResponse.<UserInformationBasicResponse>builder()
+                .code(1000)
+                .result(userService.getUserInformationBasic(userId))
+                .build();
+    }
+
     @GetMapping("/my-info")
     ApiResponse<UserResponse> getMyInfo() {
         return ApiResponse.<UserResponse>builder()
@@ -113,5 +130,11 @@ public class UserController {
                 .code(1000)
                 .message("Delete All User Success")
                 .build();
+    }
+
+    @GetMapping("/userExisted/{userId}")
+    ApiResponse<Void> userExisted(@PathVariable String userId) {
+        userService.userExisted(userId);
+        return ApiResponse.<Void>builder().code(1000).message("User existed").build();
     }
 }

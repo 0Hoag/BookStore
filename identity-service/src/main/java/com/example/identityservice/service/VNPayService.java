@@ -1,22 +1,5 @@
 package com.example.identityservice.service;
 
-import com.example.identityservice.dto.request.vn_pay.VNPayDTO;
-import com.example.identityservice.dto.request.vn_pay.VNPayResponseDTO;
-import com.example.identityservice.entity.Orders;
-import com.example.identityservice.exception.AppException;
-import com.example.identityservice.exception.ErrorCode;
-import io.micrometer.common.util.StringUtils;
-import jakarta.servlet.http.HttpServletRequest;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
@@ -25,6 +8,26 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import com.example.identityservice.dto.request.vn_pay.VNPayDTO;
+import com.example.identityservice.dto.request.vn_pay.VNPayResponseDTO;
+import com.example.identityservice.entity.Orders;
+import com.example.identityservice.exception.AppException;
+import com.example.identityservice.exception.ErrorCode;
+
+import io.micrometer.common.util.StringUtils;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -51,10 +54,10 @@ public class VNPayService {
                     : "Thanh toan don hang: " + vnp_TxnRef;
             String vnp_OrderType = "billpayment";
             BigDecimal amount = Optional.ofNullable(orders.getVnpAmount()).orElse(BigDecimal.ZERO);
-            String vnp_Amount = amount.multiply(new BigDecimal("100")).toBigInteger().toString();
+            String vnp_Amount =
+                    amount.multiply(new BigDecimal("100")).toBigInteger().toString();
             String vnp_Locale = "vn";
-            String vnp_ReturnUrl = "http://localhost:3000/payment-result";
-
+            String vnp_ReturnUrl = "YOU_URL";
 
             Map<String, String> vnp_Params = new HashMap<>();
             vnp_Params.put("vnp_Version", "2.1.0");
@@ -96,18 +99,25 @@ public class VNPayService {
         String vnp_TransactionNo = queryParams.getOrDefault("vnp_TransactionNo", "");
         String vnp_OrderInfo = queryParams.getOrDefault("vnp_OrderInfo", "");
         String vnp_PayDate = queryParams.getOrDefault("vnp_PayDate", "");
-        String vnp_TransactionStatus = queryParams.getOrDefault("vnp_TransactionStatus",""); // update (19/07)
+        String vnp_TransactionStatus = queryParams.getOrDefault("vnp_TransactionStatus", ""); // update (19/07)
 
         if (vnp_ResponseCode.isEmpty() || vnp_TxnRef.isEmpty()) {
             log.error("Missing required parameters in VNPay response");
             throw new AppException(ErrorCode.UNCATEGORIZE_EXCEPTION);
         }
 
-        return new VNPayResponseDTO(vnp_TxnRef, vnp_OrderInfo, vnp_ResponseCode, vnp_TransactionNo, vnp_PayDate,
-                ("00".equals(vnp_ResponseCode) && "00".equals(vnp_TransactionStatus) ? "00" : "Failed")); // update (19/07)
+        return new VNPayResponseDTO(
+                vnp_TxnRef,
+                vnp_OrderInfo,
+                vnp_ResponseCode,
+                vnp_TransactionNo,
+                vnp_PayDate,
+                ("00".equals(vnp_ResponseCode) && "00".equals(vnp_TransactionStatus)
+                        ? "00"
+                        : "Failed")); // update (19/07)
     }
 
-    public String getClientIpAddress(HttpServletRequest request) { //get id client
+    public String getClientIpAddress(HttpServletRequest request) { // get id client
         String ipAddress = request.getHeader("X-Forwarded-For");
         if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
             ipAddress = request.getHeader("Proxy-Client-IP");

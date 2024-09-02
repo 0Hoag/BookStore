@@ -2,13 +2,13 @@ package com.example.identityservice.service;
 
 import java.util.List;
 
-import com.example.identityservice.exception.AppException;
-import com.example.identityservice.exception.ErrorCode;
 import org.springframework.stereotype.Service;
 
 import com.example.identityservice.dto.request.PermissionRequest;
 import com.example.identityservice.dto.request.response.PermissionResponse;
 import com.example.identityservice.entity.Permission;
+import com.example.identityservice.exception.AppException;
+import com.example.identityservice.exception.ErrorCode;
 import com.example.identityservice.mapper.PermissionMapper;
 import com.example.identityservice.repository.PermissionRepository;
 
@@ -32,7 +32,8 @@ public class PermissionService {
     }
 
     public PermissionResponse getPermission(String permission) {
-        return permissionMapper.toPermissionResponse(permissionRepository.findById(permission)
+        return permissionMapper.toPermissionResponse(permissionRepository
+                .findById(permission)
                 .orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_FOUND)));
     }
 

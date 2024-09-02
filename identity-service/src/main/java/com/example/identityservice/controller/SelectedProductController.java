@@ -1,14 +1,16 @@
 package com.example.identityservice.controller;
 
+import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.example.identityservice.dto.request.*;
 import com.example.identityservice.dto.request.response.SelectedProductResponse;
 import com.example.identityservice.service.SelectedProductService;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/selectProduct")
@@ -26,7 +28,8 @@ public class SelectedProductController {
     }
 
     @PutMapping("/updateSelectedProduct/{selectedId}")
-    public ApiResponse<SelectedProductResponse> updateSelectedProduct(@PathVariable String selectedId, @RequestBody UpdateSelectedProductRequest request) {
+    public ApiResponse<SelectedProductResponse> updateSelectedProduct(
+            @PathVariable String selectedId, @RequestBody UpdateSelectedProductRequest request) {
         return ApiResponse.<SelectedProductResponse>builder()
                 .code(1000)
                 .result(selectedProductService.updateSelectedProduct(selectedId, request))
@@ -34,17 +37,18 @@ public class SelectedProductController {
     }
 
     @PostMapping("/addSelectedProductWithUser/{orderId}")
-    public ApiResponse<Void> addSelectedProductWithUser(@PathVariable String orderId, @RequestBody AddSelectedProductRequest request) {
+    public ApiResponse<Void> addSelectedProductWithUser(
+            @PathVariable String orderId, @RequestBody AddSelectedProductRequest request) {
         selectedProductService.addSelectedProductWithUser(orderId, request);
         return ApiResponse.<Void>builder()
                 .code(1000)
                 .message("Add SelectedProduct Success")
                 .build();
-
     }
 
     @DeleteMapping("/removeSelectedProductWithUser/{orderId}")
-    public ApiResponse<Void> removeSelectedProductWithUser(@PathVariable String orderId, @RequestBody RemoveSelectedProductRequest request) {
+    public ApiResponse<Void> removeSelectedProductWithUser(
+            @PathVariable String orderId, @RequestBody RemoveSelectedProductRequest request) {
         selectedProductService.removeSelectedProductWithUser(orderId, request);
         return ApiResponse.<Void>builder()
                 .code(1000)
@@ -55,10 +59,7 @@ public class SelectedProductController {
     @DeleteMapping("/deleteSelectedAll")
     public ApiResponse<Void> deleteSelectedAll() {
         selectedProductService.deleteAllSelectedProduct();
-        return ApiResponse.<Void>builder()
-                .code(1000)
-                .message("Delete All")
-                .build();
+        return ApiResponse.<Void>builder().code(1000).message("Delete All").build();
     }
 
     @GetMapping("/{SelectedId}")
@@ -68,6 +69,7 @@ public class SelectedProductController {
                 .result(selectedProductService.getSelectedProduct(SelectedId))
                 .build();
     }
+
     @GetMapping("/GetAllSelectedProduct")
     public ApiResponse<List<SelectedProductResponse>> getAllSelectedProduct() {
         return ApiResponse.<List<SelectedProductResponse>>builder()
@@ -75,6 +77,7 @@ public class SelectedProductController {
                 .result(selectedProductService.getAllSelectProduct())
                 .build();
     }
+
     @DeleteMapping("/{SelectedId}")
     public ApiResponse<SelectedProductResponse> deleteSelectedProduct(@PathVariable String SelectedId) {
         selectedProductService.deleteSelectedProduct(SelectedId);

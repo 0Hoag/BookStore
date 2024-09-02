@@ -3,10 +3,10 @@ const fetch = require("node-fetch");
 const uploadImageToDropbox = async (file) => {
     try {
         // Replace ACCESS_TOKEN with your Dropbox app's access token
-        const ACCESS_TOKEN = "YOU-TOKEN";
+        const ACCESS_TOKEN = "YOUR_ACCESS_TOKEN";
 
         // Step 1: Upload the file to Dropbox
-        const uploadResponse = await fetch("https://content.dropboxapi.com/2/files/upload", {
+        const uploadResponse = await fetch("YOUR_UPLOAD_URL", {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${ACCESS_TOKEN}`,
@@ -29,7 +29,7 @@ const uploadImageToDropbox = async (file) => {
         const { path_display } = uploadData;
 
         // Step 2: Create a shared link for the uploaded file
-        const createLinkResponse = await fetch("https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings", {
+        const createLinkResponse = await fetch("YOUR_CREATE_LINK_URL", {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${ACCESS_TOKEN}`,

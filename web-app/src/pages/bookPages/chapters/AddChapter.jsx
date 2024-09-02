@@ -29,7 +29,7 @@ const AddChapter = () => {
 
       const createdChapter = await bookService.createChapter(newChapter);
 
-      await bookService.addChapterToBook(bookId, [createdChapter.chapterId]);
+      await bookService.addChapterToBook(bookId,  [createdChapter.chapterId]);
 
       navigate(`/books/${bookId}`);
     } catch (error) {
@@ -46,11 +46,12 @@ const AddChapter = () => {
           alignItems: "center",
           justifyContent: "center",
           height: "100vh",
-          bgcolor: "#f0f2f5",
+          bgcolor: "#2e2e2e", // Dark background color
           p: 3,
+          color: '#f5f5f5' // White smoke text color
         }}
       >
-        <Typography variant="h4" component="div" sx={{ mb: 3 }}>
+        <Typography variant="h4" component="div" sx={{ mb: 3, color: '#f5f5f5' }}>
           Thêm Chương Mới
         </Typography>
         <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%", maxWidth: 600 }}>
@@ -61,7 +62,7 @@ const AddChapter = () => {
             label="Tiêu đề chương"
             value={chapterForm.chapterTitle}
             onChange={handleChange}
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, bgcolor: '#424242', color: '#f5f5f5', '& .MuiInputLabel-root': { color: '#f5f5f5' }, '& .MuiInputBase-input': { color: '#f5f5f5' } }}
           />
           <TextField
             required
@@ -71,7 +72,7 @@ const AddChapter = () => {
             label="Số thứ tự chương"
             value={chapterForm.sequenceNumber}
             onChange={handleChange}
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, bgcolor: '#424242', color: '#f5f5f5', '& .MuiInputLabel-root': { color: '#f5f5f5' }, '& .MuiInputBase-input': { color: '#f5f5f5' } }}
           />
           <TextField
             required
@@ -82,13 +83,13 @@ const AddChapter = () => {
             label="Nội dung"
             value={chapterForm.content}
             onChange={handleChange}
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, bgcolor: '#424242', color: '#f5f5f5', '& .MuiInputLabel-root': { color: '#f5f5f5' }, '& .MuiInputBase-input': { color: '#f5f5f5' } }}
           />
           <Button
             type="submit"
             variant="contained"
             color="primary"
-            sx={{ mt: 3, alignSelf: "flex-start" }}
+            sx={{ mt: 3, alignSelf: "flex-start", bgcolor: '#f5f5f5', color: '#2e2e2e', '&:hover': { bgcolor: '#e0e0e0' } }}
           >
             Thêm Chương
           </Button>

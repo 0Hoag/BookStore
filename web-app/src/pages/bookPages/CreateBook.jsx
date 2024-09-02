@@ -13,7 +13,7 @@ const CreateBook = () => {
     price: 0,
     quantity: 1,
     description: "",
-    imageFile: null,
+    image: "",
   });
   const navigate = useNavigate();
 
@@ -29,8 +29,6 @@ const CreateBook = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const { publicURL } = await uploadImageToDropbox(bookForm.imageFile);
-
       const newBook = {
         bookTitle: bookForm.bookTitle,
         author: bookForm.author,
@@ -38,7 +36,7 @@ const CreateBook = () => {
         price: parseFloat(bookForm.price),
         quantity: parseInt(bookForm.quantity),
         description: bookForm.description,
-        image: publicURL,
+        image: "YOU-IMAGE-URL",
         chapters: [],
       };
 
@@ -58,11 +56,12 @@ const CreateBook = () => {
           alignItems: "center",
           justifyContent: "center",
           height: "100vh",
-          bgcolor: "#f0f2f5",
+          bgcolor: "#1e1e1e", // Dark background similar to BookDetail
+          color: "#e0e0e0", // Light text color for contrast
           p: 3,
         }}
       >
-        <Typography variant="h4" component="div" sx={{ mb: 3 }}>
+        <Typography variant="h4" component="div" sx={{ mb: 3, color: "#e0e0e0" }}>
           Tạo Sách Mới
         </Typography>
         <Box component="form" onSubmit={handleSubmit} sx={{ width: "100%", maxWidth: 600 }}>
@@ -73,7 +72,7 @@ const CreateBook = () => {
             label="Tiêu đề sách"
             value={bookForm.bookTitle}
             onChange={handleChange}
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, input: { color: '#e0e0e0' }, label: { color: '#e0e0e0' } }}
           />
           <TextField
             required
@@ -82,7 +81,7 @@ const CreateBook = () => {
             label="Tác giả"
             value={bookForm.author}
             onChange={handleChange}
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, input: { color: '#e0e0e0' }, label: { color: '#e0e0e0' } }}
           />
           <TextField
             required
@@ -92,7 +91,7 @@ const CreateBook = () => {
             label="Giá niêm yết"
             value={bookForm.listedPrice}
             onChange={handleChange}
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, input: { color: '#e0e0e0' }, label: { color: '#e0e0e0' } }}
           />
           <TextField
             required
@@ -102,7 +101,7 @@ const CreateBook = () => {
             label="Giá bán"
             value={bookForm.price}
             onChange={handleChange}
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, input: { color: '#e0e0e0' }, label: { color: '#e0e0e0' } }}
           />
           <TextField
             required
@@ -112,7 +111,7 @@ const CreateBook = () => {
             label="Số lượng"
             value={bookForm.quantity}
             onChange={handleChange}
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, input: { color: '#e0e0e0' }, label: { color: '#e0e0e0' } }}
           />
           <TextField
             fullWidth
@@ -122,7 +121,7 @@ const CreateBook = () => {
             label="Mô tả"
             value={bookForm.description}
             onChange={handleChange}
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, input: { color: '#e0e0e0' }, label: { color: '#e0e0e0' } }}
           />
           <TextField
             required
@@ -137,7 +136,7 @@ const CreateBook = () => {
             type="submit"
             variant="contained"
             color="primary"
-            sx={{ mt: 3, alignSelf: "flex-start" }}
+            sx={{ mt: 3, backgroundColor: '#3f51b5', '&:hover': { backgroundColor: '#303f9f' }, alignSelf: "flex-start" }}
           >
             Tạo Sách
           </Button>

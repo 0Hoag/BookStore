@@ -5,10 +5,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-import com.example.identityservice.dto.request.response.ProfileExistedResponse;
-import com.example.identityservice.dto.request.response.UserProfileResponse;
-import com.example.identityservice.mapper.UserMapper;
-import feign.FeignException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,12 +20,10 @@ import com.example.identityservice.entity.Role;
 import com.example.identityservice.entity.User;
 import com.example.identityservice.exception.AppException;
 import com.example.identityservice.exception.ErrorCode;
-import com.example.identityservice.mapper.ProfileMapper;
 import com.example.identityservice.repository.InvalidatedRepository;
 import com.example.identityservice.repository.UserRepository;
 import com.example.identityservice.repository.httpclient.OutboundIdentityClient;
 import com.example.identityservice.repository.httpclient.OutboundUserClient;
-import com.example.identityservice.repository.httpclient.ProfileClient;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -103,7 +97,7 @@ public class AuthenticationService {
 
         log.info("TOKEN RESPONSE {}", response);
 
-        //Get user info
+        // Get user info
         var userInfo = outboundUserClient.getUser("json", response.getAccessToken());
         log.info("UserInfo {}", userInfo);
 
@@ -111,31 +105,31 @@ public class AuthenticationService {
         roles.add(Role.builder().name(PredefinedRole.USER_ROLE).build());
 
         // Onboard user
-        //create User and set info user google and save database(identity)
-        var user = userRepository.findByUsername(userInfo.getEmail())
+        // create User and set info user google and save database(identity)
+        var user = userRepository
+                .findByUsername(userInfo.getEmail())
                 .orElseGet(() -> userRepository.save(User.builder()
-                                .username(userInfo.getEmail())
-                                .firstName(userInfo.getGivenName())
-                                .lastName(userInfo.getFamilyName())
-                                .roles(roles)
+                        .email(userInfo.getEmail())
+                        .username(userInfo.getEmail())
+                        .firstName(userInfo.getGivenName())
+                        .lastName(userInfo.getFamilyName())
+                        .roles(roles)
                         .build()));
 
-//        var profileRequest = profileMapper.toProfileCreationRequest(UserCreationRequest.builder()
-//                        .username(userInfo.getEmail())
-//                        .firstName(userInfo.getGivenName())
-//                        .lastName(userInfo.getFamilyName())
-//                .build());
-//        profileRequest.setUserId(user.getId());
-//
-//        profileClient.createProfile(profileRequest);
+        //        var profileRequest = profileMapper.toProfileCreationRequest(UserCreationRequest.builder()
+        //                        .username(userInfo.getEmail())
+        //                        .firstName(userInfo.getGivenName())
+        //                        .lastName(userInfo.getFamilyName())
+        //                .build());
+        //        profileRequest.setUserId(user.getId());
+        //
+        //        profileClient.createProfile(profileRequest);
 
-        //convert token google => token database (identity)
+        // convert token google => token database (identity)
         var token = generateToken(user);
         log.info("Token {}", token);
 
-        return AuthenticationResponse.builder()
-                .token(token)
-                .build();
+        return AuthenticationResponse.builder().token(token).build();
     }
 
     public AuthenticationResponse authenticated(AuthenticationRequest request) {
@@ -194,7 +188,7 @@ public class AuthenticationService {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(user.getUsername())
+                .subject(user.getUserId())
                 .issuer("devteria.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(

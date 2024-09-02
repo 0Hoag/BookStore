@@ -20,7 +20,6 @@ public interface IdentityClient {
         @GetMapping(value = "/auth/token", produces = MediaType.APPLICATION_JSON_VALUE)
         ApiResponse<AuthenticationResponse> getToken(@RequestBody AuthenticationRequest request);
 
-        @GetMapping(value = "/users/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-        ApiResponse<UserResponse> getUser(@PathVariable("id") String id, @RequestHeader("Authorization") String token);
-
+        @GetMapping(value = "/users/getUserInformationBasic/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+        ApiResponse<UserResponse> getUserInformationBasic(@PathVariable("userId") String userId, @RequestHeader("Authorization") String token);
 }

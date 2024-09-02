@@ -11,7 +11,7 @@ import {
 import { Alert } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { getToken } from "../services/localStorageService";
-import { getMyInfo, changePassword } from "../services/userService";
+import userService from '../services/userService';
 import Header from "../components/header/Header";
 import Scene from "./Scene";
 
@@ -47,7 +47,7 @@ export default function Settings() {
 
   const getUserDetails = async () => {
     try {
-      const response = await getMyInfo();
+      const response = await userService.getMyInfo();
       const userInfo = response.data.result;
 
       setUserDetails(userInfo);
@@ -92,7 +92,7 @@ export default function Settings() {
 
     try {
       // await verifyPassword(password);
-      const response = await changePassword(password, newPassword);
+      const response = await userService.changePassword(password, newPassword);
       if (response && response.message) {
         showSuccess(response.message);
         setPassword("");
@@ -125,10 +125,12 @@ export default function Settings() {
           justifyContent: "center",
           alignItems: "center",
           height: "100vh",
+          bgcolor: "#121212", // Dark background
+          color: "#e0e0e0", // Light text color
         }}
       >
-        <CircularProgress />
-        <Typography>Loading ...</Typography>
+        <CircularProgress color="inherit" />
+        <Typography color="#e0e0e0">Loading ...</Typography>
       </Box>
     );
   }
@@ -157,7 +159,8 @@ export default function Settings() {
         alignItems="center"
         justifyContent="center"
         height="100vh"
-        bgcolor="#f0f2f5"
+        bgcolor="#1e1e1e" // Dark background
+        color="#e0e0e0" // Light text color
       >
         <Card
           sx={{
@@ -166,6 +169,8 @@ export default function Settings() {
             boxShadow: 3,
             borderRadius: 2,
             padding: 4,
+            bgcolor: "#1e1e1e", // Slightly lighter dark grey for the card
+            color: "#e0e0e0", // Light text color
           }}
         >
           <Box
@@ -181,6 +186,7 @@ export default function Settings() {
               sx={{
                 fontSize: 18,
                 mb: "40px",
+                color: "#b0b0b0", // Lighter gray text color for email
               }}
             >
               Settings for {userDetails.username}
@@ -198,6 +204,7 @@ export default function Settings() {
                 sx={{
                   fontSize: 14,
                   fontWeight: 600,
+                  color: "#b0b0b0", // Lighter gray text color for email
                 }}
               >
                 User Id
@@ -205,6 +212,7 @@ export default function Settings() {
               <Typography
                 sx={{
                   fontSize: 14,
+                  color: "#b0b0b0", // Lighter gray text color for email
                 }}
               >
                 {userDetails.userId}
@@ -224,6 +232,7 @@ export default function Settings() {
                 sx={{
                   fontSize: 14,
                   fontWeight: 600,
+                  color: "#b0b0b0", // Lighter gray text color for email
                 }}
               >
                 Email
@@ -231,6 +240,7 @@ export default function Settings() {
               <Typography
                 sx={{
                   fontSize: 14,
+                  color: "#b0b0b0", // Lighter gray text color for email
                 }}
               >
                 {userDetails.email}
@@ -250,6 +260,8 @@ export default function Settings() {
                 sx={{
                   fontSize: 14,
                   fontWeight: 600,
+                  color: "#b0b0b0", // Lighter gray text color for email
+
                 }}
               >
                 First Name
@@ -281,6 +293,7 @@ export default function Settings() {
                 sx={{
                   fontSize: 14,
                   fontWeight: 600,
+                  color: "#b0b0b0", // Lighter gray text color for email
                 }}
               >
                 Last Name
@@ -312,6 +325,7 @@ export default function Settings() {
                 sx={{
                   fontSize: 14,
                   fontWeight: 600,
+                  color: "#b0b0b0", // Lighter gray text color for email
                 }}
               >
                 Date of birth

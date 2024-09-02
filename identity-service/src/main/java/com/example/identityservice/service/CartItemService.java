@@ -1,5 +1,14 @@
 package com.example.identityservice.service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+
 import com.example.identityservice.dto.request.*;
 import com.example.identityservice.dto.request.response.BookResponse;
 import com.example.identityservice.dto.request.response.CartItemResponse;
@@ -16,19 +25,12 @@ import com.example.identityservice.repository.httpclient.BookClient;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,10 +52,11 @@ public class CartItemService {
     protected String signerKey;
 
     public CartItemResponse createCart(CartItemRequest request) {
-        User user = userRepository.findById(request.getUserId())
+        User user = userRepository
+                .findById(request.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         String token = generateToken(user);
-        //create CartItem
+        // create CartItem
         CartItem cartItem = cartItemMapper.toCartItem(request);
         cartItem.setUser(user);
         cartItem.setBookId(request.getBookId());
@@ -65,11 +68,13 @@ public class CartItemService {
 
         return cartItemResponse;
     }
-    //replace 7/9
+    // replace 7/9
     public CartItemResponse getCartItem(String cartItemId) {
-        var cartItem = cartItemRepository.findById(cartItemId)
+        var cartItem = cartItemRepository
+                .findById(cartItemId)
                 .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_EXISTED));
-        User user = userRepository.findById(cartItem.getUser().getUserId())
+        User user = userRepository
+                .findById(cartItem.getUser().getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         String token = generateToken(user);
         CartItemResponse cartItemResponse = cartItemMapper.toCartItemResponse(cartItem);
@@ -82,7 +87,8 @@ public class CartItemService {
     public List<CartItemResponse> getAllCartItem() {
         return cartItemRepository.findAll().stream()
                 .map(cartItem -> {
-                    User user = userRepository.findById(cartItem.getUser().getUserId())
+                    User user = userRepository
+                            .findById(cartItem.getUser().getUserId())
                             .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
                     String token = generateToken(user);
                     CartItemResponse cartItemResponse = cartItemMapper.toCartItemResponse(cartItem);
@@ -94,58 +100,56 @@ public class CartItemService {
     }
 
     public CartItemResponse updateCartItem(String cartItemId, UpdateCartItemRequest request) {
-        CartItem cartItem = cartItemRepository.findById(cartItemId)
+        CartItem cartItem = cartItemRepository
+                .findById(cartItemId)
                 .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_EXISTED));
         cartItemMapper.updateCartItem(cartItem, request);
         return cartItemMapper.toCartItemResponse(cartItemRepository.save(cartItem));
     }
 
     public UserResponse addCartItemToUser(String userId, AddCartItemRequest request) {
-        var user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        var user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        Set<CartItem> cartItems = cartItemRepository.findAllById(request.getCartItemId())
-                .stream().collect(Collectors.toSet());
+        Set<CartItem> cartItems =
+                cartItemRepository.findAllById(request.getCartItemId()).stream().collect(Collectors.toSet());
         user.getCartItem().addAll(cartItems);
         userRepository.save(user);
 
-        String token = generateToken(user);
-        Set<CartItemResponse> cartItemResponse = cartItems.stream()
-                .map(cartItem -> {
-                    CartItemResponse itemResponse = cartItemMapper.toCartItemResponse(cartItem);
-                    BookResponse bookResponse = fetchBookResponse(cartItem.getBookId(), token);
-                    itemResponse.setBookId(bookResponse);
-                    return itemResponse;
-                }).collect(Collectors.toSet());
+        Set<CartItemResponse> cartItemResponses = selectedCartItemResponse(cartItems); // update 08/02
 
         UserResponse userResponse = userMapper.toUserResponse(user);
-        userResponse.setCartItem(cartItemResponse);
+        userResponse.setCartItem(cartItemResponses);
 
         return userResponse;
     }
 
     public UserResponse removeCartItemToUser(String userId, RemoveCartItemRequest request) {
-        var user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        Set<CartItem> cartItems = cartItemRepository.findAllById(request.getCartItemId())
-                .stream().collect(Collectors.toSet());
+        var user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        Set<CartItem> cartItems =
+                cartItemRepository.findAllById(request.getCartItemId()).stream().collect(Collectors.toSet());
         user.getCartItem().removeAll(cartItems);
         userRepository.save(user);
 
-        String token = generateToken(user);
-        Set<CartItemResponse> cartItemResponses = cartItems.stream()
-                .map(cartItem -> {
-                    CartItemResponse response = cartItemMapper.toCartItemResponse(cartItem);
-                    BookResponse bookResponse = fetchBookResponse(cartItem.getBookId(), token);
-                    response.setBookId(bookResponse);
-                    return response;
-                }).collect(Collectors.toSet());
+        Set<CartItemResponse> cartItemResponses = selectedCartItemResponse(cartItems); // update 08/02
 
         UserResponse userResponse = userMapper.toUserResponse(user);
         userResponse.setCartItem(cartItemResponses);
         cartItemRepository.deleteAll(cartItems);
 
         return userResponse;
+    }
+
+    public Set<CartItemResponse> selectedCartItemResponse(Set<CartItem> cartItems) { // update 08/02
+        Set<CartItemResponse> cartItemResponses = cartItems.stream()
+                .map(cartItem -> {
+                    CartItemResponse response = cartItemMapper.toCartItemResponse(cartItem);
+                    BookResponse bookResponse =
+                            fetchBookResponse(cartItem.getBookId(), generateToken(cartItem.getUser()));
+                    response.setBookId(bookResponse);
+                    return response;
+                })
+                .collect(Collectors.toSet());
+        return cartItemResponses;
     }
 
     public void deleteCartItem(String cartItemId) {
@@ -194,5 +198,4 @@ public class CartItemService {
         ApiResponse<BookResponse> apiResponse = bookClient.getBook(bookId, "Bearer " + token);
         return apiResponse.getResult();
     }
-
 }

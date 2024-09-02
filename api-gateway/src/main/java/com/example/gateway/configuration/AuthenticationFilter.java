@@ -38,6 +38,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     private String[] publicEnpoint = {
             "/identity/auth/.*",
             "/identity/users/registration",
+            "/profile/register", //update 30/07
             "/identity/cartItem/registration",
             "/identity/selectProduct/registration",
             "/identity/order/registration",
@@ -45,6 +46,18 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             "/book/registration",
             "/book/registration/ManyChapter",
             "/book/truyen/registration",
+            "/friend/Request/Registration",
+            "/friend/ship/Registration",
+            "/friend/blockList/registration",
+            "/post/registration",
+            "/post/my-posts",
+            "/comment/comments/registration",
+            "/interaction/like/registration",
+            "/messaging/mess/registration",
+            "/messaging/messenger/registration",
+
+            //KeyCloak
+            "/profile/.*",
     };
 
     @NonFinal

@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.example.bookservice.entity.BookProfile;
 
 @Repository
-public interface BookRepository extends MongoRepository<BookProfile, String> {}
+public interface BookRepository extends MongoRepository<BookProfile, String> {
+    //    Page<Book> findAllByBookId(String bookId, Pageable pageable);
+}

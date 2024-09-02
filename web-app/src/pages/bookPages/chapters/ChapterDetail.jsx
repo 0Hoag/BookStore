@@ -68,7 +68,8 @@ const ChapterDetail = () => {
           alignItems: "center",
           justifyContent: "center",
           minHeight: "100vh",
-          bgcolor: "#f0f2f5",
+          bgcolor: "#2e2e2e", // Dark background color
+          color: '#f5f5f5', // White smoke text color
           p: 3,
         }}
       >
@@ -78,19 +79,27 @@ const ChapterDetail = () => {
             <Button
               onClick={() => handleNavigation("prev")}
               variant="outlined"
+              color="secondary"
               disabled={!currentChapter || currentChapter.sequenceNumber === 1}
+              sx={{ color: '#f5f5f5', borderColor: '#f5f5f5', '&:hover': { borderColor: '#e0e0e0' } }}
             >
               <i className="fas fa-chevron-left" /> Chương trước
             </Button>
             <Link to={`/books/${bookId}`} style={{ textDecoration: "none" }}>
-              <Button variant="outlined">
+              <Button
+                variant="outlined"
+                color="secondary"
+                sx={{ color: '#f5f5f5', borderColor: '#f5f5f5', '&:hover': { borderColor: '#e0e0e0' } }}
+              >
                 Mục lục
               </Button>
             </Link>
             <Button
               onClick={() => handleNavigation("next")}
               variant="outlined"
+              color="secondary"
               disabled={!currentChapter || currentChapter.sequenceNumber === book?.chapters.length}
+              sx={{ color: '#f5f5f5', borderColor: '#f5f5f5', '&:hover': { borderColor: '#e0e0e0' } }}
             >
               Chương sau <i className="fas fa-chevron-right" />
             </Button>
@@ -101,17 +110,17 @@ const ChapterDetail = () => {
         <Box sx={{ display: "flex", justifyContent: "center", maxWidth: 1000, overflowY: "auto" }}>
           {!currentChapter ? (
             <Box sx={{ textAlign: "center" }}>
-              <Typography variant="h4">Loading...</Typography>
+              <Typography variant="h4" sx={{ color: '#f5f5f5' }}>Loading...</Typography>
             </Box>
           ) : (
             <Box sx={{ width: "100%" }}>
-              <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3, textAlign: "center" }}>
+              <Typography variant="h4" sx={{ fontWeight: "bold", mb: 3, textAlign: "center", color: '#f5f5f5' }}>
                 {book.bookTitle}
               </Typography>
-              <Typography variant="h6" sx={{ color: "#555", mb: 3, textAlign: "center" }}>
+              <Typography variant="h6" sx={{ color: "#b0b0b0", mb: 3, textAlign: "center" }}>
                 Thứ {currentChapter.sequenceNumber} - {currentChapter.chapterTitle}
               </Typography>
-              <Typography variant="body1" sx={{ fontSize: "1.4rem", textAlign: "left" }}>
+              <Typography variant="body1" sx={{ fontSize: "1.4rem", textAlign: "left", color: '#e0e0e0' }}>
                 {currentChapter.content}
               </Typography>
             </Box>
@@ -124,19 +133,27 @@ const ChapterDetail = () => {
             <Button
               onClick={() => handleNavigation("prev")}
               variant="outlined"
+              color="secondary"
               disabled={!currentChapter || currentChapter.sequenceNumber === 1}
+              sx={{ color: '#f5f5f5', borderColor: '#f5f5f5', '&:hover': { borderColor: '#e0e0e0' } }}
             >
               <i className="fas fa-chevron-left" /> Chương trước
             </Button>
             <Link to={`/books/${bookId}`} style={{ textDecoration: "none" }}>
-              <Button variant="outlined">
+              <Button
+                variant="outlined"
+                color="secondary"
+                sx={{ color: '#f5f5f5', borderColor: '#f5f5f5', '&:hover': { borderColor: '#e0e0e0' } }}
+              >
                 Mục lục
               </Button>
             </Link>
             <Button
               onClick={() => handleNavigation("next")}
               variant="outlined"
+              color="secondary"
               disabled={!currentChapter || currentChapter.sequenceNumber === book?.chapters.length}
+              sx={{ color: '#f5f5f5', borderColor: '#f5f5f5', '&:hover': { borderColor: '#e0e0e0' } }}
             >
               Chương sau <i className="fas fa-chevron-right" />
             </Button>

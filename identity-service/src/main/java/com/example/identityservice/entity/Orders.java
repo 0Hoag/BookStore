@@ -1,15 +1,14 @@
 package com.example.identityservice.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import java.math.BigDecimal;
+import java.util.Set;
+
 import jakarta.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 @Data
 @Builder
@@ -22,7 +21,7 @@ public class Orders {
     @GeneratedValue(strategy = GenerationType.UUID)
     String orderId;
 
-    //Payment to COD
+    // Payment to COD
     String fullName;
     String phoneNumber;
     String country;
@@ -32,7 +31,7 @@ public class Orders {
     String address;
     String paymentMethod;
 
-    //Payment to VNPay
+    // Payment to VNPay
     String vnpTxnRef;
     String vnpOrderInfo;
     BigDecimal vnpAmount;
@@ -42,7 +41,7 @@ public class Orders {
     String vnpTransactionStatus;
 
     @OneToMany
-//    @JsonManagedReference
+    //    @JsonManagedReference
     Set<SelectedProduct> selectedProducts;
 
     @ManyToOne
@@ -52,21 +51,20 @@ public class Orders {
 
     @Override
     public String toString() {
-        return "Orders{" +
-                "orderId='" + orderId + '\'' +
-                ", fullName='" + fullName + '\'' +
-                ", phoneNumber='" + phoneNumber + '\'' +
-                ", country='" + country + '\'' +
-                ", city='" + city + '\'' +
-                ", district='" + district + '\'' +
-                ", ward='" + ward + '\'' +
-                ", address='" + address + '\'' +
-                ", vnpTxnRef='" + vnpTxnRef + '\'' +
-                ", vnpAmount='" + vnpAmount + '\'' +
-                ", vnpResponseCode='" + vnpResponseCode + '\'' +
-                ", vnpTransactionNo='" + vnpTransactionNo + '\'' +
-                ", vnpPayDate='" + vnpPayDate + '\'' +
-                ", vnpTransactionStatus='" + vnpTransactionStatus + '\'' +
-                '}';
+        return "Orders{" + "orderId='"
+                + orderId + '\'' + ", fullName='"
+                + fullName + '\'' + ", phoneNumber='"
+                + phoneNumber + '\'' + ", country='"
+                + country + '\'' + ", city='"
+                + city + '\'' + ", district='"
+                + district + '\'' + ", ward='"
+                + ward + '\'' + ", address='"
+                + address + '\'' + ", vnpTxnRef='"
+                + vnpTxnRef + '\'' + ", vnpAmount='"
+                + vnpAmount + '\'' + ", vnpResponseCode='"
+                + vnpResponseCode + '\'' + ", vnpTransactionNo='"
+                + vnpTransactionNo + '\'' + ", vnpPayDate='"
+                + vnpPayDate + '\'' + ", vnpTransactionStatus='"
+                + vnpTransactionStatus + '\'' + '}';
     }
 }

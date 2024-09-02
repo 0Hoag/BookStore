@@ -1,10 +1,9 @@
 package com.example.identityservice.dto.request.OrdersRequest;
 
+import java.util.Set;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
-import java.util.Set;
 
 @Getter
 @Data
@@ -23,5 +22,5 @@ public class CreateOrdersRequest {
     String paymentMethod;
     Set<String> selectedProducts;
     String userId;
-    //them vao total
+    // them vao total
 }

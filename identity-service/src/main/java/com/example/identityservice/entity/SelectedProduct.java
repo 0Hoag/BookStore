@@ -1,7 +1,9 @@
 package com.example.identityservice.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,6 +17,7 @@ public class SelectedProduct {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String selectedId;
+
     int quantity;
     String bookId;
 
@@ -23,8 +26,8 @@ public class SelectedProduct {
     @JsonBackReference
     User user;
 
-//    @ManyToOne
-//    @JoinColumn(name = "order_id")
-////    @JsonBackReference
-//    Orders orders;
+    //    @ManyToOne
+    //    @JoinColumn(name = "order_id")
+    ////    @JsonBackReference
+    //    Orders orders;
 }

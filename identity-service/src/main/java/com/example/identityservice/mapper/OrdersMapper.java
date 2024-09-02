@@ -1,14 +1,13 @@
 package com.example.identityservice.mapper;
 
+import org.mapstruct.*;
+
 import com.example.identityservice.dto.request.OrdersRequest.CreateOrdersRequest;
 import com.example.identityservice.dto.request.OrdersRequest.UpdateOrdersRequest;
-import com.example.identityservice.dto.request.UserUpdateRequest;
 import com.example.identityservice.dto.request.response.BookResponse;
 import com.example.identityservice.dto.request.response.OrdersResponse.OrdersResponse;
 import com.example.identityservice.dto.request.response.SelectedProductResponse;
 import com.example.identityservice.entity.Orders;
-import com.example.identityservice.entity.User;
-import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface OrdersMapper {
@@ -23,16 +22,12 @@ public interface OrdersMapper {
 
     @Named("mapBookIdToBookResponse")
     default BookResponse mapBookIdToBookResponse(String bookId) {
-        return BookResponse.builder()
-                .bookId(bookId)
-                .build();
+        return BookResponse.builder().bookId(bookId).build();
     }
 
     // You may need to adjust or remove this mapping based on your entity structure
     @Named("mapSelectedProductResponse")
     default SelectedProductResponse mapSelectedProductResponse(String selectedId) {
-        return SelectedProductResponse.builder()
-                .selectedId(selectedId)
-                .build();
+        return SelectedProductResponse.builder().selectedId(selectedId).build();
     }
 }

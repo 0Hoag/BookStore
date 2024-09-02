@@ -1,11 +1,10 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Login from "../components/Login";
+import Login from "../pages/Login";
 import Home from "../components/Home";
 import Authenticate from "../components/Authenticate";
-import Profile from "../pages/Profile";
+import ProfileDetail from "../pages/ProfileDetail";
 import Settings from "../pages/Settings";
-import Friend from "../pages/Friends";
 import Register from "../pages/Register";
 import Books from "../pages/bookPages/Books";
 import BookDetail from "../pages/bookPages/BookDetail";
@@ -18,6 +17,9 @@ import CheckOut from "../pages/shopping/CheckOut";
 import MyOrders from "../pages/shopping/MyOrders";
 import OrderDetails from "../pages/shopping/OrderDetails";
 import PaymentResult from "../pages/shopping/PaymentResult";
+import Friend from "../pages/Friends/Friends";
+import Profile from "../pages/Profile";
+import Messenger from "../pages/messeger/messenger";
 
 const AppRoutes = () => {
   return (
@@ -31,6 +33,7 @@ const AppRoutes = () => {
         <Route path="/books/:bookId/add-chapter" element={<AddChapter />} />
         <Route path="/books/:bookId/:chapterId" element={<ChapterDetail />} />
         <Route path="/books/:bookId/*" element={<BookDetail />} />
+        <Route path="/messages" element={<Messenger />} />
         <Route path="/orders" element={<MyOrders />} />
         <Route path="/payment-result" element={<PaymentResult />} />
         <Route path="/orders/:orderId" element={<OrderDetails />} />
@@ -39,6 +42,7 @@ const AppRoutes = () => {
         <Route path="/checkout" element={<CheckOut />} />
         <Route path="/authenticate" element={<Authenticate />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/profile/:userId" element={<ProfileDetail />} />
         <Route path="/friends" element={<Friend />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/" element={<Home />} />

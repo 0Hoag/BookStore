@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import Scene from "../Scene";
 import bookService from "../../services/bookService";
 import BookCard from "./BookCard";
-import { getMyInfo } from "../../services/userService";
+import userService from "../../services/userService";
 
 const Books = () => {
   const [books, setBooks] = useState([]);
@@ -14,7 +14,7 @@ const Books = () => {
     const fetchBooks = async () => {
       try {
         const response = await bookService.getAllBooks();
-        setBooks(response.result);
+        setBooks(response.result.data);
       } catch (error) {
         console.error('Error fetching books:', error);
       }
@@ -22,7 +22,7 @@ const Books = () => {
 
     const checkAdminRole = async () => {
       try {
-        const userInfo = await getMyInfo();
+        const userInfo = await userService.getMyInfo();
         const roles = userInfo.data?.result?.roles || [];
         const isAdminUser = roles.some(role => role.name === 'ADMIN');
         setIsAdmin(isAdminUser);
@@ -44,11 +44,12 @@ const Books = () => {
           alignItems: 'center',
           justifyContent: 'flex-start',
           minHeight: '100vh',
-          bgcolor: '#f0f2f5',
+          bgcolor: '#1e1e1e', // Dark background consistent with Friends page
+          color: '#e0e0e0', // Light text color
           p: 3,
         }}
       >
-        <Typography variant="h4" component="div" sx={{ mb: 3, textAlign: 'center' }}>
+        <Typography variant="h4" component="div" sx={{ mb: 3, textAlign: 'center', color: '#e0e0e0' }}>
           Danh sách sách
         </Typography>
         <Grid container spacing={2} justifyContent="center">
@@ -67,6 +68,7 @@ const Books = () => {
               to="/create-book"
               variant="contained"
               color="primary"
+              sx={{ bgcolor: '#444', '&:hover': { bgcolor: '#555' } }}
             >
               Tạo Sách Mới
             </Button>
@@ -75,6 +77,7 @@ const Books = () => {
               to="/delete-book"
               variant="contained"
               color="secondary"
+              sx={{ bgcolor: '#444', '&:hover': { bgcolor: '#555' } }}
             >
               Xóa Sách
             </Button>

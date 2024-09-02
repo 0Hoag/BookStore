@@ -18,10 +18,12 @@ import {
   Grid,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { getMyInfo } from '../../services/userService';
 import ordersService from '../../services/ordersService';
 import Scene from '../Scene';
 import vnpayService from '../../services/vnpayService';
+import cartItemService from '../../services/cartItemService';
+import userService from '../../services/userService';
+
 
 const CheckOut = () => {
   const navigate = useNavigate();
@@ -46,12 +48,13 @@ const CheckOut = () => {
   });
 
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [order, setOrder] = useState([]);
   const [orderId, setOrderId] = useState(null); // State để lưu orderId
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await getMyInfo();
+        const response = await userService.getMyInfo();
         if (response.data.code === 1000) {
           const userInfo = response.data.result;
           setFormData({
@@ -74,6 +77,7 @@ const CheckOut = () => {
             userId: userInfo.userId,
           });
           setSelectedProducts(userInfo.cartItem);
+          setOrder(userInfo.orders)
           
           // Lấy orderId từ đơn hàng đầu tiên trong mảng
           const firstOrder = userInfo.orders[0];
@@ -126,6 +130,12 @@ const CheckOut = () => {
       if (updateOrderResponse.error) {
         throw new Error(`Error updating order: ${updateOrderResponse.error}`);
       }
+      
+      const userMyInfo = await userService.getMyInfo();
+      const userId = userMyInfo.data.result.userId;
+      const cartItemId = selectedProducts.map((product) => (product.cartItemId));
+
+      await cartItemService.removeCartItem(userId, cartItemId);
   
       console.log('Order updated successfully:', updateOrderResponse);
 
@@ -156,7 +166,13 @@ const CheckOut = () => {
 
   return (
     <Scene>
-      <Box sx={{ p: 3 }}>
+      <Box
+        sx={{
+          p: 3,
+          bgcolor: '#303030', // Dark background color
+          color: '#e0e0e0', // Light text color
+        }}
+      >
         <Typography variant="h4" gutterBottom>
           Địa chỉ giao hàng
         </Typography>
@@ -170,6 +186,21 @@ const CheckOut = () => {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
+                sx={{
+                  input: { color: '#e0e0e0' },
+                  label: { color: '#e0e0e0' },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -180,6 +211,21 @@ const CheckOut = () => {
                 name="phoneNumber"
                 value={formData.phoneNumber}
                 onChange={handleChange}
+                sx={{
+                  input: { color: '#e0e0e0' },
+                  label: { color: '#e0e0e0' },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -189,6 +235,21 @@ const CheckOut = () => {
                 name="country"
                 value={formData.country}
                 onChange={handleChange}
+                sx={{
+                  input: { color: '#e0e0e0' },
+                  label: { color: '#e0e0e0' },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -198,6 +259,21 @@ const CheckOut = () => {
                 name="city"
                 value={formData.city}
                 onChange={handleChange}
+                sx={{
+                  input: { color: '#e0e0e0' },
+                  label: { color: '#e0e0e0' },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -207,6 +283,21 @@ const CheckOut = () => {
                 name="district"
                 value={formData.district}
                 onChange={handleChange}
+                sx={{
+                  input: { color: '#e0e0e0' },
+                  label: { color: '#e0e0e0' },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -216,6 +307,21 @@ const CheckOut = () => {
                 name="ward"
                 value={formData.ward}
                 onChange={handleChange}
+                sx={{
+                  input: { color: '#e0e0e0' },
+                  label: { color: '#e0e0e0' },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -228,15 +334,45 @@ const CheckOut = () => {
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
+                sx={{
+                  input: { color: '#e0e0e0' },
+                  label: { color: '#e0e0e0' },
+                  '& .MuiOutlinedInput-root': {
+                    '& fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                    '&:hover fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                    '&.Mui-focused fieldset': {
+                      borderColor: '#e0e0e0',
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12}>
               <FormControl fullWidth required>
-                <InputLabel>Phương thức thanh toán</InputLabel>
+                <InputLabel sx={{ color: '#e0e0e0' }}>Phương thức thanh toán</InputLabel>
                 <Select
                   name="paymentMethod"
                   value={formData.paymentMethod}
                   onChange={handleChange}
+                  sx={{
+                    color: '#e0e0e0',
+                    '& .MuiSelect-icon': { color: '#e0e0e0' },
+                    '& .MuiOutlinedInput-root': {
+                      '& fieldset': {
+                        borderColor: '#e0e0e0',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: '#e0e0e0',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#e0e0e0',
+                      },
+                    },
+                  }}
                 >
                   <MenuItem value="Thanh toán khi nhận hàng">Thanh toán khi nhận hàng</MenuItem>
                   <MenuItem value="Thanh toán ví điện tử">Ví điện tử</MenuItem>
@@ -248,30 +384,30 @@ const CheckOut = () => {
           <Typography variant="h5" gutterBottom sx={{ mt: 3 }}>
             Thông tin đơn hàng
           </Typography>
-          <TableContainer component={Paper}>
+          <TableContainer component={Paper} sx={{ bgcolor: '#424242' }}>
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Sản phẩm</TableCell>
-                  <TableCell align="right">Đơn giá</TableCell>
-                  <TableCell align="right">Số lượng</TableCell>
-                  <TableCell align="right">Thành tiền</TableCell>
+                  <TableCell sx={{ color: '#e0e0e0' }}>Sản phẩm</TableCell>
+                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>Đơn giá</TableCell>
+                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>Số lượng</TableCell>
+                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>Thành tiền</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {selectedProducts.map((product) => (
                   <TableRow key={product.cartItemId}>
-                    <TableCell>{product.bookId.bookTitle}</TableCell>
-                    <TableCell align="right">{product.bookId.price} VND</TableCell> 
-                    <TableCell align="right">{product.quantity}</TableCell>
-                    <TableCell align="right">{product.bookId.price * product.quantity} VND</TableCell> 
+                    <TableCell sx={{ color: '#e0e0e0' }}>{product.bookId.bookTitle}</TableCell>
+                    <TableCell align="right" sx={{ color: '#e0e0e0' }}>{product.bookId.price} VND</TableCell>
+                    <TableCell align="right" sx={{ color: '#e0e0e0' }}>{product.quantity}</TableCell>
+                    <TableCell align="right" sx={{ color: '#e0e0e0' }}>{product.bookId.price * product.quantity} VND</TableCell>
                   </TableRow>
                 ))}
                 <TableRow>
-                  <TableCell colSpan={3} align="right"> 
+                  <TableCell colSpan={3} align="right" sx={{ color: '#e0e0e0' }}>
                     Tổng cộng:
                   </TableCell>
-                  <TableCell align="right">{calculateTotalPrice()} VND</TableCell>
+                  <TableCell align="right" sx={{ color: '#e0e0e0' }}>{calculateTotalPrice()} VND</TableCell>
                 </TableRow>
               </TableBody>
             </Table>

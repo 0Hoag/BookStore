@@ -36,6 +36,5 @@ public class BookControllerTest {
         createBookRequest = CreateBookRequest.builder().build();
 
         response = BookResponse.builder().build();
-
     }
 }

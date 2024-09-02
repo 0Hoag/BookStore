@@ -5,19 +5,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.example.identityservice.dto.request.*;
-import com.example.identityservice.dto.request.response.BookResponse;
-import com.example.identityservice.dto.request.response.CartItemResponse;
-import com.example.identityservice.dto.request.response.OrdersResponse.OrdersResponse;
-import com.example.identityservice.dto.request.response.SelectedProductResponse;
-import com.example.identityservice.entity.*;
-import com.example.identityservice.mapper.*;
-import com.example.identityservice.repository.*;
-import com.example.identityservice.repository.httpclient.BookClient;
-import com.nimbusds.jose.*;
-import com.nimbusds.jose.crypto.MACSigner;
-import com.nimbusds.jwt.JWTClaimsSet;
-import lombok.experimental.NonFinal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -25,20 +12,30 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import com.example.event.dto.*;
 import com.example.identityservice.constant.PredefinedRole;
-import com.example.identityservice.dto.request.response.UserResponse;
+import com.example.identityservice.dto.request.*;
+import com.example.identityservice.dto.request.response.*;
+import com.example.identityservice.dto.request.response.OrdersResponse.OrdersResponse;
+import com.example.identityservice.entity.*;
 import com.example.identityservice.exception.AppException;
 import com.example.identityservice.exception.ErrorCode;
+import com.example.identityservice.mapper.*;
+import com.example.identityservice.repository.*;
+import com.example.identityservice.repository.httpclient.BookClient;
 import com.example.identityservice.repository.httpclient.ProfileClient;
+import com.nimbusds.jose.*;
+import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jwt.JWTClaimsSet;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 @Service
 @RequiredArgsConstructor
@@ -95,7 +92,7 @@ public class UserService {
                 .body("Hello " + request.getUsername())
                 .build();
 
-        //public message to kafka
+        // public message to kafka
         kafkaTemplate.send("notification-delivery", notificationEvent);
 
         return userMapper.toUserResponse(user);
@@ -105,22 +102,22 @@ public class UserService {
         var context = SecurityContextHolder.getContext();
         String username = context.getAuthentication().getName();
 
-        User user = userRepositories.findByUsername(username).orElseThrow(
-                () -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        User user = userRepositories
+                .findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        if (StringUtils.hasText(user.getPassword()))
-            throw new AppException(ErrorCode.PASSWORD_EXISTED);
+        if (StringUtils.hasText(user.getPassword())) throw new AppException(ErrorCode.PASSWORD_EXISTED);
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepositories.save(user);
     }
 
-
     public void changePassword(PasswordChangeRequest request) {
         var context = SecurityContextHolder.getContext();
         String username = context.getAuthentication().getName();
 
-        User user = userRepositories.findByUsername(username)
+        User user = userRepositories
+                .findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
@@ -135,7 +132,8 @@ public class UserService {
         var context = SecurityContextHolder.getContext();
         String username = context.getAuthentication().getName();
 
-        User user = userRepositories.findByUsername(username)
+        User user = userRepositories
+                .findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
@@ -143,134 +141,151 @@ public class UserService {
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('GET_DATA')")
+    public UserResponse getUser(String userId) {
+        User user = userRepositories.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        user.getCartItem().size();
+        //        user.getSelectedProducts().size();
+
+        UserResponse userResponse = userMapper.toUserResponse(user);
+
+        Set<CartItemResponse> cartItemResponses = selectedCartItemResponse(userResponse.getCartItem());
+
+        Set<OrdersResponse> ordersResponses = selectedOrdersResponse(userResponse.getOrders());
+
+        userResponse.setCartItem(cartItemResponses);
+        userResponse.setOrders(ordersResponses);
+
+        return userResponse;
+    }
+
+    public UserResponse getMyInfo() {
+        var context = SecurityContextHolder.getContext();
+        String userId = context.getAuthentication().getName();
+
+        User user = userRepositories
+                .findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        UserResponse userResponse = userMapper.toUserResponse(user);
+        userResponse.setNoPassword(!StringUtils.hasText(user.getPassword()));
+
+        Set<CartItemResponse> cartItemResponses = selectedCartItemResponse(userResponse.getCartItem());
+
+        Set<OrdersResponse> ordersResponses = selectedOrdersResponse(userResponse.getOrders());
+
+        userResponse.setCartItem(cartItemResponses);
+        userResponse.setOrders(ordersResponses);
+
+        return userResponse;
+    }
+
+    @PreAuthorize("hasAuthority('GET_DATA')")
     public List<UserResponse> getAllUser() {
         return userRepositories.findAll().stream()
                 .map(userMapper::toUserResponse)
                 .toList();
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    public UserResponse getUser(String userId) {
-        User user = userRepositories.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        user.getCartItem().size();
-//        user.getSelectedProducts().size();
-
-        UserResponse userResponse = userMapper.toUserResponse(user);
-
-        String token = generateToken(user);
-
-        Set<CartItemResponse> cartItemResponses = userResponse.getCartItem()
-                .stream().map(cartItemResponse -> {
-                    CartItem cartItem = cartItemRepository.findById(cartItemResponse.getCartItemId())
-                            .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_EXISTED));
-                    CartItemResponse itemResponse = cartItemMapper.toCartItemResponse(cartItem);
-                    BookResponse bookResponse = fetchBookResponse(itemResponse.getBookId().getBookId(), token);
-                    itemResponse.setBookId(bookResponse);
-                    return itemResponse;
-                }).collect(Collectors.toSet());
-
-//        Set<SelectedProductResponse> selectedProductResponses = userResponse.getSelectedProducts()
-//                        .stream().map(selectedProductResponse -> {
-//                    SelectedProduct selectedProduct = selectedProductRepository.findById(selectedProductResponse.getSelectedId())
-//                            .orElseThrow(() -> new AppException(ErrorCode.SELECTED_PRODUCT_NOT_EXISTED));
-//                    SelectedProductResponse selectedProductResponse1 = selectedProductMapper.toSelectedProductResponse(selectedProduct);
-//                    BookResponse bookResponse = fetchBookResponse(selectedProductResponse1.getBookId().getBookId(), token);
-//                    selectedProductResponse1.setBookId(bookResponse);
-//                    return selectedProductResponse1;
-//                }).collect(Collectors.toSet());
-
-        Set<OrdersResponse> ordersResponses = userResponse.getOrders()
-                        .stream().map(ordersResponse -> {
-                            Orders orders = ordersRepository.findById(ordersResponse.getOrderId())
-                                    .orElseThrow(() -> new AppException(ErrorCode.ORDERS_NOT_EXISTED));
-                            OrdersResponse ordersResponse1 = ordersMapper.toOrdersResponse(orders);
-                    Set<SelectedProductResponse> selectedProductResponses = orders.getSelectedProducts()
-                            .stream().map(selectedProductResponse -> {
-                                SelectedProduct selectedProduct = selectedProductRepository.findById(selectedProductResponse.getSelectedId())
-                                        .orElseThrow(() -> new AppException(ErrorCode.SELECTED_PRODUCT_NOT_EXISTED));
-                                SelectedProductResponse selectedProductResponse1 = selectedProductMapper.toSelectedProductResponse(selectedProduct);
-                                BookResponse bookResponse = fetchBookResponse(selectedProduct.getBookId(), token);
-                                selectedProductResponse1.setBookId(bookResponse);
-                                return selectedProductResponse1;
-                            }).collect(Collectors.toSet());
-                            ordersResponse1.setSelectedProducts(selectedProductResponses);
-                            return ordersResponse1;
-                }).collect(Collectors.toSet());
-
-        userResponse.setCartItem(cartItemResponses);
-        userResponse.setOrders(ordersResponses);
-
-        return userResponse;
+    public List<UserInformationBasicResponse> getAllUserInformationBasic() {
+        List<User> userInformationBasicResponses =
+                userRepositories.findAll().stream().toList();
+        List<UserInformationBasicResponse> informationBasicResponse =
+                convertToUserInformationBasicResponses(userInformationBasicResponses);
+        return informationBasicResponse;
     }
 
+    public UserInformationBasicResponse getUserInformationBasic(String userId) {
+        var user = userRepositories.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return UserInformationBasicResponse.builder()
+                .username(user.getUsername())
+                .lastName(user.getLastName())
+                .firstName(user.getFirstName())
+                .userId(user.getUserId())
+                .build();
+    }
 
-    public UserResponse getMyInfo() {
-        var context = SecurityContextHolder.getContext();
-        String username = context.getAuthentication().getName();
+    public List<UserInformationBasicResponse> convertToUserInformationBasicResponses(List<User> entity) {
+        return entity.stream().map(this::convertToUserInformationResponse).collect(Collectors.toList());
+    }
 
-        User user = userRepositories.findByUsername(username).orElseThrow(
-                () -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    public UserInformationBasicResponse convertToUserInformationResponse(User entity) {
+        return new UserInformationBasicResponse(
+                entity.getUserId(), entity.getUsername(), entity.getFirstName(), entity.getLastName());
+    }
 
-        UserResponse userResponse = userMapper.toUserResponse(user);
-        userResponse.setNoPassword(!StringUtils.hasText(user.getPassword()));
-
-        String token = generateToken(user);
-        Set<CartItemResponse> cartItemResponses = userResponse.getCartItem()
-                .stream().map(cartItemResponse -> {
-                    CartItem cartItem = cartItemRepository.findById(cartItemResponse.getCartItemId())
+    public Set<CartItemResponse> selectedCartItemResponse(Set<CartItemResponse> cartItemResponses) {
+        Set<CartItemResponse> cartItemResponses1 = cartItemResponses.stream()
+                .map(cartItemResponse -> {
+                    CartItem cartItem = cartItemRepository
+                            .findById(cartItemResponse.getCartItemId())
                             .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_EXISTED));
-                    CartItemResponse cartItemResponse1 = cartItemMapper.toCartItemResponse(cartItem);
-                    BookResponse bookResponse = fetchBookResponse(cartItemResponse.getBookId().getBookId(), token);
-                    cartItemResponse1.setBookId(bookResponse);
-                    return cartItemResponse1;
-                }).collect(Collectors.toSet());
+                    CartItemResponse itemResponse = cartItemMapper.toCartItemResponse(cartItem);
+                    BookResponse bookResponse =
+                            fetchBookResponse(itemResponse.getBookId().getBookId(), generateToken(cartItem.getUser()));
+                    itemResponse.setBookId(bookResponse);
+                    return itemResponse;
+                })
+                .collect(Collectors.toSet());
+        return cartItemResponses1;
+    }
 
-        Set<OrdersResponse> ordersResponses = userResponse.getOrders()
-                        .stream().map(ordersResponse -> {
-                            Orders orders = ordersRepository.findById(ordersResponse.getOrderId())
-                                    .orElseThrow(() -> new AppException(ErrorCode.ORDERS_NOT_EXISTED));
-                            OrdersResponse ordersResponse1 = ordersMapper.toOrdersResponse(orders);
-                            Set<SelectedProductResponse> selectedProductResponses = orders.getSelectedProducts()
-                                            .stream().map(selectedProductResponse -> {
-                                                SelectedProduct selectedProduct = selectedProductRepository.findById(selectedProductResponse.getSelectedId())
-                                                        .orElseThrow(() -> new AppException(ErrorCode.SELECTED_PRODUCT_NOT_EXISTED));
-                                                SelectedProductResponse selectedProductResponse1 = selectedProductMapper.toSelectedProductResponse(selectedProduct);
-                                                BookResponse bookResponse = fetchBookResponse(selectedProduct.getBookId(), token);
-                                                selectedProductResponse1.setBookId(bookResponse);
-                                                return selectedProductResponse1;
-                                    }).collect(Collectors.toSet());
-                            ordersResponse1.setSelectedProducts(selectedProductResponses);
-                            return ordersResponse1;
-                }).collect(Collectors.toSet());
-
-        userResponse.setCartItem(cartItemResponses);
-        userResponse.setOrders(ordersResponses);
-        return userResponse;
+    public Set<OrdersResponse> selectedOrdersResponse(Set<OrdersResponse> ordersResponse) {
+        Set<OrdersResponse> ordersResponses = ordersResponse.stream()
+                .map(ordersResponses1 -> {
+                    Orders orders = ordersRepository
+                            .findById(ordersResponses1.getOrderId())
+                            .orElseThrow(() -> new AppException(ErrorCode.ORDERS_NOT_EXISTED));
+                    OrdersResponse ordersResponse1 = ordersMapper.toOrdersResponse(orders);
+                    Set<SelectedProductResponse> selectedProductResponses = orders.getSelectedProducts().stream()
+                            .map(selectedProductResponse -> {
+                                SelectedProduct selectedProduct = selectedProductRepository
+                                        .findById(selectedProductResponse.getSelectedId())
+                                        .orElseThrow(() -> new AppException(ErrorCode.SELECTED_PRODUCT_NOT_EXISTED));
+                                SelectedProductResponse selectedProductResponse1 =
+                                        selectedProductMapper.toSelectedProductResponse(selectedProduct);
+                                BookResponse bookResponse = fetchBookResponse(
+                                        selectedProduct.getBookId(), generateToken(selectedProduct.getUser()));
+                                selectedProductResponse1.setBookId(bookResponse);
+                                return selectedProductResponse1;
+                            })
+                            .collect(Collectors.toSet());
+                    ordersResponse1.setSelectedProducts(selectedProductResponses);
+                    return ordersResponse1;
+                })
+                .collect(Collectors.toSet());
+        return ordersResponses;
     }
 
     public UserResponse updateUser(String userId, UserUpdateRequest request) {
         log.info("Service: updateUser");
-        User user = userRepositories.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_EXITSTED));
+        User user = userRepositories.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_EXITSTED));
+
         userMapper.updateUser(user, request);
+
         user.setPassword(passwordEncoder.encode(request.getPassword()));
+
         var roles = roleRepository.findAllById(request.getRoles());
         user.setRoles(new HashSet<>(roles));
+
         return userMapper.toUserResponse(userRepositories.save(user));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteUser(String userId) {
+        userRepositories.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         userRepositories.deleteById(userId);
-        profileClient.deleteProfileUserId(userId);
+//        profileClient.deleteProfileUserId(userId);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteAllUser() {
         userRepositories.deleteAll();
-        profileClient.deleteAllProfile();
+//        profileClient.deleteAllProfile();
+    }
+
+    public void userExisted(String userId) {
+        userRepositories.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
     public BookResponse fetchBookResponse(String bookId, String token) {
