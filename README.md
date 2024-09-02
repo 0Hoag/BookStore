@@ -4,16 +4,16 @@ Kết nối qua từng trang sách
 </div>
 📖 Giới thiệu
 Bookteria là một mạng xã hội sáng tạo dành cho những người yêu sách có thể mua bán sách. Đây là nơi bạn có thể chia sẻ đam mê, khám phá tác phẩm mới và kết nối với cộng đồng đọc sách toàn cầu.
-
-✨ Tính năng
-🔍 Tìm kiếm và duyệt sách một cách dễ dàng
-⭐ Đánh giá và chia sẻ nhận xét về sách
-👥 Kết nối với những người có cùng sở thích đọc sách
-📚 Tạo và quản lý thư viện sách cá nhân
-🏆 Tham gia thử thách đọc sách và nhận huy hiệu
-
-🚀 Bắt đầu
-Yêu cầu tiên quyết
+<br>
+✨ Tính năng<br>
+🔍 Tìm kiếm và duyệt sách một cách dễ dàng<br>
+⭐ Đánh giá và chia sẻ nhận xét về sách<br>
+👥 Kết nối với những người có cùng sở thích đọc sách<br>
+📚 Tạo và quản lý thư viện sách cá nhân<br>
+🏆 Tham gia thử thách đọc sách và nhận huy hiệu<br>
+<br>
+🚀 Bắt đầu<br>
+Yêu cầu tiên quyết<br>
 
 Node.js (v14.0.0 trở lên)
 npm (v6.0.0 trở lên)
