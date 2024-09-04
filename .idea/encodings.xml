@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/bookteria/api-gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/api-gateway/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/book-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/book-service/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/comment-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/comment-service/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/friend-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/friend-service/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/identity-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/identity-service/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/interaction-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/interaction-service/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/messaging-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/notification-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/notification-service/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/payment-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/payment-service/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/post-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/post-service/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/profile-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/profile-service/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/search-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/bookteria/search-service/src/main/resources" charset="UTF-8" />
+  </component>
+</project>
