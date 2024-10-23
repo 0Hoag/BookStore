@@ -25,9 +25,4 @@ public class SelectedProduct {
     @JoinColumn(name = "user_id")
     @JsonBackReference
     User user;
-
-    //    @ManyToOne
-    //    @JoinColumn(name = "order_id")
-    ////    @JsonBackReference
-    //    Orders orders;
 }

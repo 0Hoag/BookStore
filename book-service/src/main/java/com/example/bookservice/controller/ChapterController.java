@@ -1,18 +1,16 @@
 package com.example.bookservice.controller;
 
-import java.util.List;
-
-import org.springframework.web.bind.annotation.*;
-
 import com.example.bookservice.dto.request.CreateChapterRequest;
 import com.example.bookservice.dto.request.UpdateChapterRequest;
 import com.example.bookservice.dto.response.ApiResponse;
 import com.example.bookservice.dto.response.CreateChapterResponse;
 import com.example.bookservice.service.ChapterService;
-
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/truyen")
@@ -55,8 +53,7 @@ public class ChapterController {
     }
 
     @PutMapping("/chapter/{chapterId}")
-    public ApiResponse<CreateChapterResponse> updateChapter(
-            @PathVariable String chapterId, @RequestBody UpdateChapterRequest request) {
+    public ApiResponse<CreateChapterResponse> updateChapter(@PathVariable String chapterId, @RequestBody UpdateChapterRequest request) {
         return ApiResponse.<CreateChapterResponse>builder()
                 .code(1000)
                 .result(chapterService.updateChapter(chapterId, request))

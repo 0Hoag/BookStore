@@ -1,15 +1,21 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Card, CardContent, CardMedia, Typography, Button, Box, CircularProgress } from '@mui/material';
+import { Card, CardContent, Typography, CardMedia, Button, Box, CircularProgress } from '@mui/material';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import CancelIcon from '@mui/icons-material/Cancel';
 import CheckIcon from '@mui/icons-material/Check';
 import PeopleIcon from '@mui/icons-material/People';
 import friendService from '../../services/friendService';
+import userService from '../../services/userService';
+
 
 const UserCard = ({ user, currentUserId, onRefresh, isFriend, onClick }) => {
   const [requestStatus, setRequestStatus] = useState('none');
   const [isLoading, setIsLoading] = useState(false);
   const [requestId, setRequestId] = useState(null);
+  const [image, setImage] = useState("");
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  const [snackBarMessage, setSnackBarMessage] = useState("");
+  const [snackType, setSnackType] = useState("error");
 
   const fetchRequestStatus = useCallback(async () => {
     try {
@@ -21,8 +27,29 @@ const UserCard = ({ user, currentUserId, onRefresh, isFriend, onClick }) => {
     }
   }, [user.userId, currentUserId]);
 
+  const showMessage = (message, type = "error") => {
+    setSnackType(type);
+    setSnackBarMessage(message);
+    setSnackBarOpen(true);
+  };
+
+  const fetchImage = async () => {
+    try {
+      const users = await userService.getUser(user.userId);
+      const imageIds = users.data.result.images;
+
+      const imageResponse = await Promise.all(imageIds.map(id => userService.viewImage(id)));
+      const imageObj = imageResponse.find(img => img.data.result.imageType === 'PROFILE');
+      setImage(imageObj.data.result.imageUrl);
+    }catch (error) {
+      showMessage(error.message);
+
+    }
+  }
+
   useEffect(() => {
     fetchRequestStatus();
+    fetchImage();
   }, [fetchRequestStatus]);
 
   const handleAddFriend = async () => {
@@ -173,7 +200,6 @@ const UserCard = ({ user, currentUserId, onRefresh, isFriend, onClick }) => {
   };
 
   const handleCardClick = (event) => {
-    // Prevent navigation if the click is on the action button
     if (!event.target.closest('button')) {
       onClick(user);
     }
@@ -192,12 +218,18 @@ const UserCard = ({ user, currentUserId, onRefresh, isFriend, onClick }) => {
       }} 
       onClick={handleCardClick}
     >
+      <div style={{ position: 'relative', width: '100%', height: '190px' }}>
+        <CardMedia
+          component="img"
+          height="200"
+          image={image || "/path/to/default/avatar.png"} // Display the user image or default
+          alt={`${user.username}'s avatar`}
+          style={{ objectFit: 'cover' }}
+        />
+      </div>
       <CardContent>
         <Typography gutterBottom variant="h5" component="div">
-          {user.username}
-        </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          {user.firstName} {user.lastName}
+        {user.firstName} {user.lastName}
         </Typography>
         <Box mt={2}>
           {renderActionButton()}

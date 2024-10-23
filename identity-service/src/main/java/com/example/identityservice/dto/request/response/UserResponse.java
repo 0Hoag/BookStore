@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.example.identityservice.dto.request.response.OrdersResponse.OrdersResponse;
 
+import com.example.identityservice.entity.UserImage;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,6 +15,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserResponse {
     String userId;
+
+//    String image; // update 09/16
     String username;
     String firstName;
     String lastName;
@@ -24,6 +27,6 @@ public class UserResponse {
 
     Set<RoleResponse> roles;
     Set<CartItemResponse> cartItem;
-    //    Set<SelectedProductResponse> selectedProducts;
     Set<OrdersResponse> orders;
+    Set<String> images;
 }

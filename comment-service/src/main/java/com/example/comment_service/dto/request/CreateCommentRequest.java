@@ -10,8 +10,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CreateCommentRequest {
     String userId;
-
     String content;
-
     String postId;
 }

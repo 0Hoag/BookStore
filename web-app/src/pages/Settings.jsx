@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { ChangeEvent ,useRef ,useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -7,13 +7,17 @@ import {
   Snackbar,
   TextField,
   Typography,
+  createTheme,
+  ThemeProvider,
+  
 } from "@mui/material";
 import { Alert } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { getToken } from "../services/localStorageService";
 import userService from '../services/userService';
+import profileService from "../services/profileService";
 import Header from "../components/header/Header";
-import Scene from "./Scene";
+
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -25,6 +29,28 @@ export default function Settings() {
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   const [snackBarMessage, setSnackBarMessage] = useState("");
   const [snackType, setSnackType] = useState("error");
+  const [city, setCity] = useState("");
+  const [username, setUsername] = useState("");
+  const [showUploadMessage, setShowUploadMessage] = useState(false); // New state for upload message
+  const [file, setFile] = useState();
+  const [imageOld, setImageOld] = useState("");
+
+  const darkTheme = createTheme({
+    palette: {
+      mode: 'dark',
+      background: {
+        default: '#18191a',
+        paper: '#242526',
+      },
+      text: {
+        primary: '#e4e6eb',
+        secondary: '#b0b3b8',
+      },
+      primary: {
+        main: '#2e89ff',
+      },
+    },
+  });
   
   const handleCloseSnackBar = (event, reason) => {
     if (reason === "clickaway") {
@@ -32,6 +58,8 @@ export default function Settings() {
     }
     setSnackBarOpen(false);
   };
+
+  const fileInputRef = useRef(null);
 
   const showError = (message) => {
     setSnackType("error");
@@ -45,10 +73,28 @@ export default function Settings() {
     setSnackBarOpen(true);
   };
 
+  const handleFileChange = async (e) => { // Make the function async
+    const user = await userService.getMyInfo();
+    const imageId = user.data.result.image;
+    console.log("imageIdOld: {}", imageId);
+    
+    const file = e.target.files[0]; // Get the selected file
+    console.log("File: {}", file);
+    const response = await userService.updateImage(file);
+
+    if (imageId != "null") {
+      userService.deleteImage(imageOld);
+    }
+
+    console.log("response: {}", response);
+  };
+
   const getUserDetails = async () => {
     try {
       const response = await userService.getMyInfo();
       const userInfo = response.data.result;
+      setImageOld(userInfo.image);
+
 
       setUserDetails(userInfo);
 
@@ -63,8 +109,25 @@ export default function Settings() {
   };
 
   const handleUpdateInfo = async () => {
+    const profile = {
+      firstName: userDetails.firstName,
+      lastName: userDetails.lastName,
+      dob: userDetails.dob,
+      city: city
+    }
+
+    const userData = {
+      firstName: userDetails.firstName,
+      lastName: userDetails.lastName,
+      email: userDetails.email, // Added email field
+    }
+
     try {
-        
+      const user = await userService.updateInformation(userData);
+      console.log("User: ", user.data.result.userId);
+      const userId = await profileService.getUserByProfile(user.data.result.userId);
+      console.log("profileId: ", userId.data.result.id);
+      await profileService.updateProfile(userId.data.result.id, profile);
       showError("You need to set a password before changing it.");
       setEditing(false); // Đóng chế độ chỉnh sửa
     }catch (error) {
@@ -136,7 +199,7 @@ export default function Settings() {
   }
 
   return (
-    <Scene>
+    <ThemeProvider theme={darkTheme}>
       <Header />
       <Snackbar
         open={snackBarOpen}
@@ -237,14 +300,19 @@ export default function Settings() {
               >
                 Email
               </Typography>
-              <Typography
-                sx={{
-                  fontSize: 14,
-                  color: "#b0b0b0", // Lighter gray text color for email
-                }}
-              >
-                {userDetails.email}
-              </Typography>
+              {editing ? (
+                <TextField
+                  value={userDetails.email} // Bind the email input to userDetails.email
+                  onChange={(e) =>
+                    setUserDetails({
+                      ...userDetails,
+                      email: e.target.value, // Update email in userDetails
+                    })
+                  }
+                />
+              ) : (
+                <Typography>{userDetails.email}</Typography>
+              )}
             </Box>
 
             <Box
@@ -344,6 +412,33 @@ export default function Settings() {
                 <Typography>{userDetails.dob}</Typography>
               )}
             </Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                width: "100%",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  color: "#b0b0b0",
+                }}
+              >
+                City
+              </Typography>
+              {editing ? (
+                <TextField
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)} // Handle city input
+                />
+              ) : (
+                <Typography>{userDetails.city}</Typography>
+              )}
+            </Box>
             {editing ? (
               <Button
                 onClick={handleUpdateInfo}
@@ -416,31 +511,38 @@ export default function Settings() {
                 </Button>
               </Box>
             )}
-            <Box
-              component="form"
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "10px",
-                width: "100%",
-                mt: 3,
-              }}
-            >
-              <Typography>Change Avatar</Typography>
-              {/* Assume there's an input for uploading avatar */}
-              <Button
-                variant="contained"
-                color="primary"
-                size="large"
-                fullWidth
-              >
-                Upload Avatar
-              </Button>
-            </Box>
+                <Box
+          component="form"
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+            width: "100%",
+            mt: 3,
+          }}
+        >
+          <Typography>Change Avatar</Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            size="large"
+            fullWidth
+            onClick={() => fileInputRef.current.click()} // Trigger file input click
+          >
+            Upload Avatar
+          </Button>
+          <input
+            type="file"
+            ref={fileInputRef} // Reference to the file input
+            onChange={handleFileChange} // Handle file change
+            style={{ display: 'none' }} // Hide the input
+          />
+
+        </Box>
           </Box>
         </Card>
       </Box>
-    </Scene>
+    </ThemeProvider>
   );
 }
 

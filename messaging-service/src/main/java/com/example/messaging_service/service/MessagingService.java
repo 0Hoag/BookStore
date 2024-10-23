@@ -81,9 +81,6 @@ public class MessagingService {
         List<Message> lastMessages = messagingRepository.findLastMessagesByConversationIdsAggregation(conversationIds);
         Map<String, Message> lastMessageMap = lastMessages.stream()
                 .collect(Collectors.toMap(Message::getConversationId, Function.identity()));
-        log.info("lastMessages {}", lastMessages);
-        log.info("lastMessageMap {}", lastMessageMap);
-
 
         // Tạo danh sách kết quả
         return conversationsPage.stream().map(conversation -> {

@@ -3,11 +3,79 @@ import { API } from "../configurations/configuration";
 import { getToken } from "./localStorageService";
 
 const postService = {
-    createPost: async (newPost) => {
+    createPostFile: async (formData) => {
         try {
             const token = getToken();
             const url = API.CREATE_POST;
-            const response = httpClient.post(url, newPost, {
+            const response = httpClient.post(url, formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            return response;
+        }catch (error) {
+            throw error;
+        }
+    },
+
+    uploadImageToPost: async (postId, file) => {
+        try {
+          const token = getToken();
+          const url = `${API.UPLOAD_MEDIA_TO_POST}/${postId}`;
+          const formData = new FormData();
+          
+          formData.append('file', file);
+          
+          const response = await httpClient.post(url, formData, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'multipart/form-data'
+            },
+          });
+          return response;
+        } catch(error) {
+          throw error;
+        }
+    },
+
+    createImage: async (file) => {
+        try {
+            const token = getToken();
+            const url = API.CREATE_IMAGE_POST;
+            const formData = new FormData();
+            formData.append('image', file);
+            const response = httpClient.post(url, formData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`, // Add the token to the headers
+                    'Content-Type': 'multipart/form-data', // Set the content type
+            }},
+        );
+        return response;
+        }catch (error) {
+            throw error;
+        }
+    },
+
+    updateImageToPost: async (postId, images) => {
+        try {
+            const token = getToken();
+            const url = `${API.UPDATE_IMAGE_TO_POST}/${postId}`;
+            const response = httpClient.put(url, { images }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`, // Add the token to the headers
+                    'Content-Type': 'multipart/form-data', // Set the content type
+            }});
+            return response;
+        }catch (error) {
+            throw error;
+        }
+    },
+
+    viewImage: async (imageId) => {
+        try {
+            const token = getToken();
+            const url = `${API.GET_IMAGE_POST}/${imageId}`;
+            const response = httpClient.get(url, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -105,7 +173,7 @@ const postService = {
                     Authorization: `Bearer ${token}`,
                 },
             });
-            return response.data.result;
+            return response;
         }catch (error) {
             throw error;
         }
@@ -145,17 +213,23 @@ const postService = {
         }
     },
 
-    updatePost: async (postId, newPost) => {
+    updatePost: async (postId, content, images, videos) => {
         try {
             const token = getToken();
-            const url = `${API.UPDATE_POST}/${postId}`;
-            const response = httpClient.put(url, newPost, {
+            const url = `${API.UPDATE_POST}`;
+            const response = httpClient.put(url, null, { // Set body to null
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
+                params: { // Use params to send the parameters
+                    postId,
+                    content,
+                    images: Array.from(images), // Convert Set to Array
+                    videos: Array.from(videos), // Convert Set to Array
+                },
             });
             return response.data.result;
-        }catch (error) {
+        } catch (error) {
             throw error;
         }
     },
@@ -230,6 +304,21 @@ const postService = {
                 },
                 data: { commentId }
             });
+            return response;
+        }catch (error) {
+            throw error;
+        }
+    },
+
+    updateCommentToPost: async (postId, commentId, newComment) => {
+        try {
+            const token = getToken();
+            const url = `${API.UPDATE_COMMENT}/${postId}/${commentId}`;
+            const response = httpClient.put(url, newComment, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            })
             return response;
         }catch (error) {
             throw error;

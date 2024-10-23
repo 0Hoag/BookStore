@@ -30,7 +30,7 @@ public class EmailService {
         EmailRequest emailRequest = EmailRequest.builder()
                 .sender(Sender.builder()
                         .name("HoagTeria DotCom")
-                        .email("zzeross2005@gmail.com")
+                        .email("YOU_EMAIL")
                         .build())
                 .to(List.of(request.getTo()))
                 .subject(request.getSubject())

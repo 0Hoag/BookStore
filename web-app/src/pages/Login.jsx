@@ -6,7 +6,6 @@ import FacebookIcon from "@mui/icons-material/Facebook";
 import { logIn, isAuthenticated } from "../services/authenticationService";
 import { getToken, setToken } from "../services/localStorageService";
 import { OAuthConfig } from "../configurations/configuration";
-import keycloak from "../services/keycloak";
 import './Login.css';
 export default function Login() {
   const navigate = useNavigate();
@@ -109,11 +108,8 @@ export default function Login() {
 
   return (
     <Box className="background">
-    {/* Nền bầu trời đêm */}
     <div className="night-sky">
-      {/* Ngôi sao lấp lánh */}
       <div className="twinkling-stars">
-        {/* Tạo sao lấp lánh ngẫu nhiên ở đây */}
       </div>
     </div>
 
@@ -132,7 +128,7 @@ export default function Login() {
         >
           <CardContent>
             <Typography variant="h4" component="h1" gutterBottom color="white" textAlign="center">
-              Welcome to Hoagteria
+              Welcome to Hoag Page
             </Typography>
             <Box
               component="form"

@@ -2,6 +2,7 @@ package com.example.identityservice.service;
 
 import java.text.ParseException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -24,6 +25,7 @@ import com.example.identityservice.repository.InvalidatedRepository;
 import com.example.identityservice.repository.UserRepository;
 import com.example.identityservice.repository.httpclient.OutboundIdentityClient;
 import com.example.identityservice.repository.httpclient.OutboundUserClient;
+import com.example.identityservice.repository.httpclient.ProfileClient;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -45,6 +47,7 @@ public class AuthenticationService {
     InvalidatedRepository invalidatedRepository;
     OutboundIdentityClient outboundIdentityClient;
     OutboundUserClient outboundUserClient;
+    ProfileClient profileClient;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -116,14 +119,15 @@ public class AuthenticationService {
                         .roles(roles)
                         .build()));
 
-        //        var profileRequest = profileMapper.toProfileCreationRequest(UserCreationRequest.builder()
-        //                        .username(userInfo.getEmail())
-        //                        .firstName(userInfo.getGivenName())
-        //                        .lastName(userInfo.getFamilyName())
-        //                .build());
-        //        profileRequest.setUserId(user.getId());
-        //
-        //        profileClient.createProfile(profileRequest);
+        ProfileCreationRequest request = ProfileCreationRequest.builder()
+                .userId(user.getUserId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .dob(LocalDate.now())
+                .city("null")
+                .build();
+
+        profileClient.createProfile(request);
 
         // convert token google => token database (identity)
         var token = generateToken(user);

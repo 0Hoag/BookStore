@@ -130,8 +130,11 @@ export default function Messenger() {
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [hoveredMessageId, setHoveredMessageId] = useState(null);
+  const [interfaceUserId, setInterfaceUserId] = useState(null);
   const [chatPartnerProfile, setChatPartnerProfile] = useState(null);
   const [chatPartnerName, setChatPartnerName] = useState("");
+  const [image, setImage] = useState("");
+  const [conversationAvatar, setConversationAvatar] = useState("");
 
   const getUserConversationsList = async () => {
     try {
@@ -141,6 +144,8 @@ export default function Messenger() {
       setCurrentUserId(userId);
       const response = await messengerService.getUserConversationsList(userId, 10);
       setConversations(response.data.result);
+
+      await Promise.all(response.data.result.map(conv => fetchAvataConversation(conv.id)));
     } catch (error) {
       console.error("Error fetching conversations:", error);
     }
@@ -179,17 +184,30 @@ export default function Messenger() {
     setMessages([]);
     setCurrentPage(1);
     getMessagesForConversation(conv.id, 1);
-  
+
     try {
       const response = await messengerService.getParticipantIds(conv.id);
       const participants = response.data.result;
-  
       // Determine chat partner's name
       let partnerName = "Unknown User";
       if (participants && participants.length > 0) {
         const chatPartner = participants.find(p => p.userId !== currentUserId);
+        setInterfaceUserId(chatPartner.userId);
         if (chatPartner) {
           const partnerInfo = await userService.getUser(chatPartner.userId);
+          if (partnerInfo.data.result.images && partnerInfo.data.result.images.length > 0) {
+            const imageIds = partnerInfo.data.result.images; // Get the array of image IDs
+            // Use Promise.all to fetch all images concurrently
+            const imagesResponse = await Promise.all(imageIds.map(id => userService.viewImage(id)));
+    
+            // Find the profile image from the responses
+            const profileImageObj = imagesResponse.find(img => img.data.result.imageType === 'PROFILE');
+            if (profileImageObj) {
+              setImage(profileImageObj.data.result.imageUrl);
+            } else {
+              setImage("/path/to/default/avatar.png");
+            }
+          }
           partnerName = partnerInfo.data.result.username;
         } else {
           console.log("No chat partner found with a different userId than currentUserId");
@@ -206,6 +224,37 @@ export default function Messenger() {
   const loadMoreMessages = () => {
     if (currentPage < totalPages && selectedConversation) {
       getMessagesForConversation(selectedConversation.id, currentPage + 1);
+    }
+  };
+
+  const fetchAvataConversation = async (convId) => {
+    try {
+        const response = await messengerService.getParticipantIds(convId);
+        console.log("response: {}", response);
+        const responseCoversation = response.data.result;
+
+        // Filter out the current user from the participants
+        const otherUser = responseCoversation.find(user => user.userId !== currentUserId);
+        
+        console.log("otherUser:", otherUser);
+        if (otherUser) {
+            const partnerInfo = await userService.getUser(otherUser.userId);
+            if (partnerInfo.data.result.images && partnerInfo.data.result.images.length > 0) {
+                const imageIds = partnerInfo.data.result.images;
+                const imagesResponse = await Promise.all(imageIds.map(id => userService.viewImage(id)));
+                const profileImageObj = imagesResponse.find(img => img.data.result.imageType === 'PROFILE');
+
+                const avatarUrl = profileImageObj ? profileImageObj.data.result.imageUrl : "/path/to/default/avatar.png";
+                
+                // Update the state with the avatar for the specific conversation
+                setConversationAvatar(prevAvatars => ({
+                    ...prevAvatars,
+                    [convId]: avatarUrl,
+                }));
+            }
+        }
+    } catch (error) {
+        console.error("Error fetching participants:", error);
     }
   };
 
@@ -281,17 +330,26 @@ export default function Messenger() {
   };
 
   const fetchChatPartnerProfile = async () => {
-    if (selectedConversation && selectedConversation.lastMessageSenderId && currentUserId) {
+    if (selectedConversation && currentUserId) {
       try {
-        const partnerId = selectedConversation.lastMessageSenderId !== currentUserId ? selectedConversation.lastMessageSenderId : null;
+        const participants = await messengerService.getParticipantIds(selectedConversation.id);
+        const partnerId = participants.data.result.find(p => p.userId !== currentUserId)?.userId;
+        
         if (partnerId) {
           const partnerInfo = await userService.getUser(partnerId);
           setChatPartnerProfile(partnerInfo.data.result);
-          navigate(`/profile/${partnerId}`);
         }
       } catch (error) {
         console.error("Error fetching chat partner profile:", error);
       }
+    }
+  };
+
+  const handleViewProfile = () => {
+    if (chatPartnerProfile && chatPartnerProfile.userId) {
+      navigate(`/profile/${chatPartnerProfile.userId}`);
+    } else {
+      console.error("Chat partner profile not available");
     }
   };
 
@@ -364,7 +422,9 @@ export default function Messenger() {
                   }}
                 >
                   <ListItemAvatar>
-                    <Avatar src={conv.avatarUrl}>{conv.title[0]}</Avatar>
+                    <Avatar src={conversationAvatar[conv.id] || "/path/to/default/avatar.png"} alt={conv.title[0]}>
+                      {conv.title[0]}
+                    </Avatar>
                   </ListItemAvatar>
                   <ListItemText 
                     primary={conv.title} 
@@ -390,7 +450,11 @@ export default function Messenger() {
               <>
                 <Box sx={{ p: 2, borderBottom: '1px solid #3e4042', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <Avatar sx={{ mr: 2 }}>{chatPartnerName ? chatPartnerName[0] : 'U'}</Avatar>
+                    <Avatar 
+                      src={image} 
+                      sx={{ marginRight: "10px" }} 
+                      onClick={() => navigate(`/profile/${interfaceUserId}`)} 
+                    />
                       <Typography variant="h6" color="text.primary">{chatPartnerName}</Typography>
                     </Box>
                     <Box>
@@ -516,7 +580,7 @@ export default function Messenger() {
               <Box sx={{ p: 2, textAlign: 'center' }}>
                 <Avatar 
                   sx={{ width: 80, height: 80, margin: 'auto' }}
-                  src={selectedConversation.avatarUrl}
+                  src={image}
                 >
                   {selectedConversation.title[0]}
                 </Avatar>
@@ -539,12 +603,14 @@ export default function Messenger() {
               {chatPartnerProfile && (
                 <Box sx={{ p: 2 }}>
                   <Typography variant="h6" color="text.primary">
-                    {chatPartnerProfile.name}
+                    {chatPartnerProfile.firstName} {chatPartnerProfile.lastName}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     {chatPartnerProfile.email}
                   </Typography>
-                  {/* Add more profile details as needed */}
+                  <Button onClick={handleViewProfile} color="primary" sx={{ mt: 1 }}>
+                    View Full Profile
+                  </Button>
                 </Box>
               )}
 

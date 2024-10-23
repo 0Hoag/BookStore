@@ -38,6 +38,12 @@ import 'normalize.css';
 import CameraAltIcon from '@mui/icons-material/CameraAlt';
 import AddIcon from '@mui/icons-material/Add';
 import Header from "../components/header/Header";
+import { IoPersonAddOutline } from "react-icons/io5";
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import CancelIcon from '@mui/icons-material/Cancel';
+import CheckIcon from '@mui/icons-material/Check';
+import PeopleIcon from '@mui/icons-material/People';
+import friendService from "../services/friendService";
 
 export default function ProfileDetail() {
   const navigate = useNavigate();
@@ -57,9 +63,18 @@ export default function ProfileDetail() {
   const [editingPostId, setEditingPostId] = useState(null);
   const [editedPostContent, setEditedPostContent] = useState("");
   const [page, setPage] = useState(1);
-  const [loadingMore, setLoadingMore] = useState(false); // New state for loading more posts
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [totalPages, setTotalPages] = useState(0);
   const { userId } = useParams();
+  const [imageCover, setImageCover] = useState("");
+  const [image, setImage] = useState(null);
+  const [selectedMedia, setSelectedMedia] = useState([]);
+  const [isCurrentUser, setIsCurrentUser] = useState(false);
+  const [myUserId, setMyUserId] = useState(null);
+  const [requestStatus, setRequestStatus] = useState('none');
+  const [requestId, setRequestId] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [relationship, setRelationship] = useState(null);
 
   const darkTheme = createTheme({
     palette: {
@@ -78,6 +93,180 @@ export default function ProfileDetail() {
     },
   });
 
+  const fetchRequestStatus = useCallback(async () => {
+    try {
+      if (myUserId && userId) {
+        const response = await friendService.getFriendRequestStatus(myUserId, userId);
+        setRequestStatus(response.status);
+        setRequestId(response.requestId);
+      }
+    } catch (error) {
+      console.error("Error fetching friend request status:", error);
+      showMessage("Không thể lấy trạng thái kết bạn", "error");
+    }
+  }, [myUserId, userId]);
+
+  const handleAddFriend = async () => {
+    setIsLoading(true);
+    try {
+      const response = await friendService.createFriendRequest({ 
+        senderId: myUserId, 
+        receiverId: userDetails.userId 
+      });
+      setRequestStatus('sent');
+      setRequestId(response.requestId);
+      showMessage("Đã gửi lời mời kết bạn", "success");
+    } catch (error) {
+      console.error("Error sending friend request:", error);
+      showMessage("Không thể gửi lời mời kết bạn", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCancelFriendRequest = async () => {
+    setIsLoading(true);
+    try {
+      await friendService.removeFriendRequest(requestId);
+      setRequestStatus('none');
+      setRequestId(null);
+      showMessage("Đã hủy lời mời kết bạn", "success");
+    } catch (error) {
+      console.error("Error canceling friend request:", error);
+      showMessage("Không thể hủy lời mời kết bạn", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAcceptFriendRequest = async () => {
+    setIsLoading(true);
+    try {
+      await friendService.updateFriendStatus(requestId, { condition: 'ACCEPTED' });
+      await friendService.createFriendShip({
+        userId1: myUserId,
+        userId2: userDetails.userId
+      });
+      setRequestStatus('friends');
+      await checkRelationship(); // Refresh relationship status
+      showMessage("Đã chấp nhận lời mời kết bạn", "success");
+    } catch (error) {
+      console.error("Error accepting friend request:", error);
+      showMessage("Không thể chấp nhận lời mời kết bạn", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const renderFriendButton = () => {
+    if (isLoading) {
+      return <CircularProgress size={24} />;
+    }
+
+    switch (requestStatus) {
+      case 'sent':
+        return (
+          <Button
+            variant="outlined"
+            startIcon={<CancelIcon />}
+            onClick={handleCancelFriendRequest}
+            sx={{
+              color: '#9e9e9e',
+              borderColor: '#9e9e9e',
+              '&:hover': {
+                backgroundColor: 'rgba(158, 158, 158, 0.1)',
+              },
+            }}
+          >
+            Hủy lời mời
+          </Button>
+        );
+      case 'received':
+        return (
+          <Button
+            variant="outlined"
+            startIcon={<CheckIcon />}
+            onClick={handleAcceptFriendRequest}
+            sx={{
+              color: '#4caf50',
+              borderColor: '#4caf50',
+              '&:hover': {
+                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+              },
+            }}
+          >
+            Chấp nhận
+          </Button>
+        );
+      case 'friends':
+        return (
+          <Button
+            variant="outlined"
+            startIcon={<PeopleIcon />}
+            disabled
+            sx={{
+              color: '#4caf50',
+              borderColor: '#4caf50',
+            }}
+          >
+            Bạn bè
+          </Button>
+        );
+      default:
+        return (
+          <Button
+            variant="outlined"
+            startIcon={<PersonAddIcon />}
+            onClick={handleAddFriend}
+            sx={{
+              color: '#4caf50',
+              borderColor: '#4caf50',
+              '&:hover': {
+                backgroundColor: 'rgba(76, 175, 80, 0.1)',
+              },
+            }}
+          >
+            Kết bạn
+          </Button>
+        );
+    }
+  };
+
+  const checkRelationship = useCallback(async () => {
+    try {
+      console.log("Begin");
+      if (myUserId) {
+        console.log("myUserId: ", myUserId);
+        const response = await friendService.getUserRelationShip(myUserId);
+        const friendships = response.friendships;
+        console.log("friendships: ", friendships);
+        
+        // Kiểm tra xem có friendship nào match với cả 2 user không
+        const friendship = friendships.find(fs => 
+          (fs.userId1 === myUserId && fs.userId2 === userId) || 
+          (fs.userId1 === userId && fs.userId2 === myUserId)
+        );
+
+        console.log("friendship1: ", friendship);
+
+        if (friendship && friendship.relationShip === 'FRIENDS') {
+          setRequestStatus('friends');
+          console.log("set request status to friends");
+        }
+      }
+    } catch (error) {
+      console.error("Error checking relationship:", error);
+      showMessage("Không thể kiểm tra mối quan hệ bạn bè", "error");
+    }
+  }, [myUserId, userId]);
+
+  useEffect(() => {
+    if (myUserId && userId) {
+      checkRelationship();
+      fetchRequestStatus();
+    }
+  }, [fetchRequestStatus, checkRelationship, myUserId, userId]);
+
   const handleCloseSnackBar = (event, reason) => {
     if (reason === "clickaway") {
       return;
@@ -94,13 +283,33 @@ export default function ProfileDetail() {
   const getUserDetails = async () => {
     try {
       const response = await userService.getUser(userId);
-      if (response) {
-        setUserDetails(response.data.result);
+      setUserDetails(response.data.result);
+      if (response.data.result.images != null) {
+        const imageIds = response.data.result.images;
+        const imageResponse = await Promise.all(imageIds.map(id => userService.viewImage(id)));
+
+        const imageProfile = imageResponse.find(img => img.data.result.imageType === 'PROFILE');
+        const imageCover = imageResponse.find(img => img.data.result.imageType === 'COVER');
+        setImage(imageProfile.data.result.imageUrl);
+        setImageCover(imageCover.data.result.imageUrl);
+        console.log("set image profile and cover success!");
+      } else {
+        setImage("/path/to/default/avatar.png");
       }
     } catch (error) {
       showMessage(error.message);
     }
   };
+
+  const getMyInfo = async () => {
+    const response = await userService.getMyInfo();
+    setMyUserId(response.data.result.userId);
+    if (userId === response.data.result.userId) {
+      setIsCurrentUser(true);
+    } else {
+      setIsCurrentUser(false);
+    }
+  }
 
   const handleEditPost = (post) => {
     setEditingPostId(post.postId);
@@ -121,12 +330,12 @@ export default function ProfileDetail() {
 
   const getMyPosts = useCallback(async (pageNum) => {
     try {
-      setLoading(pageNum === 1); // Đặt trạng thái loading cho trang đầu tiên
-      setLoadingMore(pageNum > 1); // Đặt trạng thái loadingMore cho các trang sau
+      setLoading(pageNum === 1);
+      setIsLoadingMore(pageNum > 1);
       const response = await postService.getPostWithUser(userId, pageNum);
       if (response.data.code === 1000 && Array.isArray(response.data.result.data)) {
         setPosts(prevPosts => pageNum === 1 ? response.data.result.data : [...prevPosts, ...response.data.result.data]);
-        setTotalPages(response.data.result.totalPages); // Tổng số trang
+        setTotalPages(response.data.result.totalPages);
       } else {
         showMessage("Không thể tải bài viết. Dữ liệu không hợp lệ.");
       }
@@ -135,15 +344,39 @@ export default function ProfileDetail() {
       showMessage("Không thể tải bài viết. Vui lòng thử lại sau.");
     } finally {
       setLoading(false);
-      setLoadingMore(false); // Đảm bảo trạng thái loadingMore được tắt
+      setIsLoadingMore(false);
     }
-  }, []);
+  }, [userId]);
 
-  const loadMorePosts = () => {
-    if (page < totalPages) {
+  const loadMorePosts = useCallback(() => {
+    if (page < totalPages && !isLoadingMore) {
       setPage(prevPage => prevPage + 1);
     }
-  };
+  }, [page, totalPages, isLoadingMore]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.innerHeight + document.documentElement.scrollTop !== document.documentElement.offsetHeight) return;
+      if (!isLoadingMore && page < totalPages) {
+        loadMorePosts();
+      }
+    };
+
+    getMyInfo();
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [loadMorePosts, isLoadingMore, page, totalPages]);
+
+  useEffect(() => {
+    const accessToken = getToken();
+    if (!accessToken) {
+      navigate("/login");
+    } else {
+      getUserDetails();
+      getMyPosts(page);
+    }
+  }, [navigate, page, getMyPosts, userId]);
 
   const createPost = async () => {
     try {
@@ -273,6 +506,12 @@ export default function ProfileDetail() {
     }
   };
 
+  const handleImageAndVideoChange = (event) => {
+    const files = Array.from(event.target.files);
+    setSelectedMedia(prevImages => [...prevImages, ...files]);
+    setImage(files);
+  };
+
   const handleMenuOpen = (event, post) => {
     setAnchorEl(event.currentTarget);
     setSelectedPost(post);
@@ -298,7 +537,7 @@ export default function ProfileDetail() {
       const myInfo = await userService.getMyInfo();
       const currentUser = myInfo.data.result;
 
-      const conversation = {
+      const conversation = {  
         name: `${currentUser.username},${userDetails.username}`,
         participantIds: [currentUser.userId, userDetails.userId]
       };
@@ -306,7 +545,6 @@ export default function ProfileDetail() {
       const result = await messengerService.createConversation(conversation);
       if (result.data.code === 1000) {
         showMessage("Đã tạo cuộc trò chuyện", "success");
-        // Optionally, navigate to the conversation or update the UI
       } else {
         showMessage("Không thể tạo cuộc trò chuyện", "error");
       }
@@ -316,265 +554,171 @@ export default function ProfileDetail() {
     }
   };
 
-  useEffect(() => {
-    const accessToken = getToken();
-    console.log("userId: ", userId);
-    if (!accessToken) {
-      navigate("/login");
-    } else {
-      getUserDetails();
-      getMyPosts(page);
-    }
-  }, [navigate, page, getMyPosts]);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
-
-      if (scrollTop + windowHeight >= documentHeight - 100 && !loadingMore && page < totalPages) {
-        loadMorePosts();
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
-  }, [loadingMore, page, totalPages]);
-
-
   return (
     <ThemeProvider theme={darkTheme}>
-      <Header/>
-        <Snackbar
-          open={snackBarOpen}
-          onClose={handleCloseSnackBar}
-          autoHideDuration={6000}
-          anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        >
-          <Alert
-            onClose={handleCloseSnackBar}
-            severity={snackType}
-            variant="filled"
-            sx={{ width: "100%" }}
-          >
-            {snackBarMessage}
-          </Alert>
-        </Snackbar>
-        {userDetails ? (
+      <Header />
+      {userDetails ? (
+        <Box sx={{ bgcolor: '#0A0A0A', minHeight: "100vh", position: 'relative', paddingTop: '200px' }}>
           <Box
             sx={{
-              bgcolor: 'background.default',
-              minHeight: "calc(100vh - 64px)",
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '600px',
+              backgroundImage: `url(${imageCover})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.3)',
+              },
             }}
-          >
-            <Box sx={{ maxWidth: 940, margin: "0 auto", overflow: "visible" }}>
-              <Card sx={{ overflow: "visible", bgcolor: 'background.paper' }}>
-                <Box sx={{ height: 350, bgcolor: "#2e89ff", position: "relative" }}>
-                  {/* Cover photo */}
-                  <IconButton 
-                    sx={{ position: 'absolute', right: 16, bottom: 16, bgcolor: 'rgba(0,0,0,0.6)' }}
-                  >
-                    <CameraAltIcon />
-                  </IconButton>
-                </Box>
-                <Box sx={{ display: "flex", justifyContent: "space-between", px: 4, mb: 3, position: 'relative' }}>
-                  <Avatar
-                    sx={{
-                      width: 168,
-                      height: 168,
-                      border: "4px solid #242526",
-                      marginTop: "-84px",
-                      bgcolor: '#3a3b3c',
-                      color: 'text.primary',
-                    }}
-                  >
-                    {userDetails.username.charAt(0).toUpperCase()}
-                  </Avatar>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-end', mb: 2, gap: 2 }}>
-                    <Button 
-                      variant="contained" 
-                      onClick={createConversation}
-                    >
-                      Message
-                    </Button>
-                    <Button variant="contained">
-                      Add Friend
-                    </Button>
-                  </Box>
-                </Box>
-                <Box sx={{ px: 4, pb: 3 }}>
-                  <Typography variant="h4" gutterBottom color="text.primary">
-                    {userDetails.firstName} {userDetails.lastName}
-                  </Typography>
-                  <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-                    @{userDetails.username}
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
-                    {['Posts', 'About', 'Friends', 'Photos', 'Videos', 'More'].map((item) => (
-                      <Button key={item} sx={{ color: 'text.primary' }}>
-                        {item}
-                      </Button>
-                    ))}
-                  </Box>
-                </Box>
-              </Card>
+          />
+          <Grid container spacing={2} justifyContent="center" sx={{ position: 'relative', zIndex: 1 }}>
+            <Grid item xs={12} md={4} sx={{ textAlign: 'center', bgcolor: 'transparent' }}>
+              <Avatar
+                src={image}
+                alt={userDetails.username}
+                sx={{
+                  width: '10vw',
+                  height: '10vw',
+                  borderRadius: '50%',
+                  margin: '-60px auto 0',
+                  border: '4px solid white',
+                  minWidth: '150px',
+                  minHeight: '150px',
+                  display: 'inline-block',
+                  position: 'relative',
+                  cursor: 'pointer',
+                }}
+              />
+              <Typography variant="h5" sx={{ color: 'white', mt: 2 }}>{userDetails.username}</Typography>
+              <Typography variant="body2" sx={{ color: 'gray' }}>{userDetails.firstName} {userDetails.lastName}</Typography>
               
-              <Grid container spacing={3} sx={{ mt: 3 }}>
-                <Grid item xs={12} md={5}>
-                  <Card sx={{ bgcolor: 'background.paper', p: 2 }}>
-                    <Typography variant="h6" gutterBottom>About</Typography>
-                    <List>
-                      <ListItem>
-                        <ListItemIcon>
-                          <EmailIcon color="primary" />
-                        </ListItemIcon>
-                        <ListItemText 
-                          primary="Email" 
-                          secondary={userDetails.email}
-                          primaryTypographyProps={{ color: 'text.primary' }}
-                          secondaryTypographyProps={{ color: 'text.secondary', component: "span" }}
-                        />
-                        {userDetails.emailVerified && (
-                          <Typography variant="body2" color="success.main">Verified</Typography>
-                        )}
-                      </ListItem>
-                      <ListItem>
-                        <ListItemIcon>
-                          <WorkIcon color="primary" />
-                        </ListItemIcon>
-                        <ListItemText 
-                          primary="Roles" 
-                          secondary={userDetails.roles.map(role => role.name).join(", ")}
-                          primaryTypographyProps={{ color: 'text.primary' }}
-                          secondaryTypographyProps={{ color: 'text.secondary' }}
-                        />
-                      </ListItem>
-                      <ListItem>
-                        <ListItemIcon>
-                          <LockIcon color="primary" />
-                        </ListItemIcon>
-                        <ListItemText 
-                          primary="Password Status" 
-                          secondary={userDetails.noPassword ? "No password set" : "Password set"}
-                          primaryTypographyProps={{ color: 'text.primary' }}
-                          secondaryTypographyProps={{ color: 'text.secondary' }}
-                        />
-                      </ListItem>
-                    </List>
-                  </Card>
+              <Grid container spacing={1} justifyContent="center" sx={{ marginTop: 2 }}>
+                <Grid item>
+                  <Button variant="contained" sx={{ backgroundColor: '#2e89ff', color: 'white' }} onClick={handleAddFriend}>Follow</Button>
                 </Grid>
-                <Grid item xs={12} md={7}>
-                  <Card sx={{ bgcolor: 'background.paper', p: 2, mb: 2 }}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={3}
-                      variant="outlined"
-                      placeholder="What's on your mind?"
-                      value={newPost}
-                      onChange={(e) => setNewPost(e.target.value)}
-                      sx={{ mb: 2 }}
-                    />
-                    <Button
-                      variant="contained"
-                      onClick={createPost}
-                      disabled={!newPost.trim()}
-                    >
-                      Post
-                    </Button>
-                  </Card>
-                  {posts.map((post) => (
-                    <Card
-                      key={post.postId}
-                      sx={{
-                        bgcolor: 'background.paper',
-                        p: 2,
-                        mb: 2
-                      }}
-                    >
-                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                          <Avatar src={post.userId.avatarUrl} alt={post.userId.username} sx={{ mr: 1 }} />
-                          <Typography variant="subtitle1">{post.userId.username}</Typography>
-                        </Box>
-                        <IconButton onClick={(event) => handleMenuOpen(event, post)}>
-                          <MoreVertIcon />
-                        </IconButton>
-                      </Box>
-                      <Typography variant="body1" sx={{ mb: 1 }}>
-                        {post.content}
-                      </Typography>
-                      <Box sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}>
-                        <IconButton 
-                          onClick={() => post.likes.some(like => like.userId === userDetails.userId) ? unlikePost(post.postId) : likePost(post.postId)} 
-                          color={post.likes.some(like => like.userId === userDetails.userId) ? "primary" : "default"}
-                        >
-                          <ThumbUpIcon /> {post.likes ? post.likes.length : 0}
-                        </IconButton>
-                        <IconButton onClick={() => setCommentingPostId(post.postId)} color="primary">
-                          <CommentIcon /> {post.comments ? post.comments.length : 0}
-                        </IconButton>
-                      </Box>
-                      {commentingPostId === post.postId && (
-                        <Box sx={{ display: "flex", mb: 1 }}>
-                          <TextField
-                            fullWidth
-                            variant="outlined"
-                            placeholder="Write a comment..."
-                            value={newComment}
-                            onChange={(e) => setNewComment(e.target.value)}
-                            size="small"
-                          />
-                          <IconButton onClick={() => commentOnPost(post.postId)} color="primary">
-                            <SendIcon />
-                          </IconButton>
-                        </Box>
-                      )}
-                      {post.comments && post.comments.map((comment) => (
-                        <Box key={comment.commentId} sx={{ bgcolor: "#444", p: 1, borderRadius: 1, mb: 1 }}>
-                          <Box sx={{ display: "flex", alignItems: "center", mb: 0.5, justifyContent: "space-between" }}>
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                              <Avatar src={comment.userId.avatarUrl} alt={comment.userId.username} sx={{ width: 24, height: 24, mr: 1 }} />
-                              <Typography variant="subtitle2">{comment.userId.username}</Typography>
-                            </Box>
-                            <IconButton size="small" onClick={(event) => handleCommentMenuOpen(event, comment)}>
-                              <MoreVertIcon fontSize="small" />
-                            </IconButton>
-                          </Box>
-                          <Typography variant="body2">{comment.content}</Typography>
-                        </Box>
-                      ))}
-                    </Card>
-                  ))}
-                  {loadingMore && (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
-                      <CircularProgress />
-                    </Box>
-                  )}
+                <Grid item>
+                  <Button variant="outlined" onClick={createConversation} sx={{ backgroundColor: 'transparent', color: 'white', borderColor: 'gray' }}>Message</Button>
                 </Grid>
+                {!isCurrentUser && (
+                <Grid item>
+                  {renderFriendButton()}
+                </Grid>
+              )}
+              <Grid item>
+                <Button 
+                  variant="outlined" 
+                  onClick={createConversation} 
+                  sx={{ 
+                    backgroundColor: 'transparent', 
+                    color: 'white', 
+                    borderColor: 'gray' 
+                  }}
+                >
+                  Nhắn tin
+                </Button>
               </Grid>
-            </Box>
-          </Box>
-        ) : (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "30px",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "calc(100vh - 64px)",
-              bgcolor: 'background.default',
-            }}
-          >
-            <CircularProgress />
-            <Typography color="text.primary">Loading ...</Typography>
-          </Box>
-        )}
+              </Grid>
+            </Grid>
+            <Grid item xs={12} md={10} sx={{ margin: '210px' }}>
+            {isCurrentUser && (
+              <Card sx={{ bgcolor: 'black', p: 2, mb: 2 }}>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={3}
+                  variant="outlined"
+                  placeholder="Hoàng ơi, bạn đang nghĩ gì thế?"
+                  value={newPost}
+                  onChange={(e) => setNewPost(e.target.value)}
+                  sx={{ mb: 2 }}
+                />
+                <Box sx={{ display: 'flex', gap: 2, marginBottom: 2 }}>
+                  <Button
+                    variant="contained"
+                    component="label"
+                    sx={{ backgroundColor: "#3B3B3B", color: "#E0E0E0" }} 
+                  >
+                    Ảnh/video
+                    <input
+                      type="file"
+                      hidden
+                      multiple
+                      accept="image/*"
+                      onChange={handleImageAndVideoChange}
+                    />
+                  </Button>
+                  <Button
+                    variant="contained"
+                    component="label"
+                    sx={{ backgroundColor: "#3B3B3B", color: "#E0E0E0" }} 
+                  >
+                    Cảm xúc/hành động
+                    <input
+                      type="file"
+                      hidden
+                      multiple
+                      accept="image/*"
+                      onChange={handleImageAndVideoChange}
+                    />
+                  </Button>
+                </Box>
+                {selectedMedia.length > 0 && (
+                  <Typography variant="body2" sx={{ marginBottom: 1 }}>
+                    {selectedMedia.length} ảnh hoặc video đã chọn
+                  </Typography>
+                )}
+                <Button
+                  variant="contained"
+                  onClick={createPost}
+                  disabled={!newPost.trim() && selectedMedia.length === 0}
+                >
+                  Đăng bài
+                </Button>
+              </Card>
+            )}
+              <Grid container spacing={2}>
+                {posts.map((post) => (
+                  <Grid item xs={4} key={post.postId}>
+                    <Post
+                      post={post}
+                      userDetails={userDetails}
+                      handleMenuOpen={handleMenuOpen}
+                      likePost={likePost}
+                      unlikePost={unlikePost}
+                      commentOnPost={commentOnPost}
+                      volume={false}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
+            </Grid>
+          </Grid>
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "30px",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "calc(100vh - 64px)",
+            bgcolor: '#0A0A0A',
+          }}
+        >
+          <CircularProgress />
+          <Typography color="text.primary">Loading ...</Typography>
+        </Box>
+      )}
     </ThemeProvider>
   );
 }

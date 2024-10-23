@@ -9,13 +9,11 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Mappings;
 
+import com.example.identityservice.dto.request.UpdateInformationRequest;
 import com.example.identityservice.dto.request.UserCreationRequest;
 import com.example.identityservice.dto.request.UserUpdateRequest;
 import com.example.identityservice.dto.request.response.UserResponse;
-import com.example.identityservice.entity.CartItem;
-import com.example.identityservice.entity.Orders;
-import com.example.identityservice.entity.SelectedProduct;
-import com.example.identityservice.entity.User;
+import com.example.identityservice.entity.*;
 
 @Mapper(
         componentModel = "spring",
@@ -28,6 +26,9 @@ public interface UserMapper {
 
     @Mapping(target = "roles", ignore = true)
     void updateUser(@MappingTarget User user, UserUpdateRequest request);
+
+    @Mapping(target = "roles", ignore = true)
+    void updateInformationUser(@MappingTarget User user, UpdateInformationRequest request);
 
     default Set<CartItem> map(Collection<String> cartItemId) {
         return cartItemId.stream()
@@ -43,5 +44,11 @@ public interface UserMapper {
 
     default Set<Orders> mapOrders(Set<String> orderId) {
         return orderId.stream().map(id -> Orders.builder().orderId(id).build()).collect(Collectors.toSet());
+    }
+
+    default Set<String> mapUserImageId(Set<UserImage> images) {
+        return images.stream().map(userImage -> {
+            return userImage.getImageId();
+        }).collect(Collectors.toSet());
     }
 }

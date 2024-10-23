@@ -20,8 +20,7 @@ import OndemandVideoIcon from '@mui/icons-material/OndemandVideo';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import { logOut } from "../../services/authenticationService";
 import { useNavigate } from "react-router-dom";
-import { FaFacebookMessenger } from "react-icons/fa"; // Add this import at the top of your file
-
+import { FaFacebookMessenger } from "react-icons/fa";
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -71,6 +70,11 @@ const AppIconButton = styled(IconButton)(({ theme, active }) => ({
   borderRadius: 0,
   padding: theme.spacing(1),
   margin: theme.spacing(0, 1),
+}));
+
+const AppBarStyled = styled(AppBar)(({ theme }) => ({
+  backgroundColor: "#0A0A0A", // Very dark background
+  color: "#E0E0E0", // Light text color
 }));
 
 export default function Header() {
@@ -230,7 +234,7 @@ export default function Header() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static" sx={{ backgroundColor: "#333", height: '56px' }}>
+      <AppBarStyled position="static">
         <Toolbar sx={{ minHeight: '56px !important', justifyContent: 'space-between' }}>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <IconButton
@@ -240,17 +244,38 @@ export default function Header() {
               aria-label="open drawer"
               sx={{ mr: 2 }}
             >
-              <Box
-                component={"img"}
-                style={{
-                  width: "35px",
-                  height: "35px",
-                  borderRadius: 6,
-                }}
-                src="/logo/Hoag.png"
-              ></Box>
+              
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                {/* <Box
+                  component={"img"}
+                  style={{
+                    width: "50px", // Adjusted size for better visibility
+                    height: "50px",
+                    borderRadius: 6,
+                  }}
+                  src="/logo/Hoag.png"
+                ></Box> */}
+                <IconButton
+                  size="large"
+                  edge="start"
+                  color="inherit"
+                  aria-label="open drawer"
+                  sx={{ mr: 2 }}
+                  onClick={() => navigate('/')} // Navigate to home on click
+                >
+                    <span style={{ 
+                      marginLeft: '8px', 
+                      color: '#E0E0E0', 
+                      fontSize: '1.5rem', 
+                      fontWeight: 'bold', 
+                      fontFamily: 'Dancing Script, cursive' // Apply the imported font
+                    }}>
+                      HOAG
+                    </span>
+                </IconButton>
+              </Box>
             </IconButton>
-            <Search>
+            {/* <Search>
               <SearchIconWrapper>
                 <SearchIcon sx={{ color: "white" }} />
               </SearchIconWrapper>
@@ -258,7 +283,7 @@ export default function Header() {
                 placeholder="Search…"
                 inputProps={{ "aria-label": "search" }}
               />
-            </Search>
+            </Search> */}
           </Box>
 
           <Box sx={{ display: { xs: 'none', md: 'flex' }, justifyContent: 'center' }}>
@@ -284,10 +309,9 @@ export default function Header() {
               >
                 <ShoppingCartIcon sx={{ color: "white" }} />
               </IconButton>
-              {/* New Messages icon */}
               <IconButton
                 size="large"
-                aria-label="show 17 new notifications"
+                aria-label="show notifications"
                 color="inherit"
               >
                 <Badge badgeContent={17} color="error">
@@ -301,7 +325,7 @@ export default function Header() {
                 onClick={handleMessagesClick}
               >
                 <Badge badgeContent={4} color="error">
-                  <FaFacebookMessenger sx={{ color: "white", fontSize: "1.0rem" }} />
+                  <FaFacebookMessenger style={{ color: "white", fontSize: "1.25rem" }} />
                 </Badge>
               </IconButton>
               <IconButton
@@ -330,7 +354,7 @@ export default function Header() {
             </Box>
           </Box>
         </Toolbar>
-      </AppBar>
+      </AppBarStyled>
       {renderMobileMenu}
       {renderMenu}
     </Box>

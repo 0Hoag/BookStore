@@ -175,7 +175,8 @@ public class OrdersService {
                 })
                 .collect(Collectors.toSet());
         return selectedProductSet;
-    };
+    }
+    ;
 
     public Set<SelectedProduct> selectedProducts(Set<SelectedProduct> selectedProductSet) {
         Set<SelectedProduct> selectedProducts = selectedProductSet.stream()
@@ -238,7 +239,7 @@ public class OrdersService {
         ordersRepository.deleteById(orderId);
     }
 
-    private String generateToken(User user) {
+private String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()

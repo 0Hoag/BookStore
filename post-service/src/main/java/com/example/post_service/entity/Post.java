@@ -10,9 +10,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 import org.springframework.data.neo4j.core.schema.Id;
 import org.springframework.data.neo4j.core.schema.Property;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -30,13 +32,15 @@ public class Post {
     @Property(value = "user_id")
     String userId;
 
+    @Lob
+    @Column(name = "content", columnDefinition = "TEXT")
     String content;
 
-    @Column(name = "image_urls")
-    Set<String> imageUrls;
+    @Column(name = "medias")
+    Set<String> medias;
 
-    @Column(name = "video_urls")
-    Set<String> videoUrls;
+    @Column(name = "media_metadata")
+    Map<String, MediaMetadata> mediaMetadata; // update 10/17
 
     @Column(name = "created_at")
     LocalDateTime createdAt;
@@ -46,11 +50,11 @@ public class Post {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    Set<LikeResponse> likes; // Danh sách ID của người dùng đã thích bài viết
+    Set<LikeResponse> likes; // List userId by users this like to post
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    Set<CommentResponse> comments; // Danh sách ID của người dùng đã comment bài viết
+    Set<CommentResponse> comments; // List userId by users this comments to post
 
     @Override
     public String toString() {
@@ -58,10 +62,10 @@ public class Post {
                 "postId='" + postId + '\'' +
                 ", userId='" + userId + '\'' +
                 ", content='" + content + '\'' +
-                ", imageUrls='" + imageUrls + '\'' +
-                ", videoUrls='" + videoUrls + '\'' +
-                ", createdAt=" + createdAt + '\'' +
-                ", updatedAt=" + updatedAt + '\'' +
+                ", medias=" + medias +
+                ", mediaMetadata=" + mediaMetadata +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
                 ", likes=" + (likes != null ? likes.size() : 0) +
                 ", comments=" + (comments != null ? comments.size() : 0) +
                 '}';

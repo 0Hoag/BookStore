@@ -1,7 +1,10 @@
 package com.example.identityservice.dto.request.response;
 
+import com.example.identityservice.entity.UserImage;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -13,4 +16,5 @@ public class UserInformationBasicResponse {
     String username;
     String firstName;
     String lastName;
+    Set<UserImage> images;
 }

@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 @FeignClient
         (
                 name = "identity-service",
-                url = "YOUR_URL"
+                url = "http://localhost:7777/identity"
         )
 public interface IdentityClient {
         @GetMapping(value = "/auth/token", produces = MediaType.APPLICATION_JSON_VALUE)

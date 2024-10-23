@@ -1,10 +1,12 @@
 package com.example.post_service.dto.response;
 
+import com.example.post_service.entity.MediaMetadata;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -14,10 +16,10 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PostResponse {
     String postId;
-    UserResponse userId;
+    String userId;
     String content;
-    Set<String> imageUrls;
-    Set<String> videoUrls;
+    Set<String> medias;
+    Map<String, MediaMetadata> mediaMetadata;
     String created;
     Instant createdAt;
     Instant updatedAt;

@@ -2,7 +2,6 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { getToken } from "../services/localStorageService";
 import userService from "../services/userService";
-import postService from "../services/postService";
 import {
   Alert,
   Box,
@@ -18,25 +17,31 @@ import {
 import Scene from "../pages/Scene";
 import Post from "../components/Post";
 import 'normalize.css';
+import { v4 as uuidv4 } from 'uuid';
+import { debounce } from 'lodash';
+import postService from "../services/postService";
 
 export default function Home() {
   const navigate = useNavigate();
   const [userDetails, setUserDetails] = useState(null);
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState("");
-  const [newComment, setNewComment] = useState("");
   const [commentingPostId, setCommentingPostId] = useState(null);
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   const [snackBarMessage, setSnackBarMessage] = useState("");
   const [snackType, setSnackType] = useState("error");
   const [loading, setLoading] = useState(true);
-  const [loadingMore, setLoadingMore] = useState(false); // New state for loading more posts
+  const [loadingMore, setLoadingMore] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedPost, setSelectedPost] = useState(null);
   const [commentMenuAnchorEl, setCommentMenuAnchorEl] = useState(null);
   const [selectedComment, setSelectedComment] = useState(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
+  const [selectedMedia, setSelectedMedia] = useState([]);
+  const [password, setPassword] = useState("");
+  const [check, setCheck] = useState(null);
+  const [image, setImage] = useState("");
 
   const handleCloseSnackBar = (event, reason) => {
     if (reason === "clickaway") {
@@ -55,19 +60,34 @@ export default function Home() {
     try {
       const response = await userService.getMyInfo();
       setUserDetails(response.data.result);
+      setCheck(response.data.result.noPassword);
     } catch (error) {
       showMessage(error.message);
     }
   };
 
+  const addPassword = (event) => {
+    event.preventDefault();
+
+    getUserDetails(getToken());
+
+    showMessage("Your password has been created, you can use your password to login")
+  };
+
+  const createPassword = async () => {
+    const user = await userService.getMyInfo();
+    const userId = user.data.result.userId;
+    userService.createPassword(userId, password);
+  }
+
   const getAllPosts = useCallback(async (pageNum) => {
     try {
-      setLoading(pageNum === 1); // Đặt trạng thái loading cho trang đầu tiên
-      setLoadingMore(pageNum > 1); // Đặt trạng thái loadingMore cho các trang sau
+      setLoading(pageNum === 1);
+      setLoadingMore(pageNum > 1);
       const response = await postService.getAllPost(pageNum);
       if (response.data.code === 1000 && Array.isArray(response.data.result.data)) {
         setPosts(prevPosts => pageNum === 1 ? response.data.result.data : [...prevPosts, ...response.data.result.data]);
-        setTotalPages(response.data.result.totalPages); // Tổng số trang
+        setTotalPages(response.data.result.totalPages);
       } else {
         showMessage("Không thể tải bài viết. Dữ liệu không hợp lệ.");
       }
@@ -76,7 +96,7 @@ export default function Home() {
       showMessage("Không thể tải bài viết. Vui lòng thử lại sau.");
     } finally {
       setLoading(false);
-      setLoadingMore(false); // Đảm bảo trạng thái loadingMore được tắt
+      setLoadingMore(false);
     }
   }, []);
   
@@ -89,27 +109,36 @@ export default function Home() {
 
   const createPost = async () => {
     try {
-      const postData = {
+      const formData = {
         content: newPost,
-        imageUrls: [],
-        videoUrls: [],
+        medias: [],
         likes: [],
         comments: []
       };
-
-      const result = await postService.createPost(postData);
-
-      if (result.data.code === 1000) {
-        setPosts([result.data.result, ...posts]);
-        setNewPost("");
-        showMessage("Đã đăng bài viết thành công", "success");
-      } else {
-        showMessage("Không thể đăng bài viết", "error");
+  
+      const result = await postService.createPostFile(formData);
+      
+      for (let file of image) {
+        const uploadImage = await postService.uploadImageToPost(result.data.result.postId, file);
+        if (uploadImage.data.code !== 1000) {
+          showMessage("Không thể tải lên một số hình ảnh", "warning");
+        }
       }
+  
+      setPosts([result.data.result, ...posts]);
+      setNewPost("");
+      setSelectedMedia([]);
+      showMessage("Đã đăng bài viết thành công", "success");
     } catch (error) {
-      console.error("Error creating post:", error);
-      showMessage(error.message);
+      console.error("Lỗi khi tạo bài viết:", error);
+      showMessage(error.message, "error");
     }
+  };
+  
+  const handleImageAndVideoChange = (event) => {
+    const files = Array.from(event.target.files);
+    setSelectedMedia(prevImages => [...prevImages, ...files]);
+    setImage(files);
   };
 
   const likePost = async (postId) => {
@@ -127,7 +156,7 @@ export default function Home() {
           : post
       ));
       
-      showMessage("Đã thích bài viết", "success");
+      // showMessage("Đã thích bài viết", "success");
     } catch (error) {
       showMessage(error.message);
     }
@@ -140,15 +169,12 @@ export default function Home() {
       
       if (likeToRemove) { 
         await postService.removeLikeToPost(postId, [likeToRemove.likeId]);
-        console.log("likeId: ", likeToRemove.likeId);
         
         setPosts(posts.map(post => 
           post.postId === postId 
             ? { ...post, likes: post.likes.filter(like => like.likeId !== likeToRemove.likeId) } 
             : post
         ));
-        
-        showMessage("Đã bỏ thích bài viết", "success");
       }
     } catch (error) {
       showMessage(error.message);
@@ -163,13 +189,12 @@ export default function Home() {
         ...post,
         comments: post.comments.filter(comment => comment.commentId !== commentId)
       })));
-      showMessage("Đã xóa bình luận", "success");
     } catch (error) {
       showMessage(error.message);
     }
   };
 
-  const commentOnPost = async (postId) => {
+  const commentOnPost = async (postId, newComment) => {
     try {
       const commentData = {
         userId: userDetails.userId,
@@ -186,7 +211,6 @@ export default function Home() {
           : post
       ));
       
-      setNewComment("");
       setCommentingPostId(null);
       showMessage("Đã thêm bình luận", "success");
     } catch (error) {
@@ -194,13 +218,15 @@ export default function Home() {
     }
   };
 
-  const updatePost = async (postId, newContent) => {
+  const updatePost = async (postId, content, medias) => {
     try {
-      const updatedPost = await postService.updatePost(postId, { content: newContent });
-      setPosts(posts.map(post => 
-        post.postId === postId ? { ...post, content: updatedPost.content } : post
-      ));
-      showMessage("Đã cập nhật bài viết", "success");
+      const post = await postService.getPost(postId);
+      if (post.data.code === 1000) {
+        const updatedPost = await postService.updatePost(postId, content, medias); // Updated parameters
+        setPosts(posts.map(post => 
+          post.postId === postId ? { ...post, content: updatedPost.content } : post
+        ));
+      }
     } catch (error) {
       showMessage(error.message);
     }
@@ -210,7 +236,6 @@ export default function Home() {
     try {
       await postService.removePost(postId);
       setPosts(posts.filter(post => post.postId !== postId));
-      showMessage("Đã xóa bài viết", "success");
     } catch (error) {
       showMessage(error.message);
     }
@@ -241,19 +266,25 @@ export default function Home() {
     if (!accessToken) {
       navigate("/login");
     } else {
-      getAllPosts(page);
+      getAllPosts(page); // Ensure this doesn't cause a loop
       getUserDetails();
     }
   }, [navigate, page, getAllPosts]);
 
   useEffect(() => {
+    const debouncedLoadMore = debounce(() => {
+      if (page < totalPages && !loadingMore) {
+        loadMorePosts();
+      }
+    }, 300);
+
     const handleScroll = () => {
       const scrollTop = window.scrollY;
       const windowHeight = window.innerHeight;
       const documentHeight = document.documentElement.scrollHeight;
 
-      if (scrollTop + windowHeight >= documentHeight - 100 && !loadingMore && page < totalPages) {
-        loadMorePosts();
+      if (scrollTop + windowHeight >= documentHeight - 100) {
+        debouncedLoadMore();
       }
     };
 
@@ -261,11 +292,45 @@ export default function Home() {
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
+      debouncedLoadMore.cancel();
     };
-  }, [loadingMore, page, totalPages]);
+  }, [loadingMore, page, totalPages, loadMorePosts]);
 
   return (
     <Scene>
+      {check && (
+        <Box
+          component="form"
+          onSubmit={addPassword}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "10px",
+            width: "100%",
+          }}
+        >
+          <Typography>Do you want to create password?</Typography>
+          <TextField
+            label="Password"
+            type="password"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            size="large"
+            fullWidth
+            onClick={createPassword}
+          >
+            Create password
+          </Button>
+        </Box>
+        )}
       <Snackbar
         open={snackBarOpen}
         onClose={handleCloseSnackBar}
@@ -290,8 +355,8 @@ export default function Home() {
             justifyContent: "center",
             alignItems: "center",
             height: "100vh",
-            bgcolor: "#1e1e1e",
-            color: "#e0e0e0",
+            bgcolor: "#0A0A0A", // Very dark background for dark mode
+            color: "#E0E0E0", // Light text color for contrast
           }}
         >
           <CircularProgress color="inherit" />
@@ -304,40 +369,12 @@ export default function Home() {
             flexDirection: "column",
             alignItems: "center",
             padding: "20px",
-            bgcolor: "#1e1e1e",
-            color: "#e0e0e0",
+            paddingRight: "300px", // Increased left padding
+            bgcolor: "#0A0A0A", // Very dark background for dark mode
+            color: "#E0E0E0", // Light text color for contrast
             minHeight: "100vh",
           }}
         >
-          <Card
-            sx={{
-              width: "100%",
-              maxWidth: 600,
-              bgcolor: "#333",
-              color: "#e0e0e0",
-              padding: "20px",
-              marginBottom: "20px",
-            }}
-          >
-            <TextField
-              fullWidth
-              multiline
-              rows={3}
-              variant="outlined"
-              placeholder="Bạn đang nghĩ gì?"
-              value={newPost}
-              onChange={(e) => setNewPost(e.target.value)}
-              sx={{ marginBottom: "10px" }}
-            />
-            <Button
-              variant="contained"
-              onClick={createPost}
-              disabled={!newPost.trim()}
-            >
-              Đăng bài
-            </Button>
-          </Card>
-
           {posts.map((post) => (
             <Post
               key={post.postId}
@@ -347,6 +384,7 @@ export default function Home() {
               likePost={likePost}
               unlikePost={unlikePost}
               commentOnPost={commentOnPost}
+              volume={true}
             />
           ))}
         </Box>
@@ -359,7 +397,7 @@ export default function Home() {
         <MenuItem onClick={() => {
           const newContent = prompt("Nhập nội dung mới cho bài viết:", selectedPost.content);
           if (newContent) {
-            updatePost(selectedPost.postId, newContent);
+            updatePost(selectedPost.postId, newContent, selectedMedia);
           }
           handleMenuClose();
         }}>

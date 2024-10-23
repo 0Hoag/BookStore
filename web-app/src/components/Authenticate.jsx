@@ -17,7 +17,7 @@ export default function Authenticate() {
       const authCode = isMatch[1];
 
       fetch(
-        `YOUR_AUTH_URL?code=${authCode}`,
+        `http://localhost:8888/api/v1/identity/auth/outbound/authentication?code=${authCode}`,
         {
           method: "POST",
         }

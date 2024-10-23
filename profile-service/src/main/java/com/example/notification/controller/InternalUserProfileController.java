@@ -1,5 +1,6 @@
 package com.example.notification.controller;
 
+import com.example.notification.dto.response.UserProfileResponse;
 import com.example.notification.entity.UserProfile;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,14 @@ public class InternalUserProfileController {
         return ApiResponse.<UserProfile>builder()
                 .code(1000)
                 .result(userProfileService.createProfile(request))
+                .build();
+    }
+
+    @GetMapping("/internal/users/{userId}")
+    ApiResponse<UserProfileResponse> getProfile(@PathVariable String userId) {
+        return ApiResponse.<UserProfileResponse>builder()
+                .code(1000)
+                .result(userProfileService.getByUserId(userId))
                 .build();
     }
 }

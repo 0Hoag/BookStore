@@ -4,40 +4,53 @@ import com.example.post_service.dto.PageResponse;
 import com.example.post_service.dto.request.*;
 import com.example.post_service.dto.response.ApiResponse;
 import com.example.post_service.dto.response.PostResponse;
-import com.example.post_service.entity.Post;
-import com.example.post_service.service.B2StorageService;
 import com.example.post_service.service.PostService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import okhttp3.Request;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PostController {
     PostService postService;
-    B2StorageService b2StorageService;
 
     @PostMapping("/registration")
     ApiResponse<PostResponse> createPost(
-//            @RequestParam String userId,
-//            @RequestParam String content,
-//            @RequestParam List<String> likes,
-//            @RequestParam List<String> comments,
-//            @RequestParam("imageUrls") List<MultipartFile> images,
-//            @RequestParam("videoUrls") List<MultipartFile> videos
-            @RequestBody CreatePostRequest request) {
+            @RequestBody CreatePostRequest request
+    ) {
+
         return ApiResponse.<PostResponse>builder()
                 .code(1000)
-//                .result(postService.createPost(userId, content, likes, comments, images, videos))
                 .result(postService.createPost(request))
+                .build();
+    }
+
+//    @PutMapping("/updateImageToPost/{postId}")
+//    ApiResponse<PostResponse> updateImageToPost(@PathVariable String postId, @RequestBody AddImageToPostRequest request) {
+//        return ApiResponse.<PostResponse>builder()
+//                .code(1000)
+//                .result(postService.updateImageToPost(postId, request))
+//                .build();
+//    }
+
+    @PostMapping("/updateMediaToPost/{postId}")
+    public ApiResponse<PostResponse> uploadMediaToPost(
+            @PathVariable String postId,
+            @RequestPart("file") MultipartFile file) throws IOException {
+        log.info("Received file upload request for postId: {}, file name: {}, file size: {}, content type: {}",
+                postId, file.getOriginalFilename(), file.getSize(), file.getContentType());
+
+        return ApiResponse.<PostResponse>builder()
+                .code(1000)
+                .result(postService.uploadMediaToPost(postId, file))
                 .build();
     }
 
@@ -69,14 +82,6 @@ public class PostController {
         return ApiResponse.<PageResponse<PostResponse>>builder()
                 .code(1000)
                 .result(postService.getPostWithUserId(userId, page, size))
-                .build();
-    }
-
-    @GetMapping("/getToken")
-    ApiResponse<String> authorizeAccount() throws IOException {
-        return ApiResponse.<String>builder()
-                .code(1000)
-                .result(b2StorageService.authorizeAccount())
                 .build();
     }
 
@@ -131,11 +136,15 @@ public class PostController {
                 .build();
     }
 
-    @PutMapping("/activity/update/{postId}")
-    ApiResponse<PostResponse> updatePost(@PathVariable String postId, @RequestBody UpdatePostRequest request) {
+    @PutMapping("/activity/update")
+    ApiResponse<PostResponse> updatePost(
+            @RequestParam(value = "postId", required = false) String postId,
+            @RequestParam(value = "content", required = false) String content,
+            @RequestParam(value = "medias", required = false) Set<String> medias
+    ) {
         return ApiResponse.<PostResponse>builder()
                 .code(1000)
-                .result(postService.updatePost(postId, request))
+                .result(postService.updatePost(postId, content, medias))
                 .build();
     }
 

@@ -37,8 +37,8 @@ function Scene({ children }) {
       sx={{
         display: "flex",
         flexDirection: "column",
-        bgcolor: "#1e1e1e", // Dark background for the main container
-        color: "#e0e0e0", // Light text color
+        bgcolor: "#0A0A0A", // Very dark background for the main container
+        color: "#E0E0E0", // Light text color
         minHeight: "100vh",
       }}
     >
@@ -47,8 +47,8 @@ function Scene({ children }) {
         sx={{
           ml: { sm: `${drawerWidth}px` },
           zIndex: theme.zIndex.drawer + 1,
-          bgcolor: "#333", // Darker AppBar background
-          color: "#e0e0e0", // Light text color
+          bgcolor: "#0A0A0A", // Very dark AppBar background
+          color: "#E0E0E0", // Light text color
         }}
       >
         <Toolbar>
@@ -88,8 +88,8 @@ function Scene({ children }) {
               "& .MuiDrawer-paper": {
                 boxSizing: "border-box",
                 width: drawerWidth,
-                bgcolor: "#333", // Dark background for the Drawer
-                color: "#e0e0e0", // Light text color
+                bgcolor: "#1E1E1E", // Dark background for the Drawer
+                color: "#E0E0E0", // Light text color
               },
             }}
           >
@@ -102,8 +102,8 @@ function Scene({ children }) {
               "& .MuiDrawer-paper": {
                 boxSizing: "border-box",
                 width: drawerWidth,
-                bgcolor: "#333", // Dark background for the Drawer
-                color: "#e0e0e0", // Light text color
+                bgcolor: "#1E1E1E", // Dark background for the Drawer
+                color: "#E0E0E0", // Light text color
               },
             }}
             open
@@ -117,7 +117,7 @@ function Scene({ children }) {
             flexGrow: 1,
             p: 3,
             width: { sm: `calc(100% - ${drawerWidth}px)` },
-            bgcolor: "#1e1e1e", // Dark background for main content area
+            bgcolor: "#121212", // Dark background for main content area
           }}
         >
           <Toolbar />
@@ -127,6 +127,5 @@ function Scene({ children }) {
     </Box>
   );
 }
-
 
 export default Scene;

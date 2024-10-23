@@ -20,6 +20,8 @@ import PaymentResult from "../pages/shopping/PaymentResult";
 import Friend from "../pages/Friends/Friends";
 import Profile from "../pages/Profile";
 import Messenger from "../pages/messeger/messenger";
+import PageExmapl from "../pages/messeger/pageExample";
+import ProfileSetting from "../pages/profile/ProfileSetting";
 
 const AppRoutes = () => {
   return (
@@ -45,6 +47,8 @@ const AppRoutes = () => {
         <Route path="/profile/:userId" element={<ProfileDetail />} />
         <Route path="/friends" element={<Friend />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/profile/edit/info" element={<ProfileSetting />} />
+        <Route path="/pageExmapl" element={<PageExmapl />} />
         <Route path="/" element={<Home />} />
       </Routes>
     </Router>

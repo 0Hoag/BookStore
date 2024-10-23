@@ -44,43 +44,181 @@ export default function Profile() {
   const [posts, setPosts] = useState([]);
   const [newPost, setNewPost] = useState("");
   const [newComment, setNewComment] = useState("");
-  const [commentingPostId, setCommentingPostId] = useState(null);
+  const [selectedImages, setSelectedImages] = useState([]);
+  const [selectedVideos, setSelectedVideos] = useState([]);
+  const [editingPostId, setEditingPostId] = useState(null);
+  const [editedPostContent, setEditedPostContent] = useState("");
   const [snackBarOpen, setSnackBarOpen] = useState(false);
   const [snackBarMessage, setSnackBarMessage] = useState("");
   const [snackType, setSnackType] = useState("error");
-  const [loading, setLoading] = useState(true);
+  const [commentingPostId, setCommentingPostId] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedPost, setSelectedPost] = useState(null);
-  const [commentMenuAnchorEl, setCommentMenuAnchorEl] = useState(null);
-  const [selectedComment, setSelectedComment] = useState(null);
-  const [editingPostId, setEditingPostId] = useState(null);
-  const [editedPostContent, setEditedPostContent] = useState("");
   const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false); // New state for loading more posts
+  const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(0);
+  const [imageProfile, setImageProfile] = useState("/path/to/default/avatar.png");
+  const [imageCover, setImageCover] = useState("/path/to/default/cover.png");
+  const [image, setImage] = useState("");
+  const [selectedComment, setSelectedComment] = useState(null);
+  const [commentMenuAnchorEl, setCommentMenuAnchorEl] = useState(null);
+  const [selectedMedia, setSelectedMedia] = useState([]);
 
   const darkTheme = createTheme({
     palette: {
       mode: 'dark',
       background: {
-        default: '#18191a',
-        paper: '#242526',
+        default: '#0A0A0A',
+        paper: '#0A0A0A',
       },
       text: {
         primary: '#e4e6eb',
         secondary: '#b0b3b8',
       },
       primary: {
-        main: '#2e89ff',
+        main: '#0A0A0A',
       },
     },
   });
 
-  const handleCloseSnackBar = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
+  const getUserDetails = async () => {
+    try {
+      const response = await userService.getMyInfo();
+      setUserDetails(response.data.result); // Set user details regardless of image
+      
+      if (response.data.result.images && response.data.result.images.length > 0) {
+        const imageIds = response.data.result.images; // Get the array of image IDs
+        // Use Promise.all to fetch all images concurrently
+        const imagesResponse = await Promise.all(imageIds.map(id => userService.viewImage(id)));
+
+        // Find the profile image from the responses
+        const profileImageObj = imagesResponse.find(img => img.data.result.imageType === 'PROFILE');
+        const coverImageObj = imagesResponse.find(img => img.data.result.imageType === 'COVER');
+
+        if (profileImageObj) {
+          setImageProfile(profileImageObj.data.result.imageUrl);
+        } else {
+          setImageProfile("/path/to/default/avatar.png");
+        }
+        
+        if (coverImageObj) {
+          setImageCover(coverImageObj.data.result.imageUrl); // Ensure cover image is set
+        }
+      }
+    } catch (error) {
+      showMessage(error.message);
     }
-    setSnackBarOpen(false);
+  };
+
+  const updateImageProfile = async (file) => {
+    try {
+      const user = userDetails; // Ensure userDetails is correctly accessed
+      const userId = user.userId; // Get user ID
+      const imageIds = user.images; 
+
+      // Check if there are images
+      if (imageIds && imageIds.length > 0) {
+        const imageResponse = await Promise.all(imageIds.map(id => userService.viewImage(id)));
+        const profileImageObj = imageResponse.find(img => img.data.result.imageType === 'PROFILE');
+
+        // If a profile image exists, delete it before uploading the new one
+        if (profileImageObj) {
+          console.log("Deleting old profile image:", profileImageObj.data.result);
+          await userService.deleteImage(userId, [profileImageObj.data.result.imageId]); // Pass the correct ID
+        }
+      }
+
+      // Upload the new profile image
+      await userService.updateImageProfile(userId, file); // Call to update the profile image
+      console.log("New profile image uploaded successfully."); // Debugging log
+    } catch (error) {
+      console.error("Error in updateImageProfile:", error); // Log any errors
+    }
+  };
+
+  const updateImageCover = async (file) => {
+    try {
+      const user = userDetails;
+      const userId = user.userId;
+      const imageIds = user.images;
+
+      // Check if there are images
+      if (imageIds && imageIds.length > 0) {
+        const imageResponse = await Promise.all(imageIds.map(id => userService.viewImage(id)));
+        const coverImageObj = imageResponse.find(img => img.data.result.imageType === 'COVER');
+
+        // If a cover image exists, delete it before uploading the new one
+        if (coverImageObj) {
+          console.log("Deleting old cover image:", coverImageObj.data.result);
+          await userService.deleteImage(userId, [coverImageObj.data.result.imageId]);
+        }
+      }
+
+      // Upload the new cover image
+      await userService.updateImageCover(userId, file);
+      console.log("New cover image uploaded successfully!");
+    } catch (error) {
+      console.error("Error in updateImageCover:", error); // Log any errors
+    }
+  }
+
+  const handleChangeImageProfile = async (event) => {
+    const files = event.target.files;
+    console.log("Selected files:", files); // Debugging log
+    if (files.length > 0) {
+      try {
+        await updateImageProfile(files[0]); // Call to update the profile image
+        console.log("Profile image updated successfully."); // Debugging log
+      } catch (error) {
+        console.error("Error updating profile image:", error); // Log any errors
+      }
+    } else {
+      console.log("No file selected!"); // Debugging log
+    }
+  };
+
+  const handleChangeImageCover = async (event) => {
+    const files = event.target.files;
+    console.log("Selected files: ", files);
+    if (files.length > 0) {
+      try {
+        await updateImageCover(files[0]);
+        console.log("update image success!")
+      }catch (error) {
+        console.log("update image it found!")
+        throw error;
+      }
+    }else {
+      console.log("No file selected!");
+    }
+  }
+
+  const deleteComment = async (commentId) => {
+    try {
+      const postId = posts.find(post => post.comments.some(comment => comment.commentId === commentId)).postId;
+      await postService.removeCommentToPost(postId, [commentId]);
+      setPosts(posts.map(post => ({
+        ...post,
+        comments: post.comments.filter(comment => comment.commentId !== commentId)
+      })));
+    } catch (error) {
+      showMessage(error.message);
+    }
+  };
+
+  const deletePost = async (postId) => {
+    try {
+      await postService.removePost(postId);
+      setPosts(posts.filter(post => post.postId !== postId));
+    } catch (error) {
+      showMessage(error.message);
+    }
+  };
+
+  const handleCommentMenuClose = () => {
+    setCommentMenuAnchorEl(null);
+    setSelectedComment(null);
   };
 
   const showMessage = (message, type = "error") => {
@@ -89,32 +227,10 @@ export default function Profile() {
     setSnackBarOpen(true);
   };
 
-  const getUserDetails = async () => {
-    try {
-      const response = await userService.getMyInfo();
-      if (response) {
-        setUserDetails(response.data.result);
-      }
-    } catch (error) {
-      showMessage(error.message);
-    }
-  };
-
-  const handleEditPost = (post) => {
-    setEditingPostId(post.postId);
-    setEditedPostContent(post.content);
-    handleMenuClose();
-  };
-  
-  const saveEditedPost = async () => {
-    try {
-      await updatePost(editingPostId, editedPostContent);
-      setEditingPostId(null);
-      setEditedPostContent("");
-      showMessage("Bài viết đã được cập nhật", "success");
-    } catch (error) {
-      showMessage("Không thể cập nhật bài viết", "error");
-    }
+  const handleImageAndVideoChange = (event) => {
+    const files = Array.from(event.target.files);
+    setSelectedMedia(prevImages => [...prevImages, ...files]);
+    setImage(files);
   };
 
   const getMyPosts = useCallback(async (pageNum) => {
@@ -143,28 +259,45 @@ export default function Profile() {
     }
   };
 
+  const updatePost = async (postId, content, medias) => {
+    try {
+      const post = await postService.getPost(postId);
+      if (post.data.code === 1000) {
+        const updatedPost = await postService.updatePost(postId, content, medias); // Updated parameters
+        setPosts(posts.map(post => 
+          post.postId === postId ? { ...post, content: updatedPost.content } : post
+        ));
+      }
+    } catch (error) {
+      showMessage(error.message);
+    }
+  };
+
   const createPost = async () => {
     try {
-      const postData = {
+      const formData = {
         content: newPost,
-        imageUrls: [],
-        videoUrls: [],
+        medias: [],
         likes: [],
         comments: []
       };
-
-      const result = await postService.createPost(postData);
-
-      if (result.data.code === 1000) {
-        setPosts([result.data.result, ...posts]);
-        setNewPost("");
-        showMessage("Đã đăng bài viết thành công", "success");
-      } else {
-        showMessage("Không thể đăng bài viết", "error");
+  
+      const result = await postService.createPostFile(formData);
+      
+      for (let file of image) {
+        const uploadImage = await postService.uploadImageToPost(result.data.result.postId, file);
+        if (uploadImage.data.code !== 1000) {
+          showMessage("Không thể tải lên một số hình ảnh", "warning");
+        }
       }
+  
+      setPosts([result.data.result, ...posts]);
+      setNewPost("");
+      setSelectedMedia([]);
+      showMessage("Đã đăng bài viết thành công", "success");
     } catch (error) {
-      console.error("Error creating post:", error);
-      showMessage(error.message);
+      console.error("Lỗi khi tạo bài viết:", error);
+      showMessage(error.message, "error");
     }
   };
 
@@ -210,21 +343,7 @@ export default function Profile() {
     }
   };
 
-  const deleteComment = async (commentId) => {
-    try {
-      const postId = posts.find(post => post.comments.some(comment => comment.commentId === commentId)).postId;
-      await postService.removeCommentToPost(postId, [commentId]);
-      setPosts(posts.map(post => ({
-        ...post,
-        comments: post.comments.filter(comment => comment.commentId !== commentId)
-      })));
-      showMessage("Đã xóa bình luận", "success");
-    } catch (error) {
-      showMessage(error.message);
-    }
-  };
-
-  const commentOnPost = async (postId) => {
+  const commentOnPost = async (postId, newComment) => {
     try {
       const commentData = {
         userId: userDetails.userId,
@@ -240,32 +359,15 @@ export default function Profile() {
           ? { ...post, comments: [...post.comments, comment.data.result] } 
           : post
       ));
+
+      console.log("ListPost: {}", posts.map(post => 
+        post.postId === postId 
+          ? { ...post, comments: [...post.comments, comment.data.result] } 
+          : post
+      ));
       
-      setNewComment("");
       setCommentingPostId(null);
       showMessage("Đã thêm bình luận", "success");
-    } catch (error) {
-      showMessage(error.message);
-    }
-  };
-
-  const updatePost = async (postId, newContent) => {
-    try {
-      const updatedPost = await postService.updatePost(postId, { content: newContent });
-      setPosts(posts.map(post => 
-        post.postId === postId ? { ...post, content: updatedPost.content } : post
-      ));
-      showMessage("Đã cập nhật bài viết", "success");
-    } catch (error) {
-      showMessage(error.message);
-    }
-  };
-
-  const deletePost = async (postId) => {
-    try {
-      await postService.removePost(postId);
-      setPosts(posts.filter(post => post.postId !== postId));
-      showMessage("Đã xóa bài viết", "success");
     } catch (error) {
       showMessage(error.message);
     }
@@ -279,16 +381,6 @@ export default function Profile() {
   const handleMenuClose = () => {
     setAnchorEl(null);
     setSelectedPost(null);
-  };
-
-  const handleCommentMenuOpen = (event, comment) => {
-    setCommentMenuAnchorEl(event.currentTarget);
-    setSelectedComment(comment);
-  };
-
-  const handleCommentMenuClose = () => {
-    setCommentMenuAnchorEl(null);
-    setSelectedComment(null);
   };
 
   useEffect(() => {
@@ -319,190 +411,206 @@ export default function Profile() {
     };
   }, [loadingMore, page, totalPages]);
 
-
   return (
     <ThemeProvider theme={darkTheme}>
-      <Header/>
-        <Snackbar
-          open={snackBarOpen}
-          onClose={handleCloseSnackBar}
-          autoHideDuration={6000}
-          anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        >
-          <Alert
-            onClose={handleCloseSnackBar}
-            severity={snackType}
-            variant="filled"
-            sx={{ width: "100%" }}
-          >
-            {snackBarMessage}
-          </Alert>
-        </Snackbar>
-        {userDetails ? (
+      <Header />
+      {userDetails ? (
+        <Box sx={{ bgcolor: '#0A0A0A', minHeight: "100vh", position: 'relative', paddingTop: '200px' }}>
           <Box
             sx={{
-              bgcolor: 'background.default',
-              minHeight: "calc(100vh - 64px)",
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '600px',
+              backgroundImage: `url(${imageCover})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              '&::after': {
+                content: '""',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0,0,0,0.3)', // Optional: adds a slight dark overlay
+              },
             }}
-          >
-            <Box sx={{ maxWidth: 940, margin: "0 auto", overflow: "visible" }}>
-              <Card sx={{ overflow: "visible", bgcolor: 'background.paper' }}>
-                <Box sx={{ height: 350, bgcolor: "#2e89ff", position: "relative" }}>
-                  {/* Cover photo */}
-                  <IconButton 
-                    sx={{ position: 'absolute', right: 16, bottom: 16, bgcolor: 'rgba(0,0,0,0.6)' }}
+          />
+          <Grid container spacing={2} justifyContent="center" sx={{ position: 'relative', zIndex: 1 }}>
+          <Grid item xs={12} md={4} sx={{ textAlign: 'center', bgcolor: 'transparent' }}>
+            <label htmlFor="profile-image-upload">
+              <Avatar
+                src={imageProfile}
+                alt={userDetails.username}
+                sx={{
+                  width: '10vw',
+                  height: '10vw',
+                  borderRadius: '50%',
+                  margin: '-60px auto 0',
+                  border: '4px solid white',
+                  minWidth: '150px',
+                  minHeight: '150px',
+                  display: 'inline-block',
+                  position: 'relative',
+                  cursor: 'pointer',
+                  transition: 'transform 0.3s ease, box-shadow 0.3s ease', // Add transition for smooth effect
+                  '&:hover': {
+                    transform: 'scale(1.05)', // Scale up on hover
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)', // Add shadow on hover
+                  },
+                }}
+              />
+              <input
+                id="profile-image-upload"
+                type="file"
+                hidden
+                accept="image/*"
+                onChange={handleChangeImageProfile} // Link to the change handler
+              />
+            </label>
+            <Typography variant="h5" sx={{ color: 'white', mt: 2 }}>{userDetails.username}</Typography>
+            <Typography variant="body2" sx={{ color: 'gray' }}>{userDetails.firstName} {userDetails.lastName}</Typography>
+            <label htmlFor="cover-image-upload">
+              <IconButton component="span" sx={{ mt: 2 }}>
+                <CameraAltIcon sx={{ color: 'white' }} />
+              </IconButton>
+              <input
+                id="cover-image-upload"
+                type="file"
+                hidden
+                accept="image/*"
+                onChange={handleChangeImageCover}
+              />
+            </label>
+          </Grid>
+            <Grid item xs={12} md={10} sx={{margin: '210px'}}>
+            <Button variant="contained" sx={{ mt: 2, backgroundColor: "#3B3B3B", color: "#E0E0E0", display: 'flex', margin: 'auto' }} onClick={() => navigate(`/profile/edit/info`)}>Edit Profile</Button>
+              <Card sx={{ bgcolor: 'black', p: 2, mb: 2 }}>
+              <TextField
+                  fullWidth
+                  multiline
+                  rows={3}
+                  variant="outlined"
+                  placeholder="Hoàng ơi, bạn đang nghĩ gì thế?"
+                  value={newPost}
+                  onChange={(e) => setNewPost(e.target.value)}
+                  sx={{ mb: 2 }}
+                />
+                <Box sx={{ display: 'flex', gap: 2, marginBottom: 2 }}>
+                  <Button
+                    variant="contained"
+                    component="label"
+                    sx={{ backgroundColor: "#3B3B3B", color: "#E0E0E0" }} 
                   >
-                    <CameraAltIcon />
-                  </IconButton>
-                </Box>
-                <Box sx={{ display: "flex", justifyContent: "space-between", px: 4, mb: 3, position: 'relative' }}>
-                  <Avatar
-                    sx={{
-                      width: 168,
-                      height: 168,
-                      border: "4px solid #242526",
-                      marginTop: "-84px",
-                      bgcolor: '#3a3b3c',
-                      color: 'text.primary',
-                    }}
-                  >
-                    {userDetails.username.charAt(0).toUpperCase()}
-                  </Avatar>
-                  <Box sx={{ display: 'flex', alignItems: 'flex-end', mb: 2, gap: 2 }}>
-                    <Button variant="contained" startIcon={<AddIcon />}>
-                      Thêm vào tin
-                    </Button>
-                    <Button variant="contained">
-                      Chỉnh sửa trang cá nhân
-                    </Button>
-                  </Box>
-                </Box>
-                <Box sx={{ px: 4, pb: 3 }}>
-                  <Typography variant="h4" gutterBottom color="text.primary">
-                    {userDetails.username}
-                  </Typography>
-                  <Box sx={{ display: 'flex', gap: 1, mt: 2 }}>
-                    {['Bài viết', 'Giới thiệu', 'Bạn bè', 'Ảnh', 'Video', 'Reels', 'Xem thêm'].map((item) => (
-                      <Button key={item} sx={{ color: 'text.primary' }}>
-                        {item}
-                      </Button>
-                    ))}
-                  </Box>
-                </Box>
-              </Card>
-              
-              <Grid container spacing={3} sx={{ mt: 3 }}>
-                <Grid item xs={12} md={5}>
-                  <Card sx={{ bgcolor: 'background.paper', p: 2 }}>
-                    <Typography variant="h6" gutterBottom>Giới thiệu</Typography>
-                    <Button fullWidth variant="outlined" sx={{ mt: 1 }}>Thêm tiểu sử</Button>
-                    <Button fullWidth variant="outlined" sx={{ mt: 1 }}>Chỉnh sửa chi tiết</Button>
-                    <Button fullWidth variant="outlined" sx={{ mt: 1 }}>Thêm sở thích</Button>
-                  </Card>
-                </Grid>
-                <Grid item xs={12} md={7}>
-                  <Card sx={{ bgcolor: 'background.paper', p: 2, mb: 2 }}>
-                    <TextField
-                      fullWidth
-                      multiline
-                      rows={3}
-                      variant="outlined"
-                      placeholder="Bạn đang nghĩ gì?"
-                      value={newPost}
-                      onChange={(e) => setNewPost(e.target.value)}
-                      sx={{ mb: 2 }}
+                    Ảnh/video
+                    <input
+                      type="file"
+                      hidden
+                      multiple
+                      accept="image/*"
+                      onChange={handleImageAndVideoChange}
                     />
-                    <Button
-                      variant="contained"
-                      onClick={createPost}
-                      disabled={!newPost.trim()}
-                    >
-                      Đăng
-                    </Button>
-                  </Card>
-                  {posts.map((post) => (
-                    <Card
-                      key={post.postId}
-                      sx={{
-                        bgcolor: 'background.paper',
-                        padding: 2,
-                        marginBottom: 2
-                      }}
-                    >
-                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "10px" }}>
-                        <Box sx={{ display: "flex", alignItems: "center" }}>
-                          <Avatar src={post.userId.avatarUrl} alt={post.userId.username} sx={{ marginRight: "10px" }} />
-                          <Typography variant="subtitle1">{post.userId.username}</Typography>
-                        </Box>
-                        <IconButton onClick={(event) => handleMenuOpen(event, post)}>
-                          <MoreVertIcon />
-                        </IconButton>
-                      </Box>
-                      <Typography variant="body1" sx={{ marginBottom: "10px" }}>
-                        {post.content}
-                      </Typography>
-                      <Box sx={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}>
-                        <IconButton 
-                          onClick={() => post.likes.some(like => like.userId === userDetails.userId) ? unlikePost(post.postId) : likePost(post.postId)} 
-                          color={post.likes.some(like => like.userId === userDetails.userId) ? "primary" : "default"}
-                        >
-                          <ThumbUpIcon /> {post.likes ? post.likes.length : 0}
-                        </IconButton>
-                        <IconButton onClick={() => setCommentingPostId(post.postId)} color="primary">
-                          <CommentIcon /> {post.comments ? post.comments.length : 0}
-                        </IconButton>
-                      </Box>
-                      {commentingPostId === post.postId && (
-                        <Box sx={{ display: "flex", marginTop: "10px" }}>
-                          <TextField
-                            fullWidth
-                            variant="outlined"
-                            placeholder="Viết bình luận..."
-                            value={newComment}
-                            onChange={(e) => setNewComment(e.target.value)}
-                            size="small"
-                          />
-                          <IconButton onClick={() => commentOnPost(post.postId)} color="primary">
-                            <SendIcon />
-                          </IconButton>
-                        </Box>
-                      )}
-                      {post.comments && post.comments.map((comment) => (
-                        <Box key={comment.commentId} sx={{ marginTop: "10px", bgcolor: "#444", padding: "10px", borderRadius: "4px" }}>
-                          <Box sx={{ display: "flex", alignItems: "center", marginBottom: "5px", justifyContent: "space-between" }}>
-                            <Box sx={{ display: "flex", alignItems: "center" }}>
-                              <Avatar src={comment.userId.avatarUrl} alt={comment.userId.username} sx={{ width: 24, height: 24, marginRight: "10px" }} />
-                              <Typography variant="subtitle2">{comment.userId.username}</Typography>
-                            </Box>
-                            <IconButton size="small" onClick={(event) => handleCommentMenuOpen(event, comment)}>
-                              <MoreVertIcon fontSize="small" />
-                            </IconButton>
-                          </Box>
-                          <Typography variant="body2">{comment.content}</Typography>
-                        </Box>
-                      ))}
-                    </Card>
-                  ))}
-                </Grid>
+                  </Button>
+                  <Button
+                    variant="contained"
+                    component="label"
+                    sx={{ backgroundColor: "#3B3B3B", color: "#E0E0E0" }} 
+                  >
+                    Cảm xúc/hành động
+                    <input
+                      type="file"
+                      hidden
+                      multiple
+                      accept="image/*"
+                      onChange={handleImageAndVideoChange}
+                    />
+                  </Button>
+                </Box>
+                {selectedMedia.length > 0 && (
+                  <Typography variant="body2" sx={{ marginBottom: 1 }}>
+                    {selectedMedia.length} ảnh hoặc video đã chọn
+                  </Typography>
+                )}
+                <Button
+                  variant="contained"
+                  onClick={createPost}
+                  disabled={!newPost.trim() && selectedMedia.length === 0}
+                >
+                  Đăng bài
+                </Button>
+              </Card>
+              <Grid container spacing={2}>
+                {posts.map((post) => (
+                  <Grid item xs={4} key={post.postId}>
+                    <Post
+                      post={post}
+                      userDetails={userDetails}
+                      handleMenuOpen={handleMenuOpen}
+                      likePost={likePost}
+                      unlikePost={unlikePost}
+                      commentOnPost={commentOnPost}
+                      volume={false}
+                    />
+                  </Grid>
+                ))}
+                <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+              >
+                <MenuItem onClick={() => {
+                  const newContent = prompt("Nhập nội dung mới cho bài viết:", selectedPost.content);
+                  if (newContent) {
+                    updatePost(selectedPost.postId, newContent, selectedMedia);
+                  }
+                  handleMenuClose();
+                }}>
+                  Chỉnh sửa
+                </MenuItem>
+                <MenuItem onClick={() => {
+                  if (window.confirm("Bạn có chắc chắn muốn xóa bài viết này?")) {
+                    deletePost(selectedPost.postId);
+                  }
+                  handleMenuClose();
+                }}>
+                  Xóa
+                </MenuItem>
+              </Menu>
+              <Menu
+                anchorEl={commentMenuAnchorEl}
+                open={Boolean(commentMenuAnchorEl)}
+                onClose={handleCommentMenuClose}
+              >
+                {selectedComment && selectedComment.userId === userDetails.userId && (
+                  <MenuItem onClick={() => {
+                    deleteComment(selectedComment.commentId);
+                    handleCommentMenuClose();
+                  }}>
+                    Xóa bình luận
+                  </MenuItem>
+                )}
+              </Menu>
               </Grid>
-            </Box>
-          </Box>
-        ) : (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "30px",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "calc(100vh - 64px)",
-              bgcolor: 'background.default',
-            }}
-          >
-            <CircularProgress />
-            <Typography color="text.primary">Loading ...</Typography>
-          </Box>
-        )}
+            </Grid>
+          </Grid>
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: "30px",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "calc(100vh - 64px)",
+            bgcolor: '#0A0A0A',
+          }}
+        >
+          <CircularProgress />
+          <Typography color="text.primary">Loading ...</Typography>
+        </Box>
+      )}
     </ThemeProvider>
   );
-}
+};

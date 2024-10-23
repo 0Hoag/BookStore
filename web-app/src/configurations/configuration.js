@@ -1,18 +1,19 @@
 export const OAuthConfig = {
-  clientId: "YOUR_CLIENT_ID",
-  redirectUri: "YOUR_REDIRECT_URI",
-  authUri: "YOUR_AUTH_URI",
+  clientId: "YOUR_CLIENT_ID_HERE", 
+  redirectUri: "YOUR_REDIRECT_URI_HERE",
+  authUri: "https://accounts.google.com/o/oauth2/auth",
 };
 
 export const CONFIG = {
-  API_GATEWAY: "YOUR_API_GATEWAY",
+  API_GATEWAY: "http://localhost:8888/api/v1",
 };
 
 export const API = {
   //user-service
   LOGIN: "/identity/auth/token",
   MY_INFO: "/identity/users/my-info",
-
+  UPDATE_USER_INFORMATION: "/identity/users/updateInformationUser",
+  
   // MY_PROFILE: "/profile/users",
   GET_USER: "/identity/users",
   CREATE_PASSWORD: "/identity/users/create-password",
@@ -23,9 +24,17 @@ export const API = {
   FRIENDS: "/",
   REGISTRATION: "/identity/users/registration",
 
+  //User-Image(user-service)
+  VIEW_IMAGE: "/identity/userImage/getUserImage",
+  POST_PROFILE_IMAGE: "/identity/users/uploadImageUserProfile",
+  POST_COVER_IMAGE: "/identity/users/uploadImageUserCover",
+  DELETE_IMAGE: "/identity/users/deleteUserImage",
+
   //profile-service
-  CREATE_PROFILE: "/register",
+  CREATE_PROFILE: "/profile/users/register",
+  GET_USER_BY_PROFILE: "/profile/users/getUserId",
   MY_PROFILE: "/my-profile",
+  UPDATE_PROFILE: "/profile/users",
 
   //user-service(profile-service)
   CREATE_PROFILE: "/profile/register",
@@ -98,13 +107,17 @@ export const API = {
   UPDATE_POST: "/post/activity/update",
   DELETE_POST: "/post/activity",
   GET_TOKEN_BLACK_BLAZE: "/post/getToken",
+  CREATE_IMAGE_POST: "/post/image/registration",
+  GET_IMAGE_POST: "/post/image/viewImage",
+  UPDATE_COMMENT: "/post/updateCommentToPost",
 
   ADD_LIKE_TO_POST: "/post/addLikeToPost",
   REMOVE_LIKE_TO_POST: "/post/removeLikeToPost",
 
   ADD_COMMENT_TO_POST: "/post/addCommentToPost",
   REMOVE_COMMENT_TO_POST: "/post/removeCommentToPost",
-  UPDATE_COMMENT: "/post/comments/activity/updateComment",
+
+  UPLOAD_MEDIA_TO_POST: "/post/updateMediaToPost",
 
   //Comment-service
   CREATE_COMMENT: "/comment/comments/registration",
@@ -112,7 +125,7 @@ export const API = {
 
   //Interaction-service
   CREATE_LIKE: "/interaction/like/registration",
-  GET_LIKE: "/interaction/like//activity",
+  GET_LIKE: "/interaction/like/activity",
 
   //Messenger-service
   GET_USER_CONVERSATIONS: "/messaging/mess/getUserConversations",
@@ -121,10 +134,4 @@ export const API = {
   GET_MESSAGE_FOR_CONVERSATION: "/messaging/messenger/getMessageForConversation",
   GET_USER_CONVERSATIONS_LIST: "/messaging/messenger/getUserConversationList",
   GET_PARTICIPANTS_CONVERSATION: "/messaging/participant/getParticipantIds",
-};
-
-export const KEYCLOACK_CONFIG = {
-  url: "YOUR_URL",
-  realm: "YOUR_REALM",
-  clientId: "YOUR_CLIENT_ID",
 };

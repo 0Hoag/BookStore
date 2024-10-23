@@ -1,11 +1,15 @@
 package com.example.identityservice.controller;
 
+import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.validation.Valid;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.identityservice.dto.request.*;
 import com.example.identityservice.dto.request.response.UserInformationBasicResponse;
@@ -26,7 +30,8 @@ public class UserController {
     UserService userService;
 
     @PostMapping("/registration")
-    ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
+    ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request)
+            throws SQLException, IOException {
         log.info("Controller: create user");
         return ApiResponse.<UserResponse>builder()
                 .code(1000)
@@ -34,9 +39,10 @@ public class UserController {
                 .build();
     }
 
-    @PostMapping("/create-password")
-    ApiResponse<Void> createPassword(@RequestBody @Valid PasswordCreationRequest request) {
-        userService.createPassword(request);
+    @PostMapping("/create-password/{userId}")
+    ApiResponse<Void> createPassword(
+            @PathVariable("userId") String userId, @RequestBody @Valid PasswordCreationRequest request) {
+        userService.createPassword(userId, request);
         return ApiResponse.<Void>builder()
                 .code(1000)
                 .message("Password has been created, you could use it to log-in")
@@ -102,6 +108,49 @@ public class UserController {
         return ApiResponse.<UserResponse>builder()
                 .code(1000)
                 .result(userService.getMyInfo())
+                .build();
+    }
+
+    @PutMapping("/updateInformationUser")
+    ApiResponse<UserResponse> updateInformationUser(@RequestBody UpdateInformationRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .code(1000)
+                .result(userService.updateInformationUser(request))
+                .build();
+    }
+
+    @PostMapping("/uploadImageUserProfile/{userId}")
+    ApiResponse<Void> uploadImageUserProfile(
+            @PathVariable String userId,
+            @RequestPart("image") MultipartFile file)
+            throws SQLException, IOException {
+        userService.uploadImageUserProfile(userId, file);
+        return ApiResponse.<Void>builder()
+                .code(1000)
+                .message("Update image photo success!")
+                .build();
+    }
+
+    @PostMapping("/uploadImageUserCover/{userId}")
+    ApiResponse<Void> uploadImageUserCover(
+            @PathVariable String userId,
+            @RequestPart("image") MultipartFile file)
+            throws SQLException, IOException {
+        userService.uploadImageUserCover(userId, file);
+        return ApiResponse.<Void>builder()
+                .code(1000)
+                .message("Update image photo success!")
+                .build();
+    }
+
+    @DeleteMapping("/deleteUserImage/{userId}")
+    ApiResponse<Void> removeUserImage(
+            @PathVariable String userId,
+            @RequestBody RemoveUserImage image) {
+        userService.removeImageUser(userId, image);
+        return ApiResponse.<Void>builder()
+                .code(1000)
+                .message("Remove user image success!")
                 .build();
     }
 

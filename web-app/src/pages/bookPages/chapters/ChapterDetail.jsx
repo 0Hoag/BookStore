@@ -36,6 +36,16 @@ const ChapterDetail = () => {
     fetchBookDetail();
   }, [bookId, chapterId]);
 
+  // Helper function to preserve line breaks in content
+  const formatContent = (content) => {
+    return content.split('\n').map((line, index, array) => (
+      <React.Fragment key={index}>
+        <span style={{ display: 'block' }}>{line}</span>
+        {index < array.length - 1 && <br />}
+      </React.Fragment>
+    ));
+  };
+
   const handleNavigation = (direction) => {
     if (book && book.chapters && book.chapters.length > 0) {
       let newIndex;
@@ -120,8 +130,18 @@ const ChapterDetail = () => {
               <Typography variant="h6" sx={{ color: "#b0b0b0", mb: 3, textAlign: "center" }}>
                 Thứ {currentChapter.sequenceNumber} - {currentChapter.chapterTitle}
               </Typography>
-              <Typography variant="body1" sx={{ fontSize: "1.4rem", textAlign: "left", color: '#e0e0e0' }}>
-                {currentChapter.content}
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  fontSize: "1.4rem", 
+                  textAlign: "left", 
+                  color: '#e0e0e0',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  lineHeight: 1.5, // Add this line to increase space between lines
+                }}
+              >
+                {formatContent(currentChapter.content)}
               </Typography>
             </Box>
           )}

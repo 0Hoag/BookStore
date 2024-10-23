@@ -1,8 +1,12 @@
 package com.example.post_service.dto.request;
 
+import com.example.post_service.entity.MediaMetadata;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
 import java.util.Set;
 
 @Data
@@ -13,8 +17,8 @@ import java.util.Set;
 public class CreatePostRequest {
 //    String userId;
     String content;
-    Set<String> imageUrls;
-    Set<String> videoUrls;
-    Set<String> likes; // Danh sách ID của người dùng đã thích bài viết
-    Set<String> comments; // Danh sách ID của người dùng đã comment bài viết
+    Set<String> medias;
+    Map<String, MediaMetadata> mediaMetadata;
+    Set<String> likes;
+    Set<String> comments;
 }

@@ -1,105 +1,97 @@
 import React from "react";
-import Divider from "@mui/material/Divider";
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemIcon from "@mui/material/ListItemIcon";
-import ListItemText from "@mui/material/ListItemText";
-import Toolbar from "@mui/material/Toolbar";
+import { Box, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import PeopleIcon from "@mui/icons-material/People";
 import GroupsIcon from "@mui/icons-material/Groups";
-import LibraryBooksIcon from "@mui/icons-material/LibraryBooks"; // Import icon for Books
-import StarOutlineIcon from "@mui/icons-material/StarOutline"; // Brighter star icon
+import LibraryBooksIcon from "@mui/icons-material/LibraryBooks";
+import StarOutlineIcon from "@mui/icons-material/StarOutline";
 import { FaUserCircle } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { FaFacebookMessenger } from "react-icons/fa"; // Add this import at the top of your file
+import { FaFacebookMessenger } from "react-icons/fa";
 
 function SideMenu() {
   return (
-    <>
-      <Toolbar />
+    <Box sx={{ bgcolor: "#0A0A0A", color: "#E0E0E0", height: "100vh" }}> {/* Very dark background */}
       <List>
-      <ListItem key={"Profile"} disablePadding>
+        <ListItem key={"Profile"} disablePadding>
           <ListItemButton component={Link} to="/profile">
             <ListItemIcon>
-              <FaUserCircle sx={{ color: "#4CAF50", "&:hover": { color: "#388E3C" } }} />
+              <FaUserCircle style={{ color: "white", fontSize: "2rem" }} /> {/* Larger white icon */}
             </ListItemIcon>
-            <ListItemText
-              primary={"Profile"}
-              primaryTypographyProps={{ style: { fontWeight: "bold" } }}
+            <ListItemText 
+              primary={"Profile"} 
+              primaryTypographyProps={{ style: { fontWeight: "bold", color: "white", margin: "10px" } }} 
             />
           </ListItemButton>
         </ListItem>
         <ListItem key={"messages"} disablePadding>
           <ListItemButton component={Link} to="/messages">
             <ListItemIcon>
-              <FaFacebookMessenger style={{ color: "#0084FF", fontSize: "1.5rem" }} />
+              <FaFacebookMessenger style={{ color: "white", fontSize: "2rem" }} /> {/* Larger white icon */}
             </ListItemIcon>
-            <ListItemText
-              primary={"Messages"}
-              primaryTypographyProps={{ style: { fontWeight: "bold" } }}
+            <ListItemText 
+              primary={"Messages"} 
+              primaryTypographyProps={{ style: { fontWeight: "bold", color: "white", margin: "7px" } }} 
             />
           </ListItemButton>
         </ListItem>
         <ListItem key={"home"} disablePadding>
           <ListItemButton component={Link} to="/">
             <ListItemIcon>
-              <HomeIcon sx={{ color: "#4CAF50", "&:hover": { color: "#388E3C", } }} />
+              <HomeIcon sx={{ color: "white", fontSize: "2rem" }} /> {/* Larger white icon */}
             </ListItemIcon>
-            <ListItemText
-              primary={"Home"}
-              primaryTypographyProps={{ style: { fontWeight: "bold" } }}
+            <ListItemText 
+              primary={"Home"} 
+              primaryTypographyProps={{ style: { fontWeight: "bold", color: "white", margin: "7px" } }} 
             />
           </ListItemButton>
         </ListItem>
         <ListItem key={"friends"} disablePadding>
           <ListItemButton component={Link} to="/friends">
             <ListItemIcon>
-              <PeopleIcon sx={{ color: "#2196F3", "&:hover": { color: "#1976D2" } }} />
+              <PeopleIcon sx={{ color: "white", fontSize: "2rem" }} /> {/* Larger white icon */}
             </ListItemIcon>
-            <ListItemText
-              primary={"Friends"}
-              primaryTypographyProps={{ style: { fontWeight: "bold" } }}
+            <ListItemText 
+              primary={"Friends"} 
+              primaryTypographyProps={{ style: { fontWeight: "bold", color: "white", margin: "7px" } }} 
             />
           </ListItemButton>
         </ListItem>
         <ListItem key={"groups"} disablePadding>
           <ListItemButton component={Link} to="/groups">
             <ListItemIcon>
-              <GroupsIcon sx={{ color: "#FF5722", "&:hover": { color: "#E64A19" } }} />
+              <GroupsIcon sx={{ color: "white", fontSize: "2rem" }} /> {/* Larger white icon */}
             </ListItemIcon>
-            <ListItemText
-              primary={"Groups"}
-              primaryTypographyProps={{ style: { fontWeight: "bold" } }}
+            <ListItemText 
+              primary={"Groups"} 
+              primaryTypographyProps={{ style: { fontWeight: "bold", color: "white", margin: "7px" } }} 
             />
           </ListItemButton>
         </ListItem>
         <ListItem key={"books"} disablePadding>
           <ListItemButton component={Link} to="/books">
             <ListItemIcon>
-              <LibraryBooksIcon sx={{ color: "#9C27B0", "&:hover": { color: "#7B1FA2" } }} />
+              <LibraryBooksIcon sx={{ color: "white", fontSize: "2rem" }} /> {/* Larger white icon */}
             </ListItemIcon>
-            <ListItemText
-              primary={"Books"}
-              primaryTypographyProps={{ style: { fontWeight: "bold" } }}
+            <ListItemText 
+              primary={"Books"} 
+              primaryTypographyProps={{ style: { fontWeight: "bold", color: "white", margin: "7px" } }} 
             />
           </ListItemButton>
         </ListItem>
         <ListItem key={"favorites"} disablePadding>
           <ListItemButton component={Link} to="/favorites">
             <ListItemIcon>
-              <StarOutlineIcon sx={{ color: "#FFC107", "&:hover": { color: "#FFB300" } }} />
+              <StarOutlineIcon sx={{ color: "white", fontSize: "2rem" }} /> {/* Larger white icon */}
             </ListItemIcon>
-            <ListItemText
-              primary={"Favorites"}
-              primaryTypographyProps={{ style: { fontWeight: "bold" } }}
+            <ListItemText 
+              primary={"Favorites"} 
+              primaryTypographyProps={{ style: { fontWeight: "bold", color: "white", margin: "7px" } }} 
             />
           </ListItemButton>
         </ListItem>
       </List>
-      <Divider />
-    </>
+    </Box>
   );
 }
 

@@ -17,7 +17,8 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final String[] publicEnpoint = {
-            "/internal/users"
+            "/internal/users",
+            "/internal/users/**"
     };
 
     private final CustomJwtDecoder customJwtDecoder;
@@ -28,7 +29,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, publicEnpoint)
+        httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(publicEnpoint)
                 .permitAll()
                 .anyRequest()
                 .authenticated());

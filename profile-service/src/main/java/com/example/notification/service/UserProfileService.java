@@ -35,36 +35,28 @@ public class UserProfileService {
 
 
     public UserProfile createProfile(ProfileCreationRequest request) {
-        // take role form ADMIN
-//        String token = getTokenFromIdentityService();
-//        log.info("Token {}", token);
-
-        // create profile (entity)
-//        UserProfile userProfile = userProfileMapper.toUserProfile(request);
-//        userProfile = userProfileRepository.save(userProfile);
-//        String userId = userProfile.getUserId();
-//        log.info("UserProfile {}", userProfile);
-
-//        UserResponse userResponse = fetchUserInformation(userId, token);
-//        log.info("UserResponse {}", userResponse);
-
-        // create Role and set Role to roleResponses
-//        Set<RoleResponse> roleResponses = new HashSet<>();
-//        for (RoleResponse role : userResponse.getRoles()) {
-//            // take roles
-//            roleResponses.add(role);
-//        }
-//
-//        UserProfileResponse userProfileResponse = userProfileMapper.toUserProfileResponse(userProfile);
-//        userResponse.setRoles(new HashSet<>(roleResponses));
-//        userProfileResponse.setUser(userResponse);
-//        log.info("UserProfileResponse {}", userProfileResponse);
-//
-//        return userProfileResponse;
-
         var userProfile = userProfileMapper.toUserProfile(request);
-        userProfileRepository.save(userProfile);
-        return userProfile;
+
+        var profileExisted = profileExists(request.getUserId());
+
+        if (profileExisted.isValid()) {
+            return userProfile;
+        }else {
+            userProfileRepository.save(userProfile);
+            return userProfile;
+        }
+    }
+
+    public UserProfileResponse getByUserId(String userId) {
+        UserProfile userProfile = userProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_EXITSTED));
+
+        UserResponse userResponse = fetchUserInformationBasic(userId, getTokenFromIdentityService());
+
+        UserProfileResponse response = userProfileMapper.toUserProfileResponse(userProfile);
+        response.setUser(userResponse);
+
+        return response;
     }
 
     public UserProfileResponse getProfile(String profileId) {
@@ -106,10 +98,13 @@ public class UserProfileService {
 
         UserResponse userResponse = fetchUserInformationBasic(userId, token);
 
-        UserProfileResponse response = userProfileMapper.toUserResponse(userResponse);
-        response.setUser(userResponse);
+        UserProfile profile = userProfileRepository.findByUserId(userResponse.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_EXISTED));
+        log.info("profile {}", profile);
 
-        return response;
+        UserProfileResponse profileResponse = userProfileMapper.toUserProfileResponse(profile);
+        profileResponse.setUser(userResponse);
+        return profileResponse;
     }
 
     //bug(need fix now)

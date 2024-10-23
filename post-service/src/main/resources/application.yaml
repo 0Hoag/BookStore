@@ -1,6 +1,9 @@
 server:
   port: 8083
   servlet:
+    multipart:
+      max-file-size: 500MB    # Kích thước tối đa của một file
+      max-request-size: 500MB # Kích thước tối đa của toàn bộ request
     context-path: /post
 
 spring:
@@ -8,3 +11,10 @@ spring:
     mongodb:
       port: 27018
       database: post
+
+
+cloudinary:
+  cloud-name: "CLOUD_NAME"
+  api-key: "API_KEY"
+  api-secret: "API_SECRET"
+

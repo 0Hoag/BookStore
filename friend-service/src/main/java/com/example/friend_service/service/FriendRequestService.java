@@ -25,6 +25,7 @@ import java.util.List;
 public class FriendRequestService {
     FriendRequestMapper friendRequestMapper;
     FriendRequestRepository friendRequestRepository;
+
     public FriendResponse createRequest(CreateFriendRequest request) {
         var friendRequest = friendRequestMapper.toFriendRequest(request);
         friendRequest.setCondition(Condition.PENDING);

@@ -143,7 +143,7 @@ export default function Friend() {
         <Grid container spacing={3} justifyContent="center">
           {users.length > 0 ? (
             users.map((user) => (
-              <Grid item xs={12} sm={6} md={4} key={user.userId}>
+              <Grid item xs={12} sm={2} md={2} key={user.userId}>
                 <UserCard 
                   user={user} 
                   currentUserId={currentUserId} 

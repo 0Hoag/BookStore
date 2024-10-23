@@ -11,12 +11,11 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserProfileResponse {
-    String profileId;
+    String id;
 
     UserResponse user; // add 05/06/2024
-    String email;
-    String username;
     String firstName;
     String lastName;
     LocalDate dob;
+    String city;
 }
