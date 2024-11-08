@@ -1,25 +1,29 @@
 package com.example.messaging_service.entity;
 
+import java.time.Instant;
+import java.util.Map;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.Map;
+import com.example.messaging_service.entity.enums.DeliveryStatus;
+import com.example.messaging_service.entity.enums.MessageType;
 
-@Getter
-@Setter
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+@Data
 @Builder
 @Document("messaging")
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Message  {
+public class Message {
     @MongoId
     String id;
 
@@ -35,9 +39,6 @@ public class Message  {
     @Column(nullable = false)
     Instant timestamp;
 
-    @Column(name = "is_read")
-    boolean isRead;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "message_type")
     MessageType messageType;
@@ -52,30 +53,5 @@ public class Message  {
     @Column(name = "delivery_status")
     DeliveryStatus deliveryStatus;
 
-    Map<String, String> reactions; // miss in toString()
-    public enum MessageType {
-        TEXT, IMAGE, FILE, AUDIO, VIDEO
-    }
-
-    public enum DeliveryStatus {
-        SENT, DELIVERED, READ
-    }
-
-    @Override
-    public String toString() {
-        return "Message{" +
-                "id='" + id + '\'' +
-                ", conversationId='" + conversationId + '\'' +
-                ", senderId='" + senderId + '\'' +
-                ", content='" + content + '\'' +
-                ", timestamp=" + timestamp +
-                ", isRead=" + isRead +
-                ", messageType=" + messageType +
-                ", attachmentUrl='" + attachmentUrl + '\'' +
-                ", replyToId=" + replyToId +
-                ", deliveryStatus=" + deliveryStatus +
-                ", reactions=" + reactions +
-                '}';
-    }
+    Map<String, String> reactions;
 }
-

@@ -1,14 +1,16 @@
 package com.example.messaging_service.dto.response;
 
-import com.example.messaging_service.entity.Message;
+import java.time.Instant;
+import java.util.Map;
+
+import com.example.messaging_service.entity.enums.DeliveryStatus;
+import com.example.messaging_service.entity.enums.MessageType;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
-
-import java.time.Instant;
-import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -21,9 +23,9 @@ public class MessagingResponse {
     String content;
     Instant timestamp;
     boolean isRead;
-    Message.MessageType messageType;
+    MessageType messageType;
     String attachmentUrl;
     String replyToId;
-    Message.DeliveryStatus deliveryStatus;
+    DeliveryStatus deliveryStatus;
     Map<String, String> reactions;
 }

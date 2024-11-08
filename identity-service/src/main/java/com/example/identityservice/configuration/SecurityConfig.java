@@ -25,6 +25,7 @@ public class SecurityConfig {
         "/auth/logout",
         "/auth/refresh",
         "/auth/outbound/authentication",
+        "/auth/outbound/github/authentication",
         "/cartItem/registration",
         "/cartItem/addCart/{userId}",
         "/selectProduct/registration",

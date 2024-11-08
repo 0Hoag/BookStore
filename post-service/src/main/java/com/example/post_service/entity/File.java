@@ -1,13 +1,12 @@
 package com.example.post_service.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Lob;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import java.time.LocalDateTime;
+
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
-import java.time.LocalDateTime;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder

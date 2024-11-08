@@ -1,10 +1,11 @@
 package com.example.messaging_service.entity;
 
-import lombok.*;
+import java.time.Instant;
+
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
-import java.time.Instant;
+import lombok.*;
 
 @Getter
 @Setter
@@ -15,6 +16,7 @@ import java.time.Instant;
 public class ConversationParticipant {
     @MongoId
     String id;
+
     String conversationId;
     String userId;
     Instant joinedAt;

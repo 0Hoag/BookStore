@@ -57,7 +57,7 @@ public class VNPayService {
             String vnp_Amount =
                     amount.multiply(new BigDecimal("100")).toBigInteger().toString();
             String vnp_Locale = "vn";
-            String vnp_ReturnUrl = "http://localhost:3000/payment-result";
+            String vnp_ReturnUrl = "YOU_URL";
 
             Map<String, String> vnp_Params = new HashMap<>();
             vnp_Params.put("vnp_Version", "2.1.0");

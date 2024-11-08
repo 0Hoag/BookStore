@@ -1,27 +1,23 @@
 package com.example.post_service.service;
 
-import com.example.post_service.dto.response.ImageResponse;
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.post_service.dto.response.VideoResponse;
-import com.example.post_service.entity.Image;
 import com.example.post_service.entity.Video;
 import com.example.post_service.exception.AppException;
 import com.example.post_service.exception.ErrorCode;
-import com.example.post_service.mapper.ImageMapper;
 import com.example.post_service.mapper.VideoMapper;
-import com.example.post_service.repository.ImageRepository;
 import com.example.post_service.repository.VideoRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.sql.Blob;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -43,8 +39,7 @@ public class VideoService {
     }
 
     public VideoResponse viewVideo(String id) {
-        var video = videoRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.VIDEO_NOT_EXISTED));
+        var video = videoRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.VIDEO_NOT_EXISTED));
         return videoMapper.toVideoResponse(video);
     }
 

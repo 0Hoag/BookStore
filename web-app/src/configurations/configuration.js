@@ -1,8 +1,14 @@
 export const OAuthConfig = {
-  clientId: "YOUR_CLIENT_ID_HERE", 
-  redirectUri: "YOUR_REDIRECT_URI_HERE",
-  authUri: "https://accounts.google.com/o/oauth2/auth",
+  clientId: "YOU_CLIENT_ID",
+  redirectUri: "YOU_REDIRECT_URI",
+  authUri: "YOU_AUTH_URI",
 };
+
+export const OAuthConfigGithub = {
+  clientId: "YOU_CLIENT_ID",
+  redirectUri: "YOU_REDIRECT_URI",
+  authUri: "YOU_AUTH_URI",
+}
 
 export const CONFIG = {
   API_GATEWAY: "http://localhost:8888/api/v1",
@@ -76,6 +82,7 @@ export const API = {
   CREATE_BOOKS: "/book/registration/ManyChapter",
   DELETE_BOOK_WITH_CHAPTER: "/book/books",
   UPDATE_BOOK_CHAPTER: "/book/update/ManyChapter",
+  UPDATE_IMAGE_BOOK: "/book/updateImageBook",
   GET_ALL_BOOKS: "/book/getAllBooks",
   GET_BOOKS: "/book/books",
   CREATE_CHAPTER: "/book/truyen/registration",
@@ -130,8 +137,24 @@ export const API = {
   //Messenger-service
   GET_USER_CONVERSATIONS: "/messaging/mess/getUserConversations",
   CREATE_CONVERSATION: "/messaging/mess/registration",
-  SEND_MESSAGE: "/messaging/messenger/registration",
+  SEND_MESSAGE: "/messaging/messenger/sendMessage",
   GET_MESSAGE_FOR_CONVERSATION: "/messaging/messenger/getMessageForConversation",
   GET_USER_CONVERSATIONS_LIST: "/messaging/messenger/getUserConversationList",
   GET_PARTICIPANTS_CONVERSATION: "/messaging/participant/getParticipantIds",
+
+  //notification-service
+  
+    // cart-notification
+  POST_NOTIFICATION: "/notification/cartNotification/create",
+  GET_NOTIFICATION: "/notification/cartNotification/user",
+  GET_UNREAD_NOTIFICATION: "/notification/cartNotification/user/unread",
+  GET_NOTIFICATION_BY_USER: "/notification/cartNotification/getAllNotification",
+  PUT_MARK_AS_READ_NOTIFICATION: "/notification/cartNotification/read",
+  PUT_MARK_AS_READ_ALL_NOTIFICATION: "/notification/cartNotification/user/read-all",
+  DELETE_NOTIFICATION: "/notification/cartNotification/deleteNotification",
+
+    // send-notification
+  POST_SEND_NOTIFICATION: "/notification/SendFriend/create",
+  GET_ALL_SEND_NOTIFICATION_BY_USER: "/notification/SendFriend/getSendFriendBySenderId",
+  GET_SEND_NOTIFICATION_BY_USER: "/notification/SendFriend/getSendFriend"
 };

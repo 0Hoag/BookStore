@@ -3,9 +3,9 @@ import { Box, Button, TextField, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Scene from "../Scene";
 import bookService from "../../services/bookService";
-import uploadImageToDropbox from "./uploadImageToDropbox";
 
 const CreateBook = () => {
+  const [image, setImage] = useState("");
   const [bookForm, setBookForm] = useState({
     bookTitle: "",
     author: "",
@@ -13,7 +13,7 @@ const CreateBook = () => {
     price: 0,
     quantity: 1,
     description: "",
-    image: "",
+    image: image,
   });
   const navigate = useNavigate();
 
@@ -26,6 +26,11 @@ const CreateBook = () => {
     }
   };
 
+  const handleImageChange = (event) => {
+    const files = event.target.files[0];
+    setImage(files);
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
@@ -36,12 +41,22 @@ const CreateBook = () => {
         price: parseFloat(bookForm.price),
         quantity: parseInt(bookForm.quantity),
         description: bookForm.description,
-        image: "YOU-IMAGE-URL",
+        image: "",
         chapters: [],
       };
 
-      const createdBook = await bookService.createBook(newBook);
-      navigate(`/books`);
+      console.log("image: {}", image);
+      console.log("newBook: {}", newBook);
+
+      const response = await bookService.createBook(newBook);
+      if (image && response.result.bookId) {
+        try {
+            await bookService.updateImageBook(response.result.bookId, image);
+        } catch (imageError) {
+            console.error("Error updating image:", imageError);
+        }
+    }
+      // navigate(`/books`);
     } catch (error) {
       console.error("Error creating book:", error);
     }
@@ -129,7 +144,7 @@ const CreateBook = () => {
             type="file"
             name="imageFile"
             label="Ảnh bìa"
-            onChange={handleChange}
+            onChange={handleImageChange}
             sx={{ mb: 2 }}
           />
           <Button

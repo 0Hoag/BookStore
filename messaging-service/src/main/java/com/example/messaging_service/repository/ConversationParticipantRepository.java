@@ -1,16 +1,11 @@
 package com.example.messaging_service.repository;
 
-import com.example.messaging_service.dto.identity.UserResponse;
-import com.example.messaging_service.dto.response.ConversationParticipantResponse;
-import com.example.messaging_service.dto.response.ConversationResponse;
-import com.example.messaging_service.entity.Conversation;
-import com.example.messaging_service.entity.ConversationParticipant;
-import com.example.messaging_service.entity.Message;
+import java.util.List;
+
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
+import com.example.messaging_service.entity.ConversationParticipant;
 
 @Repository
 public interface ConversationParticipantRepository extends MongoRepository<ConversationParticipant, String> {

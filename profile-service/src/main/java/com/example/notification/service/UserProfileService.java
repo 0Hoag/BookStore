@@ -1,23 +1,20 @@
 package com.example.notification.service;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import com.example.notification.dto.request.AuthenticationRequest;
-import com.example.notification.dto.response.*;
-
-import com.example.notification.repository.httpClient.IdentityClient;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import com.example.notification.dto.request.AuthenticationRequest;
 import com.example.notification.dto.request.ProfileCreationRequest;
 import com.example.notification.dto.request.ProfileUpdateRequest;
+import com.example.notification.dto.response.*;
 import com.example.notification.entity.UserProfile;
 import com.example.notification.exception.AppException;
 import com.example.notification.exception.ErrorCode;
 import com.example.notification.mapper.UserProfileMapper;
 import com.example.notification.repository.UserProfileRepository;
+import com.example.notification.repository.httpClient.IdentityClient;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +30,6 @@ public class UserProfileService {
     UserProfileMapper userProfileMapper;
     IdentityClient identityClient;
 
-
     public UserProfile createProfile(ProfileCreationRequest request) {
         var userProfile = userProfileMapper.toUserProfile(request);
 
@@ -41,15 +37,15 @@ public class UserProfileService {
 
         if (profileExisted.isValid()) {
             return userProfile;
-        }else {
+        } else {
             userProfileRepository.save(userProfile);
             return userProfile;
         }
     }
 
     public UserProfileResponse getByUserId(String userId) {
-        UserProfile userProfile = userProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_EXITSTED));
+        UserProfile userProfile =
+                userProfileRepository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.USER_EXITSTED));
 
         UserResponse userResponse = fetchUserInformationBasic(userId, getTokenFromIdentityService());
 
@@ -60,7 +56,8 @@ public class UserProfileService {
     }
 
     public UserProfileResponse getProfile(String profileId) {
-        UserProfile userProfile = userProfileRepository.findById(profileId)
+        UserProfile userProfile = userProfileRepository
+                .findById(profileId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_EXISTED));
         String token = getTokenFromIdentityService();
 
@@ -89,16 +86,18 @@ public class UserProfileService {
                     response.setUser(userResponse);
 
                     return response;
-                }).toList();
+                })
+                .toList();
     }
 
-    //bug(need fix now)
+    // bug(need fix now)
     public UserProfileResponse getProfileByUserId(String userId) {
         String token = getTokenFromIdentityService();
 
         UserResponse userResponse = fetchUserInformationBasic(userId, token);
 
-        UserProfile profile = userProfileRepository.findByUserId(userResponse.getUserId())
+        UserProfile profile = userProfileRepository
+                .findByUserId(userResponse.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_EXISTED));
         log.info("profile {}", profile);
 
@@ -107,25 +106,24 @@ public class UserProfileService {
         return profileResponse;
     }
 
-    //bug(need fix now)
-//    public UserProfileResponse getMyInfo() {
-//        String token = getTokenFromIdentityService();
-//        String userId = getUserIdFromToken(token);
-//
-//        UserResponse userResponse = fetchUserInformation(userId, token);
-//
-//        UserProfile profile = userProfileRepository.findByUserId(userId)
-//                .orElseThrow(() -> new AppException(ErrorCode.PROFILE_EXISTED));
-//
-//        Set<RoleResponse> roleResponses = userResponse.getRoles();
-//        userResponse.setRoles(roleResponses);
-//
-//        UserProfileResponse response = userProfileMapper.toUserProfileResponse(profile);
-//        response.setUser(userResponse);
-//
-//        return response;
-//    }
-
+    // bug(need fix now)
+    //    public UserProfileResponse getMyInfo() {
+    //        String token = getTokenFromIdentityService();
+    //        String userId = getUserIdFromToken(token);
+    //
+    //        UserResponse userResponse = fetchUserInformation(userId, token);
+    //
+    //        UserProfile profile = userProfileRepository.findByUserId(userId)
+    //                .orElseThrow(() -> new AppException(ErrorCode.PROFILE_EXISTED));
+    //
+    //        Set<RoleResponse> roleResponses = userResponse.getRoles();
+    //        userResponse.setRoles(roleResponses);
+    //
+    //        UserProfileResponse response = userProfileMapper.toUserProfileResponse(profile);
+    //        response.setUser(userResponse);
+    //
+    //        return response;
+    //    }
 
     private String getTokenFromIdentityService() {
         AuthenticationRequest authenticationRequest = new AuthenticationRequest("admin", "admin");
@@ -134,10 +132,10 @@ public class UserProfileService {
     }
 
     private UserResponse fetchUserInformationBasic(String userId, String token) {
-        ApiResponse<UserResponse> userResponseApiResponse = identityClient.getUserInfomationBasic(userId, "Bearer " + token);
+        ApiResponse<UserResponse> userResponseApiResponse =
+                identityClient.getUserInfomationBasic(userId, "Bearer " + token);
         return userResponseApiResponse.getResult();
     }
-
 
     public void deleteProfile(String profileId) {
         UserProfile userProfile = userProfileRepository

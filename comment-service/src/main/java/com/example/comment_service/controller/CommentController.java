@@ -1,18 +1,18 @@
 package com.example.comment_service.controller;
 
-import com.example.comment_service.dto.request.AddCommentToPostRequest;
+import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.example.comment_service.dto.request.CreateCommentRequest;
 import com.example.comment_service.dto.request.UpdateCommentRequest;
 import com.example.comment_service.dto.response.ApiResponse;
 import com.example.comment_service.dto.response.CommentResponse;
-import com.example.comment_service.dto.response.PostResponse;
 import com.example.comment_service.service.CommentService;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -46,7 +46,8 @@ public class CommentController {
     }
 
     @PutMapping("/activity/updateComment/{commentId}")
-    ApiResponse<CommentResponse> updateCommentResponse(@PathVariable String commentId, @RequestBody UpdateCommentRequest request) {
+    ApiResponse<CommentResponse> updateCommentResponse(
+            @PathVariable String commentId, @RequestBody UpdateCommentRequest request) {
         return ApiResponse.<CommentResponse>builder()
                 .code(1000)
                 .result(commentService.updateCommentResponse(commentId, request))
@@ -54,7 +55,7 @@ public class CommentController {
     }
 
     @DeleteMapping("/activity/{commentId}")
-    ApiResponse<Void> deleteComment(@PathVariable String commentId){
+    ApiResponse<Void> deleteComment(@PathVariable String commentId) {
         commentService.deleteComment(commentId);
         return ApiResponse.<Void>builder()
                 .code(1000)

@@ -14,7 +14,6 @@ spring:
 
 
 cloudinary:
-  cloud-name: "CLOUD_NAME"
-  api-key: "API_KEY"
-  api-secret: "API_SECRET"
-
+  cloud_name: "YOU_CLOUD_NAME"
+  api_key: "YOU_API_KEY"
+  api_secret: "YOU_SECRET_KEY"

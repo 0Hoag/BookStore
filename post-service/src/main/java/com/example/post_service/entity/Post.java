@@ -1,22 +1,21 @@
 package com.example.post_service.entity;
 
-import com.example.post_service.dto.response.CommentResponse;
-import com.example.post_service.dto.response.LikeResponse;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.MongoId;
-import org.springframework.data.neo4j.core.schema.Id;
-import org.springframework.data.neo4j.core.schema.Property;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import jakarta.persistence.*;
+
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.MongoId;
+import org.springframework.data.neo4j.core.schema.Property;
+
+import com.example.post_service.dto.response.CommentResponse;
+import com.example.post_service.dto.response.LikeResponse;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder
@@ -58,16 +57,15 @@ public class Post {
 
     @Override
     public String toString() {
-        return "Post{" +
-                "postId='" + postId + '\'' +
-                ", userId='" + userId + '\'' +
-                ", content='" + content + '\'' +
-                ", medias=" + medias +
-                ", mediaMetadata=" + mediaMetadata +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                ", likes=" + (likes != null ? likes.size() : 0) +
-                ", comments=" + (comments != null ? comments.size() : 0) +
-                '}';
+        return "Post{" + "postId='"
+                + postId + '\'' + ", userId='"
+                + userId + '\'' + ", content='"
+                + content + '\'' + ", medias="
+                + medias + ", mediaMetadata="
+                + mediaMetadata + ", createdAt="
+                + createdAt + ", updatedAt="
+                + updatedAt + ", likes="
+                + (likes != null ? likes.size() : 0) + ", comments="
+                + (comments != null ? comments.size() : 0) + '}';
     }
 }

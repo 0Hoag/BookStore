@@ -1,8 +1,9 @@
 package com.example.messaging_service.exception;
 
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+
+import lombok.Getter;
 
 @Getter
 public enum ErrorCode {
@@ -15,14 +16,15 @@ public enum ErrorCode {
     USER_NOT_EXISTED(1006, "USER_NOT_EXISTED", HttpStatus.NOT_FOUND),
     UNAUTHENTICATED(1007, "UNAUTHENTICATED", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZE(1008, "YOU DO NOT HAVE PREMISSION", HttpStatus.FORBIDDEN),
-//    INVALID_DOB(1009, "YOU AGE MUST BE AT least {min}", HttpStatus.BAD_REQUEST),
-//    BLOCK_LIST_NOT_EXISTED(1010, "BLOCKLIST_NOT_EXISTED", HttpStatus.BAD_REQUEST),
-//    FRIENDS_REQUEST_NOT_EXISTED(1011, "FRIENDS_REQUEST_NOT_EXISTED", HttpStatus.BAD_REQUEST),
-//    FRIENDS_SHIP_NOT_EXISTED(1011, "FRIENDS_SHIP_NOT_EXISTED", HttpStatus.BAD_REQUEST),
-//    FRIENDS_SHIP_NOT_VALIDATOR(1012, "Can not create friendShip because it not validator condition", HttpStatus.BAD_REQUEST),
+    //    INVALID_DOB(1009, "YOU AGE MUST BE AT least {min}", HttpStatus.BAD_REQUEST),
+    //    BLOCK_LIST_NOT_EXISTED(1010, "BLOCKLIST_NOT_EXISTED", HttpStatus.BAD_REQUEST),
+    //    FRIENDS_REQUEST_NOT_EXISTED(1011, "FRIENDS_REQUEST_NOT_EXISTED", HttpStatus.BAD_REQUEST),
+    //    FRIENDS_SHIP_NOT_EXISTED(1011, "FRIENDS_SHIP_NOT_EXISTED", HttpStatus.BAD_REQUEST),
+    //    FRIENDS_SHIP_NOT_VALIDATOR(1012, "Can not create friendShip because it not validator condition",
+    // HttpStatus.BAD_REQUEST),
     CONVERSATION_NOT_EXISTED(1009, "Conversation not existed", HttpStatus.BAD_REQUEST),
     MESSAGE_NOT_EXISTED(1010, "Message not existed", HttpStatus.BAD_REQUEST),
-            ;
+    ;
     private int code;
     private String message;
     private HttpStatusCode statusCode;

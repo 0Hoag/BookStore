@@ -1,7 +1,5 @@
 package com.example.post_service.service;
 
-import org.springframework.stereotype.Component;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -9,6 +7,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
+
+import org.springframework.stereotype.Component;
 
 @Component
 public class DateTimeFormatter {
@@ -25,10 +25,10 @@ public class DateTimeFormatter {
     public String format(Instant instant) {
         long elapseSeconds = ChronoUnit.SECONDS.between(instant, Instant.now());
 
-        var strategy = strategyMap.entrySet()
-                .stream()
+        var strategy = strategyMap.entrySet().stream()
                 .filter(longFunctionEntry -> elapseSeconds < longFunctionEntry.getKey())
-                .findFirst().get();
+                .findFirst()
+                .get();
 
         return strategy.getValue().apply(instant);
     }

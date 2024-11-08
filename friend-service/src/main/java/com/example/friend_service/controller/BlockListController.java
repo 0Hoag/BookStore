@@ -1,18 +1,19 @@
 package com.example.friend_service.controller;
 
+import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.example.friend_service.dto.request.BlockListRequest;
 import com.example.friend_service.dto.request.BlockListUpdateRequest;
 import com.example.friend_service.dto.response.ApiResponse;
 import com.example.friend_service.dto.response.BlockListResponse;
 import com.example.friend_service.service.BlockListService;
+
 import lombok.AccessLevel;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -65,7 +66,8 @@ public class BlockListController {
     }
 
     @PutMapping("/updateBlockList/{blockId}")
-    public ApiResponse<BlockListResponse> UpdateAllBlockList(@PathVariable String blockId, @RequestBody BlockListUpdateRequest request) {
+    public ApiResponse<BlockListResponse> UpdateAllBlockList(
+            @PathVariable String blockId, @RequestBody BlockListUpdateRequest request) {
         return ApiResponse.<BlockListResponse>builder()
                 .code(1000)
                 .result(blockListService.updateBlockList(blockId, request))

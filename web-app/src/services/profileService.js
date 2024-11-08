@@ -17,7 +17,7 @@ function getAuthHeader() {
         'Content-Type': 'application/json',
       },
     };
-  }
+}
   
 
 export default profileService;

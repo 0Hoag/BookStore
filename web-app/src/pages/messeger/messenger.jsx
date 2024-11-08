@@ -1,7 +1,9 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { getToken } from "../../services/localStorageService";
 import Header from "../../components/header/Header";
+import { Client, Stomp } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
 import {
   Box,
   Typography,
@@ -116,6 +118,112 @@ const messengerTheme = createTheme({
   },
 });
 
+const useWebSocket = () => {
+  const [stompClient, setStompClient] = useState(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [connectionError, setConnectionError] = useState(null);
+
+  const connect = useCallback((currentUserId, onMessageReceived) => {
+    try {
+
+      if (stompClient) {
+        stompClient.deactivate();
+      }
+
+      // Create new SockJS instance
+      const socket = new SockJS('http://localhost:8090/messaging/ws');
+      
+      // Configure STOMP client
+      const client = new Client({
+        webSocketFactory: () => socket,
+        reconnectDelay: 5000,
+        heartbeatIncoming: 4000,
+        heartbeatOutgoing: 4000,
+        debug: (str) => {
+          console.log('STOMP Debug:', str);
+        },
+      });
+
+      // Handle connection success
+      client.onConnect = () => {
+        console.log('WebSocket Connected!');
+        setStompClient(client);
+        setIsConnected(true);
+        setConnectionError(null);
+
+        // Subscribe to public channel
+        client.subscribe('/topic/messages', (message) => {
+          try {
+            const receivedMessage = JSON.parse(message.body);
+            onMessageReceived(receivedMessage);
+          } catch (error) {
+            console.error('Error parsing message:', error);
+          }
+        });
+      };
+
+      // Handle connection error
+      client.onStompError = (frame) => {
+        console.error('STOMP Error:', frame);
+        setConnectionError('Failed to connect to WebSocket server');
+        
+        // Attempt to reconnect
+        setTimeout(() => {
+          connect(currentUserId, onMessageReceived);
+        }, 5000);
+      };
+
+      // Start connection
+      client.activate();
+
+    } catch (error) {
+      console.error('WebSocket connection error:', error);
+      setConnectionError('Failed to initialize WebSocket connection');
+    }
+  }, [stompClient]);
+
+  const disconnect = useCallback(() => {
+    if (stompClient) {
+      try {
+        stompClient.deactivate();
+        setStompClient(null);
+        setIsConnected(false);
+        setConnectionError(null);
+        console.log('WebSocket Disconnected');
+      } catch (error) {
+        console.error('Error disconnecting:', error);
+      }
+    }
+  }, [stompClient]);
+
+  const sendMessage = useCallback((message) => {
+    if (!stompClient || !isConnected) {
+      console.warn('Cannot send message: WebSocket not connected');
+      return false;
+    }
+
+    try {
+      stompClient.publish({
+        destination: "/app/chat",
+        body: JSON.stringify(message)
+      });
+      return true;
+    } catch (error) {
+      console.error('Error sending message:', error);
+      return false;
+    }
+  }, [stompClient, isConnected]);
+
+  // Return the hook's interface
+  return {
+    connect,
+    disconnect,
+    sendMessage,
+    isConnected,
+    connectionError
+  };
+};
+
 export default function Messenger() {
   const navigate = useNavigate();
   const [conversations, setConversations] = useState([]);
@@ -135,6 +243,28 @@ export default function Messenger() {
   const [chatPartnerName, setChatPartnerName] = useState("");
   const [image, setImage] = useState("");
   const [conversationAvatar, setConversationAvatar] = useState("");
+  const { connect, disconnect, sendMessage: sendWebSocketMessage, isConnected } = useWebSocket();
+
+  const handleMessageReceived = useCallback((message) => {
+    setMessages(prevMessages => {
+      if (!prevMessages.some(msg => msg.id === message.id)) {
+        const newMessages = [...prevMessages, message];
+        return newMessages.sort((a, b) => 
+          new Date(a.timestamp) - new Date(b.timestamp)
+        );
+      }
+      return prevMessages;
+    });
+  }, []);
+
+useEffect(() => {
+  if (currentUserId && !isConnected) {
+    connect(currentUserId, handleMessageReceived); // Only connect if not already connected
+    return () => {
+      disconnect(); // Cleanup when the component is unmounted
+    };
+  }
+}, [currentUserId, connect, disconnect, isConnected, handleMessageReceived]); 
 
   const getUserConversationsList = async () => {
     try {
@@ -230,13 +360,11 @@ export default function Messenger() {
   const fetchAvataConversation = async (convId) => {
     try {
         const response = await messengerService.getParticipantIds(convId);
-        console.log("response: {}", response);
         const responseCoversation = response.data.result;
 
         // Filter out the current user from the participants
         const otherUser = responseCoversation.find(user => user.userId !== currentUserId);
         
-        console.log("otherUser:", otherUser);
         if (otherUser) {
             const partnerInfo = await userService.getUser(otherUser.userId);
             if (partnerInfo.data.result.images && partnerInfo.data.result.images.length > 0) {
@@ -275,18 +403,20 @@ export default function Messenger() {
         senderId: currentUserId,
         timestamp: new Date().toISOString()
       };
-      setMessages(prevMessages => [...prevMessages, newMessage]);
-      setMessage("");
-      
+  
       try {
         await sendMessage({
           conversationId: selectedConversation.id,
           content: message,
           senderId: currentUserId
         });
+        sendWebSocketMessage(newMessage);
+        console.log("send message success!");
       } catch (error) {
         console.error("Error sending message:", error);
       }
+  
+      setMessage("");
     }
   };
 

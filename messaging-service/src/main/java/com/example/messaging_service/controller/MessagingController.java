@@ -1,18 +1,21 @@
 package com.example.messaging_service.controller;
 
+import java.util.List;
+
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.web.bind.annotation.*;
+
 import com.example.messaging_service.dto.request.CreateMessagingRequest;
 import com.example.messaging_service.dto.response.ApiResponse;
 import com.example.messaging_service.dto.response.MessagingResponse;
 import com.example.messaging_service.dto.response.PageResponse;
 import com.example.messaging_service.entity.ConversationListItem;
 import com.example.messaging_service.service.MessagingService;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -21,12 +24,16 @@ import java.util.List;
 @RequestMapping("/messenger")
 public class MessagingController {
     MessagingService messagingService;
+    SimpMessagingTemplate messagingTemplate;
 
-    @PostMapping("/registration")
+    @PostMapping("/sendMessage")
     public ApiResponse<MessagingResponse> createMessage(@RequestBody CreateMessagingRequest request) {
-        return ApiResponse.<MessagingResponse>builder()
-                .result(messagingService.sendMessage(request))
-                .build();
+
+        MessagingResponse response = messagingService.sendMessage(request);
+
+        messagingTemplate.convertAndSend("/topic/messages", response);
+
+        return ApiResponse.<MessagingResponse>builder().result(response).build();
     }
 
     @GetMapping("/getAllMess")
@@ -41,8 +48,7 @@ public class MessagingController {
     public ApiResponse<PageResponse<MessagingResponse>> getMessagesForConversation(
             @RequestParam(value = "conversationId", required = false) String conversationId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "size", required = false, defaultValue = "10") int size
-            ) {
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         return ApiResponse.<PageResponse<MessagingResponse>>builder()
                 .code(1000)
                 .result(messagingService.getMessagesForConversation(conversationId, page, size))
@@ -60,8 +66,7 @@ public class MessagingController {
     @GetMapping("/getUserConversationList")
     public ApiResponse<List<ConversationListItem>> getUserConversationList(
             @RequestParam(value = "userId", required = false) String userId,
-            @RequestParam(value = "limit", required = false, defaultValue = "1") int limit
-    ) {
+            @RequestParam(value = "limit", required = false, defaultValue = "1") int limit) {
         return ApiResponse.<List<ConversationListItem>>builder()
                 .result(messagingService.getUserConversationList(userId, limit))
                 .build();

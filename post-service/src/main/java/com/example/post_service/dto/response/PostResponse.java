@@ -1,13 +1,13 @@
 package com.example.post_service.dto.response;
 
-import com.example.post_service.entity.MediaMetadata;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Set;
+
+import com.example.post_service.entity.MediaMetadata;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @AllArgsConstructor

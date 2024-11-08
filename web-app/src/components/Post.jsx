@@ -115,8 +115,6 @@ const Post = ({ post, userDetails, handleMenuOpen, likePost, unlikePost, comment
     }
   };
 
-
-
   const openModal = () => {
     setIsModalOpen(true);
   };

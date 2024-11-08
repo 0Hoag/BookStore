@@ -1,17 +1,19 @@
 package com.example.identityservice.controller;
 
+import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.example.identityservice.dto.request.ApiResponse;
 import com.example.identityservice.dto.request.UserImageRequest;
 import com.example.identityservice.dto.request.UserImageUpdateRequest;
 import com.example.identityservice.dto.request.response.UserImageResponse;
 import com.example.identityservice.entity.UserImage;
 import com.example.identityservice.service.UserImageService;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/userImage")
@@ -45,7 +47,8 @@ public class UserImageController {
     }
 
     @PutMapping("/updateUserImage/{imageId}")
-    public ApiResponse<UserImageResponse> updateImage(@PathVariable String imageId, @RequestBody UserImageUpdateRequest request) {
+    public ApiResponse<UserImageResponse> updateImage(
+            @PathVariable String imageId, @RequestBody UserImageUpdateRequest request) {
         return ApiResponse.<UserImageResponse>builder()
                 .code(1000)
                 .result(userImageService.updateUserImage(imageId, request))

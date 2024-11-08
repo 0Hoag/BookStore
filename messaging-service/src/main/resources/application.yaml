@@ -4,6 +4,8 @@ server:
     context-path: /messaging
 
 spring:
+  kafka:
+    bootstrap-servers: YOU_URL
   data:
     mongodb:
       port: 27025

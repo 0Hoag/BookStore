@@ -7,7 +7,7 @@ spring:
     name: notification-service
   data:
     mongodb:
-      uri: mongodb://root:601748@localhost:27019/notification-service?authSource=admin
+      uri: YOU_URL_MONGODB
   kafka:
     bootstrap-servers: localhost:9094
     consumer:
@@ -17,5 +17,27 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "*"
+    producer:
+        key-serializer: org.apache.kafka.common.serialization.StringSerializer
+        value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    cart-notification:
+      group-id: cart-notification-group
+      topic: cart-notifications
+    friend-notification:
+      group-id: friend-notification-group
+      topic: send-notifications
+    messaging-notification:
+      group-id: message-notification-group
+      topic: message-notifications
+
+app:
+  service:
+    identity-service: YOU_URL_IDENTITY
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
 jwt:
-  apiKey: "API_KEY"
+  apiKey: "YOU_API_KEY"

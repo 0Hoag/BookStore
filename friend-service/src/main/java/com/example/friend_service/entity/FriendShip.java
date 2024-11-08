@@ -1,14 +1,16 @@
 package com.example.friend_service.entity;
 
-import com.example.friend_service.enums.RelationShip;
-import com.example.friend_service.enums.Status;
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.neo4j.core.schema.Id;
 
-import java.time.LocalDateTime;
+import com.example.friend_service.enums.RelationShip;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder

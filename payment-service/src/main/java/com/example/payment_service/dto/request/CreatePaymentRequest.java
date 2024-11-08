@@ -1,10 +1,9 @@
 package com.example.payment_service.dto.request;
 
 import com.example.payment_service.entity.enumclass.PaymentMethod;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor

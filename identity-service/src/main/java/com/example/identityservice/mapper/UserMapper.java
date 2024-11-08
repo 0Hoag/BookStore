@@ -47,8 +47,10 @@ public interface UserMapper {
     }
 
     default Set<String> mapUserImageId(Set<UserImage> images) {
-        return images.stream().map(userImage -> {
-            return userImage.getImageId();
-        }).collect(Collectors.toSet());
+        return images.stream()
+                .map(userImage -> {
+                    return userImage.getImageId();
+                })
+                .collect(Collectors.toSet());
     }
 }

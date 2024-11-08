@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useEffect, useState } from 'react';
 import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
@@ -21,6 +21,17 @@ import StorefrontIcon from '@mui/icons-material/Storefront';
 import { logOut } from "../../services/authenticationService";
 import { useNavigate } from "react-router-dom";
 import { FaFacebookMessenger } from "react-icons/fa";
+import userService from "../../services/userService";
+import { Bell } from 'lucide-react';
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
+import notificationService from "../../services/notificationService";
+import { Popover, 
+  List, ListItem, ListItemText, 
+  ListItemAvatar, Avatar, Typography, Button, 
+  Dialog, DialogTitle, DialogContent, 
+  Table, TableBody, TableRow, TableCell } from '@mui/material';
+import { getToken } from '../../services/localStorageService';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -72,19 +83,35 @@ const AppIconButton = styled(IconButton)(({ theme, active }) => ({
   margin: theme.spacing(0, 1),
 }));
 
+const NotificationItem = styled(ListItem)(({ theme, isRead }) => ({
+  backgroundColor: isRead ? 'transparent' : alpha(theme.palette.primary.main, 0.1),
+  '&:hover': {
+    backgroundColor: theme.palette.action.hover,
+  },
+  padding: theme.spacing(2),
+  borderBottom: `1px solid ${theme.palette.divider}`,
+}));
+
 const AppBarStyled = styled(AppBar)(({ theme }) => ({
   backgroundColor: "#0A0A0A", // Very dark background
   color: "#E0E0E0", // Light text color
 }));
 
 export default function Header() {
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
-  const [activeIcon, setActiveIcon] = React.useState('home');
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState(null);
+  const [activeIcon, setActiveIcon] = useState('home');
+  const [userId, setUserId] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [notificationAnchorEl, setNotificationAnchorEl] = useState(null);
+  const [optionsDialogOpen, setOptionsDialogOpen] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState(null);
   const navigate = useNavigate();
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+  const isNotificationsOpen = Boolean(notificationAnchorEl);
 
   const appIcons = [
     { name: 'home', icon: <HomeIcon />, label: 'Home', path: '/' },
@@ -108,6 +135,21 @@ export default function Header() {
 
   const handleMobileMenuOpen = (event) => {
     setMobileMoreAnchorEl(event.currentTarget);
+  };
+
+  // Function to handle marking as read
+  const handleMarkAsRead = () => {
+    if (selectedNotification) {
+      markAsRead(selectedNotification.notificationId);
+      setOptionsDialogOpen(false);
+    }
+  };
+
+  // Function to handle deleting notification
+  const handleDeleteNotification = async () => {
+    if (selectedNotification) {
+      await notificationService.deleteNotification(selectedNotification.notificationId);
+    }
   };
 
   const handleLogout = () => {
@@ -145,6 +187,21 @@ export default function Header() {
     handleMenuClose();
     navigate("/myOrders");
   }
+
+  const handleNotificationsClick = (event) => {
+    setNotificationAnchorEl(event.currentTarget);
+    loadAllNotifications(userId);
+  };
+
+  const handleNotificationsClose = () => {
+    setNotificationAnchorEl(null);
+  };
+
+  const handleOptionsClick = (notification) => {
+    console.log("notification: {}", notification);
+    setSelectedNotification(notification);
+    setOptionsDialogOpen(true);
+  };
 
   const menuId = "primary-search-account-menu";
   const renderMenu = (
@@ -232,6 +289,293 @@ export default function Header() {
     </Menu>
   );
 
+  useEffect(() => {
+    const getMyInfo = async () => {
+      const response = await userService.getMyInfo();
+      if (response.data.result.userId) {
+        setUserId(response.data.result.userId);
+      }
+    };
+    getMyInfo();
+    if (userId) {
+      loadAllNotifications(userId);
+    }
+  }, [userId]);
+
+  const BASE_URL = 'http://localhost:8082';
+  const API_PREFIX = '/notification';
+
+  useEffect(() => {
+    let stompClient = null;
+
+    const initializeWebSocket = () => {
+        const wsUrl = `${BASE_URL}${API_PREFIX}/ws`;
+        const socket = new SockJS(wsUrl);
+        const client = new Client({
+            webSocketFactory: () => socket,
+            reconnectDelay: 5000,
+            heartbeatIncoming: 4000,
+            heartbeatOutgoing: 4000,
+        });
+
+        client.onConnect = () => {
+            client.subscribe(`/topic/messages/${userId}`, message => {
+                try {
+                    const notification = JSON.parse(message.body);
+                    handleNewNotification(notification);
+                } catch (error) {
+                    console.error('Error processing notification:', error);
+                }
+            });
+        };
+
+        client.activate();
+        return client;
+    };
+
+    if (userId) {
+        stompClient = initializeWebSocket();
+    }
+
+    return () => {
+        if (stompClient) {
+            stompClient.deactivate();
+        }
+    };
+  }, [userId]);
+
+  const fetchUnreadNotifications = async (currentUserId) => {
+    try {
+      const response = await notificationService.getUnreadNotification(currentUserId);
+      if (response?.data?.result) {
+        const notificationsList = response.data.result;
+        setNotifications(notificationsList);
+        const unreadNotifications = notificationsList.filter(notif => !notif.isRead);
+        setUnreadCount(unreadNotifications.length);
+      }
+    } catch (error) {
+      console.error('Error fetching unread notifications:', error);
+    }
+  };
+
+  const updateUnreadCount = (notifs) => {
+    const unread = notifs.filter(n => !n.read).length;
+    setUnreadCount(unread);
+  };
+    
+  const loadAllNotifications = async (userId) => {
+    try {
+        const response = await notificationService.getAllNotifications(userId);
+        if (response?.data?.result) {
+            const notificationsList = response.data.result;
+
+            // Count unread notifications where idRead is false
+            const unreadCount = notificationsList.filter(n => !n.idRead).length;
+            setUnreadCount(unreadCount); // Update unreadCount based on idRead
+
+            // Sort notifications by timestamp
+            const sortedNotifications = notificationsList.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            // Separate new notifications (e.g., within the last 24 hours)
+            const now = new Date();
+            const threshold = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+            const newNotifications = sortedNotifications.filter(n => (now - new Date(n.timestamp)) < threshold);
+            const olderNotifications = sortedNotifications.filter(n => (now - new Date(n.timestamp)) >= threshold);
+
+            // Combine new and older notifications
+            setNotifications([...newNotifications, ...olderNotifications]);
+        }
+    } catch (error) {
+        console.error('Error loading notifications:', error);
+    }
+  };
+
+  const formatTimestampVietnamese = (timestamp) => {
+    const now = new Date();
+    const notificationTime = new Date(timestamp);
+    const diffInSeconds = Math.floor((now - notificationTime) / 1000);
+
+    if (diffInSeconds < 60) {
+        return `${diffInSeconds} giây trước`;
+    } else if (diffInSeconds < 3600) {
+        const minutes = Math.floor(diffInSeconds / 60);
+        return `${minutes} phút trước`;
+    } else if (diffInSeconds < 86400) {
+        const hours = Math.floor(diffInSeconds / 3600);
+        return `${hours} giờ trước`;
+    } else if (diffInSeconds < 604800) { // Less than a week
+        const days = Math.floor(diffInSeconds / 86400);
+        return `${days} ngày trước`;
+    } else {
+        const weeks = Math.floor(diffInSeconds / 604800);
+        return `${weeks} tuần trước`;
+    }
+  };
+
+    const handleNewNotification = (notification) => {
+      setNotifications(prev => {
+          // Kiểm tra xem notification đã tồn tại chưa
+          const exists = prev.some(n => n.notificationId === notification.notificationId);
+          if (!exists) {
+              const newNotifications = [notification, ...prev];
+              updateUnreadCount(newNotifications);
+              return newNotifications;
+          }
+          return prev;
+      });
+  };
+
+  const markAsRead = async (notificationId) => {
+    try {
+      console.log("Start");
+      await notificationService.putMarkAsReadNotification(notificationId);
+      console.log("End");
+      setNotifications(prev =>
+        prev.map(notif =>
+          notif.notificationId === notificationId
+            ? { ...notif, isRead: true }
+            : notif
+        )
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  const markAllAsRead = async () => {
+    try {
+      await notificationService.putMarkAsReadAllNotification(userId);
+      setNotifications(prev =>
+        prev.map(notif => ({ ...notif, isRead: true }))
+      );
+      setUnreadCount(0);
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+    }
+  };
+
+
+  const renderNotificationsPopover = (
+    <Popover
+      open={isNotificationsOpen}
+      anchorEl={notificationAnchorEl}
+      onClose={handleNotificationsClose}
+      anchorOrigin={{
+        vertical: 'bottom',
+        horizontal: 'right',
+      }}
+      transformOrigin={{
+        vertical: 'top',
+        horizontal: 'right',
+      }}
+    >
+      <Box sx={{ width: 400, maxHeight: 500 }}>
+        <Box sx={{ 
+          p: 2, 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          borderBottom: '1px solid',
+          borderColor: 'divider'
+        }}>
+          <Typography variant="h6">Notifications</Typography>
+          {unreadCount > 0 && (
+            <Button 
+              onClick={markAllAsRead}
+              size="small"
+              sx={{ color: 'primary.main' }}
+            >
+              Mark all as read
+            </Button>
+          )}
+        </Box>
+        <List sx={{ maxHeight: 400, overflow: 'auto', p: 0 }}>
+          {notifications.length > 0 ? (
+            notifications.map((notification) => (
+              <NotificationItem
+                key={notification.notificationId}
+                isRead={notification.isRead}
+                onClick={() => handleNotificationClick(notification)}
+                sx={{ cursor: 'pointer' }}
+              >
+                <ListItemAvatar>
+                  <Avatar
+                    src={notification.bookImage}
+                    alt={notification.bookTitle}
+                    variant="rounded"
+                  />
+                </ListItemAvatar>
+                <ListItemText
+                  primary={
+                    <Typography variant="subtitle2" component="div">
+                      {notification.message}
+                    </Typography>
+                  }
+                  secondary={
+                    <Typography variant="caption" color="text.secondary">
+                      {formatTimestampVietnamese(notification.timestamp)}
+                    </Typography>
+                  }
+                />
+                <IconButton
+                  size="small"
+                  onClick={(event) => {
+                    event.stopPropagation(); // Prevent triggering the notification click
+                    handleOptionsClick(notification); // Function to handle options
+                  }}
+                >
+                  <MoreIcon />
+                </IconButton>
+              </NotificationItem>
+            ))
+          ) : (
+            <ListItem>
+              <ListItemText 
+                primary={
+                  <Typography align="center" color="text.secondary">
+                    No notifications
+                  </Typography>
+                }
+              />
+            </ListItem>
+          )}
+        </List>
+      </Box>
+    </Popover>
+  );
+
+  const renderOptionsDialog = (
+    <Dialog open={optionsDialogOpen} onClose={() => setOptionsDialogOpen(false)}>
+      <DialogTitle>Notification Options</DialogTitle>
+      <DialogContent>
+        <Table>
+          <TableBody>
+            <TableRow>
+              <TableCell>
+                <Button onClick={handleMarkAsRead}>Mark as Read</Button>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>
+                <Button onClick={handleDeleteNotification}>Delete Notification</Button>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </DialogContent>
+    </Dialog>
+  );
+
+  const handleNotificationClick = (notification) => {
+    markAsRead(notification.notificationId);
+    if (notification.type === 'ADD_TO_CART') {
+      navigate('/shoppingcart');
+    }
+    
+    handleNotificationsClose();
+  };
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBarStyled position="static">
@@ -313,8 +657,9 @@ export default function Header() {
                 size="large"
                 aria-label="show notifications"
                 color="inherit"
+                onClick={handleNotificationsClick}
               >
-                <Badge badgeContent={17} color="error">
+                <Badge badgeContent={unreadCount} color="error">
                   <NotificationsIcon sx={{ color: "white" }} />
                 </Badge>
               </IconButton>
@@ -324,7 +669,7 @@ export default function Header() {
                 color="inherit"
                 onClick={handleMessagesClick}
               >
-                <Badge badgeContent={4} color="error">
+                <Badge color="error">
                   <FaFacebookMessenger style={{ color: "white", fontSize: "1.25rem" }} />
                 </Badge>
               </IconButton>
@@ -357,6 +702,8 @@ export default function Header() {
       </AppBarStyled>
       {renderMobileMenu}
       {renderMenu}
+      {renderNotificationsPopover}
+      {renderOptionsDialog}
     </Box>
   );
 }

@@ -22,7 +22,8 @@ import Profile from "../pages/Profile";
 import Messenger from "../pages/messeger/messenger";
 import PageExmapl from "../pages/messeger/pageExample";
 import ProfileSetting from "../pages/profile/ProfileSetting";
-
+import NotificationDetail from "../components/NotificationDetail";
+import AuthenticateGithub from "../components/AuthenticateGithub";
 const AppRoutes = () => {
   return (
     <Router>
@@ -43,11 +44,13 @@ const AppRoutes = () => {
         <Route path="/myOrders" element={<MyOrders />} />
         <Route path="/checkout" element={<CheckOut />} />
         <Route path="/authenticate" element={<Authenticate />} />
+        <Route path="/login/oauth2/code/github" element={<AuthenticateGithub />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/:userId" element={<ProfileDetail />} />
         <Route path="/friends" element={<Friend />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/profile/edit/info" element={<ProfileSetting />} />
+        <Route path="/notification/:id" element={<NotificationDetail />} />
         <Route path="/pageExmapl" element={<PageExmapl />} />
         <Route path="/" element={<Home />} />
       </Routes>

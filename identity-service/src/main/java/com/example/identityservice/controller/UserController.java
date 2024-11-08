@@ -3,7 +3,6 @@ package com.example.identityservice.controller;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Set;
 
 import jakarta.validation.Valid;
 
@@ -120,9 +119,7 @@ public class UserController {
     }
 
     @PostMapping("/uploadImageUserProfile/{userId}")
-    ApiResponse<Void> uploadImageUserProfile(
-            @PathVariable String userId,
-            @RequestPart("image") MultipartFile file)
+    ApiResponse<Void> uploadImageUserProfile(@PathVariable String userId, @RequestPart("image") MultipartFile file)
             throws SQLException, IOException {
         userService.uploadImageUserProfile(userId, file);
         return ApiResponse.<Void>builder()
@@ -132,9 +129,7 @@ public class UserController {
     }
 
     @PostMapping("/uploadImageUserCover/{userId}")
-    ApiResponse<Void> uploadImageUserCover(
-            @PathVariable String userId,
-            @RequestPart("image") MultipartFile file)
+    ApiResponse<Void> uploadImageUserCover(@PathVariable String userId, @RequestPart("image") MultipartFile file)
             throws SQLException, IOException {
         userService.uploadImageUserCover(userId, file);
         return ApiResponse.<Void>builder()
@@ -144,9 +139,7 @@ public class UserController {
     }
 
     @DeleteMapping("/deleteUserImage/{userId}")
-    ApiResponse<Void> removeUserImage(
-            @PathVariable String userId,
-            @RequestBody RemoveUserImage image) {
+    ApiResponse<Void> removeUserImage(@PathVariable String userId, @RequestBody RemoveUserImage image) {
         userService.removeImageUser(userId, image);
         return ApiResponse.<Void>builder()
                 .code(1000)

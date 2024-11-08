@@ -3,6 +3,7 @@ package com.example.messaging_service.configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -16,9 +17,14 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final String[] publicEnpoint = {
-            "/mess/registration",
-            "/messenger/registration"
+    private final String[] PUBLIC_ENDPOINTS = {
+        "/mess/registration",
+        "/messenger/registration",
+        "/ws/**",
+        "/api/v1/notification/ws/**",
+        "/api/v1/notification/ws/info/**",
+        "/api/v1/notification/ws/handshake/**",
+        "/topic/**" // Thêm endpoint cho STOMP
     };
 
     private final CustomJwtDecoder customJwtDecoder;
@@ -29,11 +35,15 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, publicEnpoint)
+        httpSecurity.cors(Customizer.withDefaults()).authorizeHttpRequests(request -> request.requestMatchers(
+                        HttpMethod.POST, PUBLIC_ENDPOINTS)
+                .permitAll()
+                .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS)
+                .permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated());
-
         httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer
                         .decoder(customJwtDecoder)
                         .jwtAuthenticationConverter(jwtAuthenticationConverter()))
@@ -42,20 +52,6 @@ public class SecurityConfig {
 
         return httpSecurity.build();
     }
-
-    //    @Bean
-    //    public CorsFilter corsFilter(){
-    //        CorsConfiguration corsConfiguration = new CorsConfiguration();
-    //
-    //        corsConfiguration.addAllowedOrigin("*");
-    //        corsConfiguration.addAllowedMethod("*");
-    //        corsConfiguration.addAllowedHeader("*");
-    //
-    //        UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
-    //        urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
-    //
-    //        return new CorsFilter(urlBasedCorsConfigurationSource);
-    //    }
 
     @Bean
     JwtAuthenticationConverter jwtAuthenticationConverter() {

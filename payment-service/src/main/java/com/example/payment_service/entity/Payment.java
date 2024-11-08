@@ -1,13 +1,14 @@
 package com.example.payment_service.entity;
 
+import java.time.LocalDateTime;
+
+import jakarta.persistence.*;
+
 import com.example.payment_service.entity.enumclass.PaymentMethod;
 import com.example.payment_service.entity.enumclass.PaymentStatus;
-import jakarta.persistence.*;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -42,4 +43,3 @@ public class Payment {
     String currency;
     String notes;
 }
-

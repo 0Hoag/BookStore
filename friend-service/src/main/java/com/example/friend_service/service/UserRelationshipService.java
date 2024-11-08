@@ -1,5 +1,9 @@
 package com.example.friend_service.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
 
 import com.example.friend_service.dto.request.AuthenticationRequest;
 import com.example.friend_service.dto.response.*;
@@ -13,14 +17,11 @@ import com.example.friend_service.repository.BlockListRepository;
 import com.example.friend_service.repository.FeignClient.IdentityClient;
 import com.example.friend_service.repository.FriendRequestRepository;
 import com.example.friend_service.repository.FriendShipRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +38,7 @@ public class UserRelationshipService {
     BlockListMapper blockListMapper;
 
     public UserRelationshipInfo getUserRelationShip(String userId) {
-        //List entity
+        // List entity
         List<FriendRequest> sentRequests = friendRequestRepository.findBySenderId(userId);
         List<FriendRequest> receivedRequests = friendRequestRepository.findByReceiverId(userId);
 
@@ -46,7 +47,7 @@ public class UserRelationshipService {
         List<BlockList> blockedUsers = blockListRepository.findByUserId(userId);
         List<BlockList> blockedByUsers = blockListRepository.findByBlockedUserId(userId);
 
-        //convertToResponse
+        // convertToResponse
         List<FriendResponse> sentRequest = convertToFriendResponses(sentRequests);
         List<FriendResponse> receivedRequest = convertToFriendResponses(receivedRequests);
 
@@ -75,36 +76,30 @@ public class UserRelationshipService {
         return authResponse.getResult().getToken();
     }
 
-    //convertToFriendResponse
+    // convertToFriendResponse
     public List<FriendResponse> convertToFriendResponses(List<FriendRequest> entity) {
-        return entity.stream()
-                .map(this::convertToFriendResponse)
-                .collect(Collectors.toList());
+        return entity.stream().map(this::convertToFriendResponse).collect(Collectors.toList());
     }
+
     public FriendResponse convertToFriendResponse(FriendRequest entity) {
         return friendRequestMapper.toFriendResponse(entity);
     }
 
-    //convertToFriendShipResponse
+    // convertToFriendShipResponse
     public List<FriendShipResponse> convertToFriendShipResponses(List<FriendShip> entity) {
-        return entity.stream()
-                .map(this::convertToFriendShipResponse)
-                .collect(Collectors.toList());
+        return entity.stream().map(this::convertToFriendShipResponse).collect(Collectors.toList());
     }
+
     public FriendShipResponse convertToFriendShipResponse(FriendShip entity) {
         return friendShipMapper.toFriendResponse(entity);
     }
 
-    //convertToBlockLists
+    // convertToBlockLists
     public List<BlockListResponse> convertToBlockLists(List<BlockList> entity) {
-        return entity.stream()
-                .map(this::convertToBlockList)
-                .collect(Collectors.toList());
+        return entity.stream().map(this::convertToBlockList).collect(Collectors.toList());
     }
 
     public BlockListResponse convertToBlockList(BlockList entity) {
         return blockListMapper.toBlockListResponse(entity);
     }
-
-
 }

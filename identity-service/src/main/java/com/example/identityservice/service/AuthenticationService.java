@@ -15,17 +15,19 @@ import org.springframework.util.CollectionUtils;
 import com.example.identityservice.constant.PredefinedRole;
 import com.example.identityservice.dto.request.*;
 import com.example.identityservice.dto.request.response.AuthenticationResponse;
+import com.example.identityservice.dto.request.response.GithubUserResponse;
 import com.example.identityservice.dto.request.response.IntrospectResponse;
 import com.example.identityservice.entity.InvalidatedToken;
 import com.example.identityservice.entity.Role;
 import com.example.identityservice.entity.User;
+import com.example.identityservice.entity.UserImage;
+import com.example.identityservice.enums.ImageType;
 import com.example.identityservice.exception.AppException;
 import com.example.identityservice.exception.ErrorCode;
 import com.example.identityservice.repository.InvalidatedRepository;
+import com.example.identityservice.repository.UserImageRepository;
 import com.example.identityservice.repository.UserRepository;
-import com.example.identityservice.repository.httpclient.OutboundIdentityClient;
-import com.example.identityservice.repository.httpclient.OutboundUserClient;
-import com.example.identityservice.repository.httpclient.ProfileClient;
+import com.example.identityservice.repository.httpclient.*;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -44,9 +46,12 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationService {
     UserRepository userRepository;
+    UserImageRepository userImageRepository;
     InvalidatedRepository invalidatedRepository;
-    OutboundIdentityClient outboundIdentityClient;
-    OutboundUserClient outboundUserClient;
+    OutboundGoogleIdentityClient outboundGoogleIdentityClient;
+    OutboundGithubIdentityClient outboundGithubIdentityClient;
+    OutboundGoogleUserClient outboundUserClient;
+    OutboundGithubUserClient outboundGithubUserClient;
     ProfileClient profileClient;
 
     @NonFinal
@@ -62,16 +67,28 @@ public class AuthenticationService {
     protected long refreshtable_duration;
 
     @NonFinal
-    @Value("${outbound.identity.client-id}")
-    protected String CLIENT_ID;
+    @Value("${outbound.google.client-id}")
+    protected String GOOGLE_CLIENT_ID;
 
     @NonFinal
-    @Value("${outbound.identity.client-secret}")
-    protected String CLIENT_SECRET;
+    @Value("${outbound.google.client-secret}")
+    protected String GOOGLE_CLIENT_SECRET;
 
     @NonFinal
-    @Value("${outbound.identity.redirect-uri}")
-    protected String REDIRECT_URI;
+    @Value("${outbound.google.redirect-uri}")
+    protected String GOOGLE_REDIRECT_URI;
+
+    @NonFinal
+    @Value("${outbound.github.client-id}")
+    protected String GITHUB_CLIENT_ID;
+
+    @NonFinal
+    @Value("${outbound.github.client-secret}")
+    protected String GITHUB_CLIENT_SECRET;
+
+    @NonFinal
+    @Value("${outbound.github.redirect-uri}")
+    protected String GITHUB_REDIRECT_URI;
 
     @NonFinal
     protected final String GRANT_TYPE = "authorization_code";
@@ -89,12 +106,77 @@ public class AuthenticationService {
         return IntrospectResponse.builder().valid(isValid).build();
     }
 
-    public AuthenticationResponse outboundAuthentication(String code) {
-        var response = outboundIdentityClient.exchangeToken(ExchangeTokenRequest.builder()
+    public GithubUserResponse getUserInfo(String accessToken) {
+        return outboundGithubUserClient.getUser("Bearer " + accessToken);
+    }
+
+    public AuthenticationResponse outboundAuthenticationGithub(String code) {
+        var response = outboundGithubIdentityClient.exchangeToken(ExchangeGithubTokenRequest.builder()
+                .clientId(GITHUB_CLIENT_ID)
+                .clientSecret(GITHUB_CLIENT_SECRET)
                 .code(code)
-                .clientId(CLIENT_ID)
-                .clientSecret(CLIENT_SECRET)
-                .redirectUri(REDIRECT_URI)
+                .build());
+
+        log.info("Token response: {}", response);
+
+        // get user info
+        var userInfo = getUserInfo(response.getAccessToken());
+        log.info("UserInfo: {}", userInfo);
+
+        Optional<User> existedUser = userRepository.findByUsername(userInfo.getLogin());
+
+        if (existedUser.isPresent()) {
+            var token = generateToken(existedUser.get());
+            log.info("token: {}", token);
+            return AuthenticationResponse.builder().token(token).build();
+        }
+
+        Set<Role> roles = new HashSet<>();
+        roles.add(Role.builder().name(PredefinedRole.USER_ROLE).build());
+
+        var user = userRepository.save(User.builder()
+                .username(userInfo.getLogin())
+                .firstName(userInfo.getName())
+                .lastName(userInfo.getName())
+                .email(userInfo.getEmail())
+                .roles(roles)
+                .build());
+
+        Set<UserImage> images = new HashSet<>();
+        UserImage image = UserImage.builder()
+                .imageUrl(userInfo.getAvatar_url())
+                .user(user)
+                .imageType(ImageType.PROFILE)
+                .build();
+
+        userImageRepository.save(image);
+        images.add(image);
+        user.setImages(images);
+        userRepository.save(user);
+
+        ProfileCreationRequest request = ProfileCreationRequest.builder()
+                .userId(user.getUserId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .dob(LocalDate.now())
+                .city("null")
+                .build();
+
+        profileClient.createProfile(request);
+
+        // convert token github => token database (identity)
+        var token = generateToken(user);
+        log.info("Token {}", token);
+
+        return AuthenticationResponse.builder().token(token).build();
+    }
+
+    public AuthenticationResponse outboundAuthenticationGoogle(String code) {
+        var response = outboundGoogleIdentityClient.exchangeToken(ExchangeTokenRequest.builder()
+                .code(code)
+                .clientId(GOOGLE_CLIENT_ID)
+                .clientSecret(GOOGLE_CLIENT_SECRET)
+                .redirectUri(GOOGLE_REDIRECT_URI)
                 .grantType(GRANT_TYPE)
                 .build());
 

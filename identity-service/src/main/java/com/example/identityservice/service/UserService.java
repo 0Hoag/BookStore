@@ -2,16 +2,12 @@ package com.example.identityservice.service;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.Blob;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
-import com.example.identityservice.enums.ImageType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -24,12 +20,15 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.example.event.dto.*;
 import com.example.identityservice.constant.PredefinedRole;
 import com.example.identityservice.dto.request.*;
 import com.example.identityservice.dto.request.response.*;
 import com.example.identityservice.dto.request.response.OrdersResponse.OrdersResponse;
 import com.example.identityservice.entity.*;
+import com.example.identityservice.enums.ImageType;
 import com.example.identityservice.exception.AppException;
 import com.example.identityservice.exception.ErrorCode;
 import com.example.identityservice.mapper.*;
@@ -116,7 +115,7 @@ public class UserService {
                 .build();
 
         // public message to kafka
-        //        kafkaTemplate.send("notification-delivery", notificationEvent);
+        kafkaTemplate.send("notification-delivery", notificationEvent);
 
         return userMapper.toUserResponse(user);
     }
@@ -291,14 +290,15 @@ public class UserService {
             if (FileUtils.validateFile(file)) {
                 file.transferTo(tempFile);
 
-                Map<String, Object> uploadResult = cloudinaryConfig().uploader().upload(tempFile, ObjectUtils.emptyMap());
+                Map<String, Object> uploadResult =
+                        cloudinaryConfig().uploader().upload(tempFile, ObjectUtils.emptyMap());
                 return uploadResult;
-            }else {
+            } else {
                 throw new AppException(ErrorCode.UPLOAD_FILE_FAIL);
             }
-        }catch (IOException e) {
+        } catch (IOException e) {
             throw new AppException(ErrorCode.UPLOAD_FILE_FAIL);
-        }finally {
+        } finally {
             if (tempFile.exists()) {
                 tempFile.delete();
             }
@@ -306,16 +306,15 @@ public class UserService {
     }
 
     public void uploadImageUserProfile(String userId, MultipartFile file) throws IOException, SQLException {
-        var user = userRepositories.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        var user = userRepositories.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         Map<String, Object> uploadResult = uploadPhoto(file);
         String imageUrl = (String) uploadResult.get("url");
 
         UserImage image = userImageService.toCreateUserImage(UserImageRequest.builder()
-                        .imageType(ImageType.PROFILE)
-                        .imageUrl(imageUrl)
-                        .user(userId)
+                .imageType(ImageType.PROFILE)
+                .imageUrl(imageUrl)
+                .user(userId)
                 .build());
 
         user.getImages().add(image);
@@ -323,16 +322,15 @@ public class UserService {
     }
 
     public void uploadImageUserCover(String userId, MultipartFile file) throws IOException {
-        var user = userRepositories.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        var user = userRepositories.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         Map<String, Object> uploadResult = uploadPhoto(file);
         String imageUrl = (String) uploadResult.get("url");
 
         UserImage image = userImageService.toCreateUserImage(UserImageRequest.builder()
-                        .imageUrl(imageUrl)
-                        .imageType(ImageType.COVER)
-                        .user(userId)
+                .imageUrl(imageUrl)
+                .imageType(ImageType.COVER)
+                .user(userId)
                 .build());
 
         user.getImages().add(image);
@@ -340,12 +338,11 @@ public class UserService {
     }
 
     public void removeImageUser(String userId, RemoveUserImage image) {
-        var user = userRepositories.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.IMAGE_NOT_EXISTED));
-        Set<UserImage> userImages = userImageRepository.findAllById(image.getImages())
-                .stream().collect(Collectors.toSet());
+        var user = userRepositories.findById(userId).orElseThrow(() -> new AppException(ErrorCode.IMAGE_NOT_EXISTED));
+        Set<UserImage> userImages =
+                userImageRepository.findAllById(image.getImages()).stream().collect(Collectors.toSet());
 
-        for (UserImage image1: userImages) {
+        for (UserImage image1 : userImages) {
             try {
                 String publicId = extractPublicIdFromUrl(image1.getImageUrl());
                 log.info("publicId: {}", publicId);
@@ -355,11 +352,11 @@ public class UserService {
                 if ("ok".equals(result.get("result"))) {
                     log.info("Successfully delete image from Cloudinary: {}", publicId);
                     user.getImages().remove(image1);
-                }else {
+                } else {
                     log.error("Failed to delete image from Cloudinary: {}", publicId);
                     throw new AppException(ErrorCode.REMOVE_FILE_FAIL);
                 }
-            }catch (IOException e) {
+            } catch (IOException e) {
                 throw new AppException(ErrorCode.REMOVE_FILE_FAIL);
             }
         }
@@ -369,7 +366,7 @@ public class UserService {
     public String extractPublicIdFromUrl(String imageUrl) {
         String[] urlParts = imageUrl.split("/");
         int uploadIndex = -1;
-        for (int i = 0;i < urlParts.length;i++) {
+        for (int i = 0; i < urlParts.length; i++) {
             if ("upload".equals(urlParts[i])) {
                 uploadIndex = i;
                 break;
@@ -380,12 +377,13 @@ public class UserService {
             throw new IllegalArgumentException("Invalid Cloudinary URL format");
         }
 
-        return String.join("/", Arrays.stream(urlParts, uploadIndex + 1, urlParts.length)
-                        .filter(part -> !part.startsWith("v"))
-                        .collect(Collectors.toList()))
+        return String.join(
+                        "/",
+                        Arrays.stream(urlParts, uploadIndex + 1, urlParts.length)
+                                .filter(part -> !part.startsWith("v"))
+                                .collect(Collectors.toList()))
                 .replaceFirst("[.][^.]+$", "");
     }
-
 
     public UserResponse updateUser(String userId, UserUpdateRequest request) {
         log.info("Service: updateUser");

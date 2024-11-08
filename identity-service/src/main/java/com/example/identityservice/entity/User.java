@@ -20,8 +20,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     String userId;
 
-//    @Column(name = "image")
-//    String image;
+    //    @Column(name = "image")
+    //    String image;
 
     @Column(name = "username", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     String username;
@@ -53,17 +53,16 @@ public class User {
 
     @Override
     public String toString() {
-        return "User{" +
-                "userId='" + userId + '\'' +
-                ", username='" + username + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", email='" + email + '\'' +
-                ", emailVerified=" + emailVerified +
-                ", rolesCount=" + (roles != null ? roles.size() : 0) +
-                ", cartItemsCount=" + (cartItem != null ? cartItem.size() : 0) +
-                ", ordersCount=" + (orders != null ? orders.size() : 0) +
-                ", imagesCount=" + (images != null ? images.size() : 0) +
-                '}';
+        return "User{" + "userId='"
+                + userId + '\'' + ", username='"
+                + username + '\'' + ", firstName='"
+                + firstName + '\'' + ", lastName='"
+                + lastName + '\'' + ", email='"
+                + email + '\'' + ", emailVerified="
+                + emailVerified + ", rolesCount="
+                + (roles != null ? roles.size() : 0) + ", cartItemsCount="
+                + (cartItem != null ? cartItem.size() : 0) + ", ordersCount="
+                + (orders != null ? orders.size() : 0) + ", imagesCount="
+                + (images != null ? images.size() : 0) + '}';
     }
 }

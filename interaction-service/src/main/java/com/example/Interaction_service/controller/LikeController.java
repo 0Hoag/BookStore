@@ -1,17 +1,17 @@
 package com.example.Interaction_service.controller;
 
+import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
 
 import com.example.Interaction_service.dto.request.CreateLikeRequest;
 import com.example.Interaction_service.dto.response.ApiResponse;
 import com.example.Interaction_service.dto.response.LikeResponse;
-import com.example.Interaction_service.dto.response.PostResponse;
 import com.example.Interaction_service.service.LikeService;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,7 +45,7 @@ public class LikeController {
     }
 
     @DeleteMapping("/activity/{likeId}")
-    ApiResponse<LikeResponse> deleteLike(@PathVariable String likeId){
+    ApiResponse<LikeResponse> deleteLike(@PathVariable String likeId) {
         likeService.deleteLike(likeId);
         return ApiResponse.<LikeResponse>builder()
                 .code(1000)

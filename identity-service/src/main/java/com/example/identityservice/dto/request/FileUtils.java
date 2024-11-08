@@ -1,13 +1,11 @@
 package com.example.identityservice.dto.request;
 
-import org.springframework.http.codec.multipart.FilePart;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.awt.image.DataBuffer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import org.springframework.web.multipart.MultipartFile;
 
 public class FileUtils {
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -24,7 +22,9 @@ public class FileUtils {
     public static Boolean validateFileExtension(MultipartFile file) {
         String originalFilename = file.getOriginalFilename();
         if (originalFilename != null && originalFilename.contains(".")) {
-            String fileExtension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
+            String fileExtension = originalFilename
+                    .substring(originalFilename.lastIndexOf(".") + 1)
+                    .toLowerCase();
             return ALLOWED_EXTENSIONS.contains(fileExtension);
         }
         return false;
@@ -39,7 +39,7 @@ public class FileUtils {
                 .map(f -> {
                     int pos = f.lastIndexOf(".");
                     return pos > 0 ? f.substring(pos + 1) : "";
-                }).orElse("");
-
+                })
+                .orElse("");
     }
 }

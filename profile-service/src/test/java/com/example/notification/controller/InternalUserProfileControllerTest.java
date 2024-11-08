@@ -1,8 +1,5 @@
 package com.example.notification.controller;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-
 import java.time.LocalDate;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -58,25 +55,25 @@ public class InternalUserProfileControllerTest {
                 .build();
     }
 
-//    @Test
-//    @WithMockUser
-//    void createProfile_validRequest_success() throws Exception {
-//        // GIVEN
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        objectMapper.registerModule(new JavaTimeModule());
-//        String content = objectMapper.writeValueAsString(request);
-//
-//        when(userProfileService.createProfile(any())).thenReturn(response);
-//        // WHEN
-//        mockMvc.perform(post("/internal/users")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(content))
-//                .andExpect(status().isOk())
-//                .andExpect(MockMvcResultMatchers.jsonPath("code").value(1000))
-//                .andExpect(MockMvcResultMatchers.jsonPath("result.firstName").value("Harry"))
-//                .andExpect(MockMvcResultMatchers.jsonPath("result.lastName").value("Potter"))
-//                .andExpect(MockMvcResultMatchers.jsonPath("result.dob").value("2005-09-02"))
-//                .andExpect(MockMvcResultMatchers.jsonPath("result.city").value("Ho Chi Minh"));
-//        // THEn
-//    }
+    //    @Test
+    //    @WithMockUser
+    //    void createProfile_validRequest_success() throws Exception {
+    //        // GIVEN
+    //        ObjectMapper objectMapper = new ObjectMapper();
+    //        objectMapper.registerModule(new JavaTimeModule());
+    //        String content = objectMapper.writeValueAsString(request);
+    //
+    //        when(userProfileService.createProfile(any())).thenReturn(response);
+    //        // WHEN
+    //        mockMvc.perform(post("/internal/users")
+    //                        .contentType(MediaType.APPLICATION_JSON)
+    //                        .content(content))
+    //                .andExpect(status().isOk())
+    //                .andExpect(MockMvcResultMatchers.jsonPath("code").value(1000))
+    //                .andExpect(MockMvcResultMatchers.jsonPath("result.firstName").value("Harry"))
+    //                .andExpect(MockMvcResultMatchers.jsonPath("result.lastName").value("Potter"))
+    //                .andExpect(MockMvcResultMatchers.jsonPath("result.dob").value("2005-09-02"))
+    //                .andExpect(MockMvcResultMatchers.jsonPath("result.city").value("Ho Chi Minh"));
+    //        // THEn
+    //    }
 }

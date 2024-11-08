@@ -21,13 +21,20 @@ This microservice is responsible for:
 `mvn clean package`
 
 ## Docker guideline
+## Build application
+`docker build -t identity-service:0.9.0`
 ### Build docker image
-`docker build -t <account>/identity_service:0.9.0 .`
+`docker build -t hoag402/identity_service:0.9.0 .`
 ### Push docker image to Docker Hub
-`docker image push <account>/identity_service:0.9.0`
+`docker image push hoag402/identity_service:0.9.0`
 ### Create network:
-`docker network create devteria-network`
-### Start MySQL in devteria-network
-`docker run --network devteria-network --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=root -d mysql:8.0.36-debian`
-### Run your application in devteria-network
-`docker run --name identity-service --network devteria-network -p 7777:7777 -e DBMS_CONNECTION=jdbc:mysql://mysql:3306/identity_service identity_service:0.9.0`
+`docker network create hoagteria-network`
+### Start MySQL in hoagteria-network
+`docker run --network hoagteria-network --name mysql -p 3306:3306 -e MYSQL_ROOT_PASSWORD=601748 -d mysql:8.0.36-debian`
+### Run your application in hoagteria-network
+`docker run --name identity-service --network hoagteria-network -p 7777:7777 -e DBMS_CONNECTION=jdbc:mysql://mysql:3306/identity-service identity_service:0.9.0`
+
+## Pull image in docker
+`docker pull hoag402/identity_service`
+## Create application in hoagteria-network
+`docker run --name identity-service --network hoagteria-network -p 7777:7777 -e DBMS_CONNECTION=jdbc:mysql://mysql:3306/identity-service hoag402/identity_service:0.9.0`

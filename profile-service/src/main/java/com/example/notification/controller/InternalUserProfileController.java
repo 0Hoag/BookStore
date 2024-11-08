@@ -1,11 +1,11 @@
 package com.example.notification.controller;
 
-import com.example.notification.dto.response.UserProfileResponse;
-import com.example.notification.entity.UserProfile;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.notification.dto.request.ProfileCreationRequest;
 import com.example.notification.dto.response.ApiResponse;
+import com.example.notification.dto.response.UserProfileResponse;
+import com.example.notification.entity.UserProfile;
 import com.example.notification.service.UserProfileService;
 
 import lombok.AccessLevel;

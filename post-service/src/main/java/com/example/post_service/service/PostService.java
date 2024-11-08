@@ -1,5 +1,19 @@
 package com.example.post_service.service;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.cloudinary.Cloudinary;
 import com.cloudinary.Transformation;
 import com.cloudinary.utils.ObjectUtils;
@@ -19,26 +33,11 @@ import com.example.post_service.repository.httpClient.CommentClient;
 import com.example.post_service.repository.httpClient.IdentityClient;
 import com.example.post_service.repository.httpClient.InteractionClient;
 import com.example.post_service.repository.httpClient.ProfileClient;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
-import java.io.IOException;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
-
 
 @Service
 @RequiredArgsConstructor
@@ -56,7 +55,6 @@ public class PostService {
     ImageService imageService;
     ImageRepository imageRepository;
     VideoService videoService;
-
 
     public PostResponse createPost(CreatePostRequest request) {
         String token = generationToken();
@@ -83,8 +81,7 @@ public class PostService {
     }
 
     public PostResponse uploadMediaToPost(String postId, MultipartFile file) throws IOException {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
+        Post post = postRepository.findById(postId).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
 
         if (!FileUtils.validateFile(file)) {
             log.error("Invalid file: {}", file.getOriginalFilename());
@@ -101,9 +98,7 @@ public class PostService {
             }
 
             // Upload file gốc lên Cloudinary
-            Map<String, Object> uploadResult = cloudinaryConfig()
-                    .uploader()
-                    .upload(file.getBytes(), uploadOptions);
+            Map<String, Object> uploadResult = cloudinaryConfig().uploader().upload(file.getBytes(), uploadOptions);
 
             // Lấy thông tin từ kết quả upload
             String originalUrl = (String) uploadResult.get("secure_url");
@@ -120,22 +115,26 @@ public class PostService {
 
             if (isVideo) {
                 // Tạo URL cho video version 720p
-                String video720pUrl = cloudinaryConfig().url()
+                String video720pUrl = cloudinaryConfig()
+                        .url()
                         .transformation(new Transformation().width(720).crop("scale"))
                         .format("mp4")
                         .generate(publicId);
                 versions.put("w720", video720pUrl);
             } else {
                 // Tạo URL cho ảnh version 1080p
-                String image1080pUrl = cloudinaryConfig().url()
+                String image1080pUrl = cloudinaryConfig()
+                        .url()
                         .transformation(new Transformation().width(1080).crop("scale"))
                         .generate(publicId);
                 versions.put("w1080", image1080pUrl);
             }
 
             // Tạo thumbnail URL
-            String thumbnailUrl = cloudinaryConfig().url()
-                    .transformation(new Transformation().width(1000).height(1000).crop("thumb"))
+            String thumbnailUrl = cloudinaryConfig()
+                    .url()
+                    .transformation(
+                            new Transformation().width(1000).height(1000).crop("thumb"))
                     .generate(publicId);
 
             metadata.setThumbnailUrl(thumbnailUrl);
@@ -164,23 +163,21 @@ public class PostService {
 
     @Bean
     public Cloudinary cloudinaryConfig() {
-//        Cloudinary cloudinary = null;
-//        Map config = new HashMap();
-//        config.put("cloud_name", "ddclol9ih");
-//        config.put("api_key", "484769914577293");
-//        config.put("api_secret", "41IJGj5NP901wP-74TR-fmIj0OQ");
-//        cloudinary = new Cloudinary(config);
+        //        Cloudinary cloudinary = null;
+        //        Map config = new HashMap();
+        //        config.put("cloud_name", "ddclol9ih");
+        //        config.put("api_key", "484769914577293");
+        //        config.put("api_secret", "41IJGj5NP901wP-74TR-fmIj0OQ");
+        //        cloudinary = new Cloudinary(config);
         return new Cloudinary(ObjectUtils.asMap(
                 "cloud_name", "ddclol9ih",
                 "api_key", "484769914577293",
                 "api_secret", "41IJGj5NP901wP-74TR-fmIj0OQ",
-                "secure", true
-        ));
+                "secure", true));
     }
 
     public void removeImagePost(String postId) {
-        var post = postRepository.findById(postId)
-                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
+        var post = postRepository.findById(postId).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
         Set<String> postImages = new HashSet<>(post.getMedias());
 
         for (String mediaUrl : postImages) {
@@ -192,7 +189,7 @@ public class PostService {
                 if (FileUtils.isVideoFile(mediaUrl)) {
                     params.put("resource_type", "video");
                     log.info("Delete video with publicId: {}", publicId);
-                }else {
+                } else {
                     log.info("Delete image with publicId: {}", publicId);
                 }
 
@@ -201,7 +198,7 @@ public class PostService {
                 if ("ok".equals(result.get("result"))) {
                     log.info("Successfully delete media from Cloudinary");
                     post.getMedias().remove(mediaUrl);
-                }else {
+                } else {
                     log.error("Failed to delete media from Cloudinary");
                     throw new AppException(ErrorCode.REMOVE_FILE_FAIL);
                 }
@@ -231,7 +228,8 @@ public class PostService {
                             postResponse.setUserId(userResponse.getUserId());
 
                             return postResponse;
-                        }).collect(Collectors.toList()))
+                        })
+                        .collect(Collectors.toList()))
                 .build();
     }
 
@@ -257,13 +255,13 @@ public class PostService {
                             postResponse.setUserId(userResponse.getUserId());
 
                             return postResponse;
-                        }).collect(Collectors.toList()))
+                        })
+                        .collect(Collectors.toList()))
                 .build();
     }
 
     public PostResponse getPost(String postId) {
-        var post = postRepository.findById(postId)
-                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
+        var post = postRepository.findById(postId).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
 
         String token = generationToken();
         UserResponse user = getUserInformationBasic(post.getUserId(), token);
@@ -271,7 +269,7 @@ public class PostService {
 
         PostResponse postResponse = postMapper.toPostResponse(post);
         postResponse.setUserId(user.getUserId());
-//        postResponse.setLikes(likeResponses);
+        //        postResponse.setLikes(likeResponses);
 
         return postResponse;
     }
@@ -291,7 +289,8 @@ public class PostService {
                     postResponse.setCreated(dateTimeFormatter.format(postResponse.getCreatedAt()));
                     postResponse.setUserId(user.getUserId());
                     return postResponse;
-                }).collect(Collectors.toList());
+                })
+                .collect(Collectors.toList());
 
         return PageResponse.<PostResponse>builder()
                 .currentPage(page)
@@ -303,14 +302,14 @@ public class PostService {
     }
 
     public PostResponse addCommentToPost(String postId, AddCommentToPostRequest request) {
-        var post = postRepository.findById(postId)
-                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
+        var post = postRepository.findById(postId).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
 
-        Set<CommentResponse> commentResponses = request.getCommentId()
-                        .stream().map(s -> {
-                            CommentResponse commentResponse = getComment(s, generationToken());
-                            return commentResponse;
-                }).collect(Collectors.toSet());
+        Set<CommentResponse> commentResponses = request.getCommentId().stream()
+                .map(s -> {
+                    CommentResponse commentResponse = getComment(s, generationToken());
+                    return commentResponse;
+                })
+                .collect(Collectors.toSet());
 
         post.getComments().addAll(commentResponses);
         postRepository.save(post);
@@ -321,15 +320,15 @@ public class PostService {
     }
 
     public PostResponse removeCommentToPost(String postId, RemoveCommentToPostRequest request) {
-        var post = postRepository.findById(postId)
-                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
+        var post = postRepository.findById(postId).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
 
-        Set<CommentResponse> commentResponses = request.getCommentId()
-                .stream().map(s -> {
+        Set<CommentResponse> commentResponses = request.getCommentId().stream()
+                .map(s -> {
                     CommentResponse commentResponse = getComment(s, generationToken());
                     deleteComments(s, generationToken());
                     return commentResponse;
-                }).collect(Collectors.toSet());
+                })
+                .collect(Collectors.toSet());
 
         post.getComments().removeAll(commentResponses);
         postRepository.save(post);
@@ -342,10 +341,9 @@ public class PostService {
 
     public PostResponse updateCommentToPost(String postId, String commentId, UpdateCommentRequest request) {
         String token = generationToken();
-        var post = postRepository.findById(postId)
-                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
-        Set<CommentResponse> commentResponses = post.getComments()
-                .stream().map(commentResponse -> {
+        var post = postRepository.findById(postId).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
+        Set<CommentResponse> commentResponses = post.getComments().stream()
+                .map(commentResponse -> {
                     if (commentResponse.getCommentId().equals(commentId)) {
                         // update comment pass FeignClient
                         updateComment(commentId, request);
@@ -353,7 +351,8 @@ public class PostService {
                         return getComment(commentId, token);
                     }
                     return commentResponse;
-                }).collect(Collectors.toSet());
+                })
+                .collect(Collectors.toSet());
 
         post.setComments(commentResponses);
         postRepository.save(post);
@@ -365,16 +364,16 @@ public class PostService {
     }
 
     public PostResponse addLikeToPost(String postId, AddLikeToPostRequest request) {
-        var post = postRepository.findById(postId)
-                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
+        var post = postRepository.findById(postId).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
 
         String token = generationToken();
 
-        Set<LikeResponse> likeResponses = request.getLikeId()
-                .stream().map(s -> {
+        Set<LikeResponse> likeResponses = request.getLikeId().stream()
+                .map(s -> {
                     LikeResponse likeResponse = getLike(s, token);
                     return likeResponse;
-                }).collect(Collectors.toSet());
+                })
+                .collect(Collectors.toSet());
 
         post.getLikes().addAll(likeResponses);
         postRepository.save(post);
@@ -385,15 +384,15 @@ public class PostService {
     }
 
     public PostResponse removeLikeToPost(String postId, RemoveLikeToPostRequest request) {
-        var post = postRepository.findById(postId)
-                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
+        var post = postRepository.findById(postId).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
 
-        Set<LikeResponse> likeResponses = request.getLikeId()
-                .stream().map(s -> {
+        Set<LikeResponse> likeResponses = request.getLikeId().stream()
+                .map(s -> {
                     LikeResponse response = getLike(s, generationToken());
                     deleteLike(response.getLikeId(), generationToken());
                     return response;
-                }).collect(Collectors.toSet());
+                })
+                .collect(Collectors.toSet());
 
         post.getLikes().removeAll(likeResponses);
         postRepository.save(post);
@@ -405,15 +404,14 @@ public class PostService {
     }
 
     public void deletePost(String postId) {
-        var post = postRepository.findById(postId)
-                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
+        var post = postRepository.findById(postId).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
 
         if (post.getMedias() == null) {
-            selectedLikeToRemove(post.getLikes()); //delete all like to post
+            selectedLikeToRemove(post.getLikes()); // delete all like to post
             selectedCommentToRemove(post.getComments()); // delete all comment to post
-        }else {
+        } else {
             removeImagePost(postId);
-            selectedLikeToRemove(post.getLikes()); //delete all like to post
+            selectedLikeToRemove(post.getLikes()); // delete all like to post
             selectedCommentToRemove(post.getComments()); // delete all comment to post
         }
         postRepository.deleteById(postId);
@@ -433,9 +431,11 @@ public class PostService {
             throw new IllegalArgumentException("Invalid Cloudinary URL format");
         }
 
-        return String.join("/", Arrays.stream(urlParts, uploadIndex + 1, urlParts.length)
-                        .filter(part -> !part.startsWith("v"))
-                        .collect(Collectors.toList()))
+        return String.join(
+                        "/",
+                        Arrays.stream(urlParts, uploadIndex + 1, urlParts.length)
+                                .filter(part -> !part.startsWith("v"))
+                                .collect(Collectors.toList()))
                 .replaceFirst("[.][^.]+$", "");
     }
 
@@ -443,12 +443,8 @@ public class PostService {
         postRepository.deleteAll();
     }
 
-    public PostResponse updatePost(
-            String postId,
-            String content,
-            Set<String> medias) {
-        var post = postRepository.findById(postId)
-                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
+    public PostResponse updatePost(String postId, String content, Set<String> medias) {
+        var post = postRepository.findById(postId).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
         post.setContent(content);
         post.setMedias(medias);
         post.setUpdatedAt(LocalDateTime.now());
@@ -461,7 +457,8 @@ public class PostService {
                     CommentResponse comment1 = getComment(commentResponse.getCommentId(), generationToken());
                     deleteComments(comment1.getCommentId(), generationToken());
                     return comment1;
-                }).collect(Collectors.toSet());
+                })
+                .collect(Collectors.toSet());
         return commentSet;
     }
 
@@ -472,7 +469,8 @@ public class PostService {
                     LikeResponse response = getLike(likeResponse.getLikeId(), token);
                     deleteLike(response.getLikeId(), token);
                     return response;
-                }).collect(Collectors.toSet());
+                })
+                .collect(Collectors.toSet());
         return likeResponses1;
     }
 
@@ -486,13 +484,15 @@ public class PostService {
     }
 
     public CommentResponse getComment(String commentId, String token) {
-        ApiResponse<CommentResponse> commentResponseApiResponse = commentClient.getComment(commentId, "Bearer " + token);
+        ApiResponse<CommentResponse> commentResponseApiResponse =
+                commentClient.getComment(commentId, "Bearer " + token);
         return commentResponseApiResponse.getResult();
     }
 
     public CommentResponse updateComment(String commentId, UpdateCommentRequest request) {
         String token = generationToken();
-        ApiResponse<CommentResponse> commentResponseApiResponse = commentClient.updateCommentResponse(commentId, request, "Bearer " + token);
+        ApiResponse<CommentResponse> commentResponseApiResponse =
+                commentClient.updateCommentResponse(commentId, request, "Bearer " + token);
         return commentResponseApiResponse.getResult();
     }
 

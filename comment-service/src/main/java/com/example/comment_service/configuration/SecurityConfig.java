@@ -19,7 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final String[] publicEnpoint = {
-            "/comment/registration",
+        "/comment/registration",
     };
 
     private final CustomJwtDecoder customJwtDecoder;

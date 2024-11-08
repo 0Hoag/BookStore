@@ -1,12 +1,10 @@
 package com.example.comment_service.dto.response;
 
+import java.time.Instant;
+import java.util.Set;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.Set;
 
 @Data
 @AllArgsConstructor

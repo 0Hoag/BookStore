@@ -2,11 +2,11 @@ package com.example.notification.controller;
 
 import java.util.List;
 
-import com.example.notification.dto.response.ProfileExistedResponse;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.notification.dto.request.ProfileUpdateRequest;
 import com.example.notification.dto.response.ApiResponse;
+import com.example.notification.dto.response.ProfileExistedResponse;
 import com.example.notification.dto.response.UserProfileResponse;
 import com.example.notification.service.UserProfileService;
 
@@ -56,16 +56,19 @@ public class UserProfileController {
     @DeleteMapping("/{profileId}")
     ApiResponse<Void> deleteProfile(@PathVariable String profileId) {
         userProfileService.deleteProfile(profileId);
-        return ApiResponse.<Void>builder().code(1000).message("Delete Profile Success").build();
+        return ApiResponse.<Void>builder()
+                .code(1000)
+                .message("Delete Profile Success")
+                .build();
     }
 
-//    @GetMapping("/my-info")
-//    ApiResponse<UserProfileResponse> getMyInfoProfile() {
-//        return ApiResponse.<UserProfileResponse>builder()
-//                .code(1000)
-//                .result(userProfileService.getMyInfo())
-//                .build();
-//    }
+    //    @GetMapping("/my-info")
+    //    ApiResponse<UserProfileResponse> getMyInfoProfile() {
+    //        return ApiResponse.<UserProfileResponse>builder()
+    //                .code(1000)
+    //                .result(userProfileService.getMyInfo())
+    //                .build();
+    //    }
 
     @DeleteMapping("/userId/{userId}")
     ApiResponse<Void> deleteProfileToUserId(@PathVariable String userId) {

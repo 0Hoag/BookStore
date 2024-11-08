@@ -1,9 +1,11 @@
 package com.example.search_service.entity;
 
 import jakarta.persistence.Entity;
+
+import org.springframework.data.neo4j.core.schema.Id;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.neo4j.core.schema.Id;
 
 @AllArgsConstructor
 @Getter

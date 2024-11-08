@@ -23,8 +23,17 @@ public class AuthenticationController {
     AuthenticationService authenticationService;
 
     @PostMapping("/outbound/authentication")
-    ApiResponse<AuthenticationResponse> outboutAuthentication(@RequestParam("code") String code) {
-        var result = authenticationService.outboundAuthentication(code);
+    ApiResponse<AuthenticationResponse> outboundGoogleAuthentication(@RequestParam("code") String code) {
+        var result = authenticationService.outboundAuthenticationGoogle(code);
+        return ApiResponse.<AuthenticationResponse>builder()
+                .result(result)
+                .code(1000)
+                .build();
+    }
+
+    @PostMapping("/outbound/github/authentication")
+    ApiResponse<AuthenticationResponse> outboundGithubAuthentication(@RequestParam("code") String code) {
+        var result = authenticationService.outboundAuthenticationGithub(code);
         return ApiResponse.<AuthenticationResponse>builder()
                 .result(result)
                 .code(1000)

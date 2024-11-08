@@ -1,19 +1,21 @@
 package com.example.post_service.controller;
 
+import java.io.IOException;
+import java.util.Set;
+
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.post_service.dto.PageResponse;
 import com.example.post_service.dto.request.*;
 import com.example.post_service.dto.response.ApiResponse;
 import com.example.post_service.dto.response.PostResponse;
 import com.example.post_service.service.PostService;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.Set;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,9 +25,7 @@ public class PostController {
     PostService postService;
 
     @PostMapping("/registration")
-    ApiResponse<PostResponse> createPost(
-            @RequestBody CreatePostRequest request
-    ) {
+    ApiResponse<PostResponse> createPost(@RequestBody CreatePostRequest request) {
 
         return ApiResponse.<PostResponse>builder()
                 .code(1000)
@@ -33,20 +33,24 @@ public class PostController {
                 .build();
     }
 
-//    @PutMapping("/updateImageToPost/{postId}")
-//    ApiResponse<PostResponse> updateImageToPost(@PathVariable String postId, @RequestBody AddImageToPostRequest request) {
-//        return ApiResponse.<PostResponse>builder()
-//                .code(1000)
-//                .result(postService.updateImageToPost(postId, request))
-//                .build();
-//    }
+    //    @PutMapping("/updateImageToPost/{postId}")
+    //    ApiResponse<PostResponse> updateImageToPost(@PathVariable String postId, @RequestBody AddImageToPostRequest
+    // request) {
+    //        return ApiResponse.<PostResponse>builder()
+    //                .code(1000)
+    //                .result(postService.updateImageToPost(postId, request))
+    //                .build();
+    //    }
 
     @PostMapping("/updateMediaToPost/{postId}")
     public ApiResponse<PostResponse> uploadMediaToPost(
-            @PathVariable String postId,
-            @RequestPart("file") MultipartFile file) throws IOException {
-        log.info("Received file upload request for postId: {}, file name: {}, file size: {}, content type: {}",
-                postId, file.getOriginalFilename(), file.getSize(), file.getContentType());
+            @PathVariable String postId, @RequestPart("file") MultipartFile file) throws IOException {
+        log.info(
+                "Received file upload request for postId: {}, file name: {}, file size: {}, content type: {}",
+                postId,
+                file.getOriginalFilename(),
+                file.getSize(),
+                file.getContentType());
 
         return ApiResponse.<PostResponse>builder()
                 .code(1000)
@@ -57,8 +61,7 @@ public class PostController {
     @GetMapping("/my-posts")
     ApiResponse<PageResponse<PostResponse>> getMyPost(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "size", required = false, defaultValue = "10") int size
-                                                      ) {
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         return ApiResponse.<PageResponse<PostResponse>>builder()
                 .code(1000)
                 .result(postService.getMyPost(page, size))
@@ -77,8 +80,7 @@ public class PostController {
     ApiResponse<PageResponse<PostResponse>> getPostWithUser(
             @RequestParam(value = "userId", required = false) String userId,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "size", required = false, defaultValue = "10") int size
-    ) {
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         return ApiResponse.<PageResponse<PostResponse>>builder()
                 .code(1000)
                 .result(postService.getPostWithUserId(userId, page, size))
@@ -88,8 +90,7 @@ public class PostController {
     @GetMapping("/activity")
     ApiResponse<PageResponse<PostResponse>> getAllPost(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "size", required = false, defaultValue = "10") int size
-    ) {
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         return ApiResponse.<PageResponse<PostResponse>>builder()
                 .code(1000)
                 .result(postService.getAll(page, size))
@@ -97,7 +98,8 @@ public class PostController {
     }
 
     @PostMapping("/addCommentToPost/{postId}")
-    ApiResponse<PostResponse> addCommentToPost(@PathVariable String postId, @RequestBody AddCommentToPostRequest request) {
+    ApiResponse<PostResponse> addCommentToPost(
+            @PathVariable String postId, @RequestBody AddCommentToPostRequest request) {
         return ApiResponse.<PostResponse>builder()
                 .code(1000)
                 .result(postService.addCommentToPost(postId, request))
@@ -105,7 +107,8 @@ public class PostController {
     }
 
     @DeleteMapping("/removeCommentToPost/{postId}")
-    ApiResponse<PostResponse> removeCommentToPost(@PathVariable String postId, @RequestBody RemoveCommentToPostRequest request) {
+    ApiResponse<PostResponse> removeCommentToPost(
+            @PathVariable String postId, @RequestBody RemoveCommentToPostRequest request) {
         return ApiResponse.<PostResponse>builder()
                 .code(1000)
                 .result(postService.removeCommentToPost(postId, request))
@@ -113,7 +116,8 @@ public class PostController {
     }
 
     @PutMapping("/updateCommentToPost/{postId}/{commentId}")
-    ApiResponse<PostResponse> updateCommentToPost(@PathVariable String postId, @PathVariable String commentId, @RequestBody UpdateCommentRequest request) {
+    ApiResponse<PostResponse> updateCommentToPost(
+            @PathVariable String postId, @PathVariable String commentId, @RequestBody UpdateCommentRequest request) {
         return ApiResponse.<PostResponse>builder()
                 .code(1000)
                 .result(postService.updateCommentToPost(postId, commentId, request))
@@ -129,7 +133,8 @@ public class PostController {
     }
 
     @DeleteMapping("/removeLikeToPost/{postId}") // none test
-    ApiResponse<PostResponse> removeLikeToPost(@PathVariable String postId, @RequestBody RemoveLikeToPostRequest request) {
+    ApiResponse<PostResponse> removeLikeToPost(
+            @PathVariable String postId, @RequestBody RemoveLikeToPostRequest request) {
         return ApiResponse.<PostResponse>builder()
                 .code(1000)
                 .result(postService.removeLikeToPost(postId, request))
@@ -140,8 +145,7 @@ public class PostController {
     ApiResponse<PostResponse> updatePost(
             @RequestParam(value = "postId", required = false) String postId,
             @RequestParam(value = "content", required = false) String content,
-            @RequestParam(value = "medias", required = false) Set<String> medias
-    ) {
+            @RequestParam(value = "medias", required = false) Set<String> medias) {
         return ApiResponse.<PostResponse>builder()
                 .code(1000)
                 .result(postService.updatePost(postId, content, medias))
@@ -149,7 +153,7 @@ public class PostController {
     }
 
     @DeleteMapping("/activity/{postId}")
-    ApiResponse<PostResponse> deletePost(@PathVariable String postId){
+    ApiResponse<PostResponse> deletePost(@PathVariable String postId) {
         postService.deletePost(postId);
         return ApiResponse.<PostResponse>builder()
                 .code(1000)

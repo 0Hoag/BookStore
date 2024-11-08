@@ -1,10 +1,10 @@
 package com.example.post_service.dto.response;
 
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-
 import java.math.BigDecimal;
 import java.util.Set;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
@@ -35,5 +35,5 @@ public class OrdersResponse {
 
     Set<SelectedProductResponse> selectedProducts;
 
-    String paymentUrl;  // Thêm trường này cho URL thanh toán VNPay
+    String paymentUrl; // Thêm trường này cho URL thanh toán VNPay
 }

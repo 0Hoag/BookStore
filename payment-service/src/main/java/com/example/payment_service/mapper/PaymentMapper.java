@@ -1,12 +1,13 @@
 package com.example.payment_service.mapper;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+
 import com.example.payment_service.dto.request.CreatePaymentRequest;
 import com.example.payment_service.dto.request.UpdatePaymentRequest;
 import com.example.payment_service.dto.response.OrdersResponse;
 import com.example.payment_service.dto.response.PaymentResponse;
 import com.example.payment_service.entity.Payment;
-import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface PaymentMapper {

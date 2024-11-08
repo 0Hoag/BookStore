@@ -27,15 +27,19 @@ const bookService = {
     }
   },
 
-  getAllBooks: async () => {
+  getAllBooks: async (page) => {
     try {
       const token = getToken();
       const response = await httpClient.get(API.GET_ALL_BOOKS, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        params: {
+          page: page,
+          size: 10,
+        }
       });
-      return response.data;
+      return response;
     } catch (error) {
       throw error;
     }
@@ -153,6 +157,25 @@ const bookService = {
       return response.data.result;
     } catch (error) {
       throw error;
+    }
+  },
+
+  updateImageBook: async (bookId, file) => {
+    try {
+        const token = getToken();
+        const url = `${API.UPDATE_IMAGE_BOOK}/${bookId}`;
+        const formData = new FormData();
+          formData.append('file', file);
+          const response = httpClient.put(url, formData, {
+              headers: {
+                  'Authorization': `Bearer ${token}`, // Add the token to the headers
+                  'Content-Type': 'multipart/form-data', // Set the content type
+          }},
+        );
+        return response;
+    } catch (error) {
+        console.error('Error updating image:', error);
+        throw error;
     }
   },
 };

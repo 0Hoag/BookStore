@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication
 @EnableFeignClients
 public class InteractionServiceApplication {
-	public static void main(String[] args) {
-		SpringApplication.run(InteractionServiceApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(InteractionServiceApplication.class, args);
+    }
 }

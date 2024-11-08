@@ -24,9 +24,8 @@ public enum ErrorCode {
     IMAGE_NOT_EXISTED(1014, "Image not existed", HttpStatus.BAD_REQUEST),
 
     UPLOAD_FILE_FAIL(1015, "Upload file to fail!", HttpStatus.BAD_REQUEST),
-    REMOVE_FILE_FAIL(1016, "Remove file to fail!", HttpStatus.BAD_REQUEST)
+    REMOVE_FILE_FAIL(1016, "Remove file to fail!", HttpStatus.BAD_REQUEST);
 
-    ;
     private int code;
     private String message;
     private HttpStatusCode statusCode;

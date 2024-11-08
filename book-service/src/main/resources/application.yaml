@@ -10,6 +10,6 @@ spring:
       database: bookstore
 
 cloudinary:
-  cloud-name: "CLOUD_NAME"
+  cloud-name: "YOU_CLOUD_NAME"
   api-key: "API_KEY"
   api-secret: "API_SECRET"

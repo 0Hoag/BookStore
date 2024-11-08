@@ -1,6 +1,12 @@
 package com.example.messaging_service.service;
 
-import com.example.messaging_service.dto.identity.UserResponse;
+import java.time.Instant;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
 import com.example.messaging_service.dto.request.CreateConversationRequest;
 import com.example.messaging_service.dto.request.UpdateConversationRequest;
 import com.example.messaging_service.dto.response.ConversationResponse;
@@ -12,17 +18,10 @@ import com.example.messaging_service.mapper.ConversationMapper;
 import com.example.messaging_service.repository.ConversationParticipantRepository;
 import com.example.messaging_service.repository.ConversationRepository;
 import com.example.messaging_service.repository.httpClient.IdentityClient;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import javax.swing.text.html.Option;
-import java.time.Instant;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,9 +35,10 @@ public class ConversationService {
     IdentityClient identityClient;
 
     public ConversationResponse createConversation(CreateConversationRequest request) {
-        List<Conversation> existedParticipantIdBoth = conversationRepository.findByParticipantIdContainingBoth(request.getParticipantIds());
+        List<Conversation> existedParticipantIdBoth =
+                conversationRepository.findByParticipantIdContainingBoth(request.getParticipantIds());
 
-        for (Conversation conversation: existedParticipantIdBoth) {
+        for (Conversation conversation : existedParticipantIdBoth) {
             if (conversation.getParticipantIds().size() == 2) {
                 return conversationMapper.toConversationResponse(conversation);
             }
@@ -64,8 +64,7 @@ public class ConversationService {
     }
 
     public List<ConversationResponse> getUserConversations(String userId) {
-        List<String> conversationIds = participantRepository.findByUserId(userId)
-                .stream()
+        List<String> conversationIds = participantRepository.findByUserId(userId).stream()
                 .map(ConversationParticipant::getConversationId)
                 .collect(Collectors.toList());
         log.info("conversationIds: {}", conversationIds);
@@ -78,12 +77,14 @@ public class ConversationService {
                     conver.setLastMessage(messagingService.getLastMessage(conversation.getId()));
                     return conver;
                 })
-                .sorted(Comparator.comparing(ConversationResponse::getLastMessageAt).reversed())
+                .sorted(Comparator.comparing(ConversationResponse::getLastMessageAt)
+                        .reversed())
                 .collect(Collectors.toList());
     }
 
     public ConversationResponse updateConversation(String conversationId, UpdateConversationRequest request) {
-        Conversation conversation = conversationRepository.findById(conversationId)
+        Conversation conversation = conversationRepository
+                .findById(conversationId)
                 .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_EXISTED));
 
         conversation.setName(request.getName());
@@ -94,7 +95,8 @@ public class ConversationService {
     }
 
     public void addParticipant(String conversationId, String userId) {
-        Conversation conversation = conversationRepository.findById(conversationId)
+        Conversation conversation = conversationRepository
+                .findById(conversationId)
                 .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_EXISTED));
 
         if (!conversation.getParticipantIds().contains(userId)) {
@@ -110,7 +112,8 @@ public class ConversationService {
     }
 
     public void removeParticipant(String conversationId, String userId) {
-        Conversation conversation = conversationRepository.findById(conversationId)
+        Conversation conversation = conversationRepository
+                .findById(conversationId)
                 .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_EXISTED));
 
         if (conversation.getParticipantIds().contains(userId)) {

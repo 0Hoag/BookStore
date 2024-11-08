@@ -1,21 +1,20 @@
 package com.example.post_service.controller;
 
+import java.io.IOException;
+import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.post_service.dto.response.ApiResponse;
-import com.example.post_service.dto.response.ImageResponse;
 import com.example.post_service.dto.response.VideoResponse;
 import com.example.post_service.entity.Video;
-import com.example.post_service.service.ImageService;
 import com.example.post_service.service.VideoService;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.List;
 
 @RestController
 @RequestMapping("/video")

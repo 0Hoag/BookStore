@@ -2,14 +2,17 @@ package com.example.identityservice.service;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.example.event.dto.NotificationEvent;
 import com.example.identityservice.dto.request.ApiResponse;
 import com.example.identityservice.dto.request.OrdersRequest.AddSelectedProductWithOrdersWithUserRequest;
 import com.example.identityservice.dto.request.OrdersRequest.CreateOrdersRequest;
@@ -18,6 +21,7 @@ import com.example.identityservice.dto.request.OrdersRequest.UpdateOrdersRequest
 import com.example.identityservice.dto.request.response.BookResponse;
 import com.example.identityservice.dto.request.response.OrdersResponse.OrdersResponse;
 import com.example.identityservice.dto.request.response.SelectedProductResponse;
+import com.example.identityservice.dto.request.response.UserResponse;
 import com.example.identityservice.dto.request.vn_pay.VNPayResponseDTO;
 import com.example.identityservice.entity.Orders;
 import com.example.identityservice.entity.SelectedProduct;
@@ -50,6 +54,8 @@ public class OrdersService {
     UserRepository userRepository;
     SelectedProductRepository selectedProductRepository;
     SelectedProductMapper selectedProductMapper;
+    UserService userService;
+    KafkaTemplate<String, Object> kafkaTemplate;
 
     BookClient bookClient;
 
@@ -127,6 +133,17 @@ public class OrdersService {
 
         if ("00".equals(responseDTO.getResponseCode()) && "00".equals(responseDTO.getTransactionStatus())) {
             order.setVnpTransactionStatus("PAYMENT_SUCCESS");
+
+            UserResponse userResponse = userService.getMyInfo();
+            log.info("userResponse: {}", userResponse);
+            NotificationEvent notificationEvent = NotificationEvent.builder()
+                    .channel("EMAIL")
+                    .recipient(userResponse.getEmail())
+                    .subject("It your bill book in system to " + LocalDate.now())
+                    .body("Thank you for purchasing our products")
+                    .build();
+
+            kafkaTemplate.send("notification-delivery", notificationEvent);
         } else {
             order.setVnpTransactionStatus("PAYMENT_FAILED");
         }
@@ -239,7 +256,7 @@ public class OrdersService {
         ordersRepository.deleteById(orderId);
     }
 
-private String generateToken(User user) {
+    private String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()

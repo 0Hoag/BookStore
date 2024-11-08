@@ -1,11 +1,11 @@
 package com.example.friend_service.repository;
 
-import com.example.friend_service.entity.FriendRequest;
-import com.example.friend_service.entity.FriendShip;
+import java.util.List;
+
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.example.friend_service.entity.FriendShip;
 
 @Repository
 public interface FriendShipRepository extends MongoRepository<FriendShip, String> {

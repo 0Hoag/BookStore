@@ -12,9 +12,11 @@ import org.springframework.util.CollectionUtils;
 import com.example.identityservice.dto.request.*;
 import com.example.identityservice.dto.request.response.BookResponse;
 import com.example.identityservice.dto.request.response.CartItemResponse;
+import com.example.identityservice.dto.request.response.CartNotificationResponse;
 import com.example.identityservice.dto.request.response.UserResponse;
 import com.example.identityservice.entity.CartItem;
 import com.example.identityservice.entity.User;
+import com.example.identityservice.enums.NotificationType;
 import com.example.identityservice.exception.AppException;
 import com.example.identityservice.exception.ErrorCode;
 import com.example.identityservice.mapper.CartItemMapper;
@@ -22,6 +24,7 @@ import com.example.identityservice.mapper.UserMapper;
 import com.example.identityservice.repository.CartItemRepository;
 import com.example.identityservice.repository.UserRepository;
 import com.example.identityservice.repository.httpclient.BookClient;
+import com.example.identityservice.repository.httpclient.NotificationClient;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -42,6 +45,8 @@ public class CartItemService {
     UserMapper userMapper;
     CartItemRepository cartItemRepository;
     CartItemMapper cartItemMapper;
+    String NOTIFICATION_TOPIC = "cart-notifications";
+    NotificationClient notificationClient;
 
     @NonFinal
     @Value("${jwt.valid-duration}")
@@ -62,12 +67,26 @@ public class CartItemService {
         cartItem.setBookId(request.getBookId());
         cartItem = cartItemRepository.save(cartItem);
 
+        var book = fetchBookResponse(cartItem.getBookId(), generateToken(user));
+        CartNotificationRequest cartNotificationRequest = CartNotificationRequest.builder()
+                .bookId(book.getBookId())
+                .bookTitle(book.getBookTitle())
+                .bookImage(book.getImage())
+                .quantity(cartItem.getQuantity())
+                .price(cartItem.getQuantity() * book.getPrice())
+                .userId(user.getUserId())
+                .idRead(false)
+                .type(NotificationType.ADD_TO_CART)
+                .build();
+        createCartNotification(cartNotificationRequest, token);
+
         CartItemResponse cartItemResponse = cartItemMapper.toCartItemResponse(cartItem);
         BookResponse bookResponse = fetchBookResponse(cartItem.getBookId(), token);
         cartItemResponse.setBookId(bookResponse);
 
         return cartItemResponse;
     }
+
     // replace 7/9
     public CartItemResponse getCartItem(String cartItemId) {
         var cartItem = cartItemRepository
@@ -113,6 +132,7 @@ public class CartItemService {
         Set<CartItem> cartItems =
                 cartItemRepository.findAllById(request.getCartItemId()).stream().collect(Collectors.toSet());
         user.getCartItem().addAll(cartItems);
+
         userRepository.save(user);
 
         Set<CartItemResponse> cartItemResponses = selectedCartItemResponse(cartItems); // update 08/02
@@ -197,5 +217,11 @@ public class CartItemService {
     public BookResponse fetchBookResponse(String bookId, String token) {
         ApiResponse<BookResponse> apiResponse = bookClient.getBook(bookId, "Bearer " + token);
         return apiResponse.getResult();
+    }
+
+    public CartNotificationResponse createCartNotification(CartNotificationRequest request, String token) {
+        ApiResponse<CartNotificationResponse> cartNotificationResponseApiResponse =
+                notificationClient.createCartNotification(request, "Bearer " + token);
+        return cartNotificationResponseApiResponse.getResult();
     }
 }

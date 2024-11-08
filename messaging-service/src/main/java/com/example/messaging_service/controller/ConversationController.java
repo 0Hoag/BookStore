@@ -1,16 +1,18 @@
 package com.example.messaging_service.controller;
 
+import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.example.messaging_service.dto.request.CreateConversationRequest;
 import com.example.messaging_service.dto.response.ApiResponse;
 import com.example.messaging_service.dto.response.ConversationResponse;
 import com.example.messaging_service.service.ConversationService;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @Slf4j

@@ -1,8 +1,9 @@
 package com.example.friend_service.exception;
 
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+
+import lombok.Getter;
 
 @Getter
 public enum ErrorCode {
@@ -19,8 +20,9 @@ public enum ErrorCode {
     BLOCK_LIST_NOT_EXISTED(1010, "BLOCKLIST_NOT_EXISTED", HttpStatus.BAD_REQUEST),
     FRIENDS_REQUEST_NOT_EXISTED(1011, "FRIENDS_REQUEST_NOT_EXISTED", HttpStatus.BAD_REQUEST),
     FRIENDS_SHIP_NOT_EXISTED(1011, "FRIENDS_SHIP_NOT_EXISTED", HttpStatus.BAD_REQUEST),
-    FRIENDS_SHIP_NOT_VALIDATOR(1012, "Can not create friendShip because it not validator condition", HttpStatus.BAD_REQUEST),
-            ;
+    FRIENDS_SHIP_NOT_VALIDATOR(
+            1012, "Can not create friendShip because it not validator condition", HttpStatus.BAD_REQUEST),
+    ;
     private int code;
     private String message;
     private HttpStatusCode statusCode;

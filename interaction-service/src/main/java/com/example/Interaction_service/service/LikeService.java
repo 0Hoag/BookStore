@@ -1,6 +1,12 @@
 package com.example.Interaction_service.service;
 
-import com.example.Interaction_service.dto.request.AddLikeToPostRequest;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
 import com.example.Interaction_service.dto.request.AuthenticationRequest;
 import com.example.Interaction_service.dto.request.CreateLikeRequest;
 import com.example.Interaction_service.dto.response.*;
@@ -11,16 +17,11 @@ import com.example.Interaction_service.mapper.LikeMapper;
 import com.example.Interaction_service.repository.LikeRepository;
 import com.example.Interaction_service.repository.httpClient.IdentityClient;
 import com.example.Interaction_service.repository.httpClient.PostClient;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -49,28 +50,30 @@ public class LikeService {
     }
 
     public LikeResponse getLike(String likeId) {
-        var like = likeRepository.findById(likeId)
-                .orElseThrow(() -> new AppException(ErrorCode.LIKE_NOT_EXISTED));
+        var like = likeRepository.findById(likeId).orElseThrow(() -> new AppException(ErrorCode.LIKE_NOT_EXISTED));
         return likeMapper.toLikeResponse(like);
     }
 
     public List<LikeResponse> getAllLike() {
-        return likeRepository.findAll()
-                .stream().map(like -> {
-                        var like1 = likeRepository.findById(like.getLikeId())
+        return likeRepository.findAll().stream()
+                .map(like -> {
+                    var like1 = likeRepository
+                            .findById(like.getLikeId())
                             .orElseThrow(() -> new AppException(ErrorCode.LIKE_NOT_EXISTED));
-                        return likeMapper.toLikeResponse(like1);
+                    return likeMapper.toLikeResponse(like1);
                 })
                 .collect(Collectors.toList());
     }
 
     public Set<Like> selectedLike(Set<String> strings) {
-        Set<Like> likeSet = likeRepository.findAllById(strings)
-                .stream().map(like -> {
-                    Like like1 = likeRepository.findById(like.getLikeId())
+        Set<Like> likeSet = likeRepository.findAllById(strings).stream()
+                .map(like -> {
+                    Like like1 = likeRepository
+                            .findById(like.getLikeId())
                             .orElseThrow(() -> new AppException(ErrorCode.LIKE_NOT_EXISTED));
                     return like1;
-                }).collect(Collectors.toSet());
+                })
+                .collect(Collectors.toSet());
         return likeSet;
     }
 
@@ -79,20 +82,19 @@ public class LikeService {
                 .map(like -> {
                     LikeResponse likeResponse = likeMapper.toLikeResponse(like);
                     return likeResponse;
-                }).collect(Collectors.toSet());
+                })
+                .collect(Collectors.toSet());
         return likeResponses;
     }
 
     public void deleteLike(String likeId) {
-        likeRepository.findById(likeId)
-                        .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
+        likeRepository.findById(likeId).orElseThrow(() -> new AppException(ErrorCode.POST_NOT_EXISTED));
         likeRepository.deleteById(likeId);
     }
 
     public void deleteAllLike() {
         likeRepository.deleteAll();
     }
-
 
     public PostResponse getPost(String postId, String token) {
         ApiResponse<PostResponse> postResponseApiResponse = postClient.getPost(postId, "Bearer " + token);
@@ -104,6 +106,7 @@ public class LikeService {
         ApiResponse<AuthenticationResponse> getToken = identityClient.getToken(authenticationRequest);
         return getToken.getResult().getToken();
     }
+
     private UserResponse getUserInformationBasic(String userId, String token) {
         ApiResponse<UserResponse> userResponse = identityClient.getUserInformationBasic(userId, "Bearer " + token);
         return userResponse.getResult();

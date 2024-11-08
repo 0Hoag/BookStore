@@ -1,17 +1,19 @@
 package com.example.friend_service.controller;
 
+import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.example.friend_service.dto.request.CreateFriendRequest;
 import com.example.friend_service.dto.request.UpdateFriendStatus;
 import com.example.friend_service.dto.response.ApiResponse;
 import com.example.friend_service.dto.response.FriendResponse;
 import com.example.friend_service.service.FriendRequestService;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -22,10 +24,11 @@ public class FriendRequestController {
     FriendRequestService friendRequestService;
 
     @PostMapping("/Registration")
-    public ApiResponse<FriendResponse> createFriendRequest(@RequestBody CreateFriendRequest request) {
+    public ApiResponse<FriendResponse> createFriendRequest(
+            @RequestBody CreateFriendRequest request, @RequestHeader("Authorization") String token) {
         return ApiResponse.<FriendResponse>builder()
                 .code(1000)
-                .result(friendRequestService.createRequest(request))
+                .result(friendRequestService.createRequest(request, token))
                 .build();
     }
 
@@ -46,7 +49,8 @@ public class FriendRequestController {
     }
 
     @PutMapping("/updateFriendRequest/{requestId}")
-    ApiResponse<FriendResponse> updateFriendStatus(@PathVariable String requestId, @RequestBody UpdateFriendStatus status) {
+    ApiResponse<FriendResponse> updateFriendStatus(
+            @PathVariable String requestId, @RequestBody UpdateFriendStatus status) {
         return ApiResponse.<FriendResponse>builder()
                 .code(1000)
                 .result(friendRequestService.updateFriendCondition(requestId, status))

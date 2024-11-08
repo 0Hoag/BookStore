@@ -8,7 +8,7 @@ spring:
     name: profile-service
 
   neo4j:
-    uri: bolt://localhost:7687
+    uri: YOU_URI
     authentication:
-      username: USER_NAME
-      password: PASS_WORD
+      username: YOU_USERNAME
+      password: YOU_PASSWORD

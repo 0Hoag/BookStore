@@ -2,10 +2,11 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Button, Card, CardContent, Divider, TextField, Typography, Snackbar, Alert } from "@mui/material";
 import GoogleIcon from "@mui/icons-material/Google";
-import FacebookIcon from "@mui/icons-material/Facebook";
+import GitHubIcon from "@mui/icons-material/GitHub";
 import { logIn, isAuthenticated } from "../services/authenticationService";
 import { getToken, setToken } from "../services/localStorageService";
 import { OAuthConfig } from "../configurations/configuration";
+import { OAuthConfigGithub } from "../configurations/configuration";
 import './Login.css';
 export default function Login() {
   const navigate = useNavigate();
@@ -26,6 +27,19 @@ export default function Login() {
       callbackUrl
     )}&response_type=code&client_id=${googleClientId}&scope=openid%20email%20profile`;
 
+    console.log(targetUrl);
+    window.location.href = targetUrl;
+  };
+
+  const handleGithubLogin = () => {
+    const callbackUrl = OAuthConfigGithub.redirectUri;
+    const authUrl = OAuthConfigGithub.authUri;
+    const githubClientId = OAuthConfigGithub.clientId;
+    
+    const targetUrl = `${authUrl}?redirect_uri=${encodeURIComponent(
+      callbackUrl
+    )}&client_id=${githubClientId}&scope=user%20user:email`;
+    
     console.log(targetUrl);
     window.location.href = targetUrl;
   };
@@ -192,11 +206,12 @@ export default function Login() {
                 type="button"
                 variant="contained"
                 size="large"
+                onClick={handleGithubLogin}
                 fullWidth
-                sx={{ backgroundColor: "#4267b2", ":hover": { backgroundColor: "#365899" }, gap: "10px" }}
+                sx={{ backgroundColor: "#0A0A0A", ":hover": { backgroundColor: "#0A0A0A" }, gap: "10px" }}
               >
-                <FacebookIcon />
-                Continue with Facebook
+                <GitHubIcon />
+                Continue with Github
               </Button>
               <Button
                 type="button"
@@ -205,7 +220,7 @@ export default function Login() {
                 size="large"
                 fullWidth
                 onClick={handleCreateAccount}
-                sx={{ backgroundColor: "#42b72a", ":hover": { backgroundColor: "#36a420" } }}
+                sx={{ backgroundColor: "#42b72a", ":hover": { backgroundColor: "#0A0A0A" } }}
               >
                 Create an account
               </Button>

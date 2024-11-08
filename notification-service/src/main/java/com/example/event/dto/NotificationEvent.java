@@ -1,9 +1,9 @@
 package com.example.event.dto;
 
+import java.util.Map;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.Map;
 
 @Data
 @Builder
@@ -11,10 +11,10 @@ import java.util.Map;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class NotificationEvent {
-   String channel;
-   String recipient;
-   String templateCode;
-   Map<String, Object> param;
-   String subject;
-   String body;
+    String channel;
+    String recipient;
+    String templateCode;
+    Map<String, Object> param;
+    String subject;
+    String body;
 }

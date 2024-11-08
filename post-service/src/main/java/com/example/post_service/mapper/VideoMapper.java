@@ -1,17 +1,13 @@
 package com.example.post_service.mapper;
 
-import com.example.post_service.dto.request.CreateImageRequest;
-import com.example.post_service.dto.request.CreateVideoRequest;
-import com.example.post_service.dto.response.ImageResponse;
-import com.example.post_service.dto.response.VideoResponse;
-import com.example.post_service.entity.Image;
-import com.example.post_service.entity.Video;
+import java.util.Base64;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.sql.Blob;
-import java.sql.SQLException;
-import java.util.Base64;
+import com.example.post_service.dto.request.CreateVideoRequest;
+import com.example.post_service.dto.response.VideoResponse;
+import com.example.post_service.entity.Video;
 
 @Mapper(componentModel = "spring")
 public interface VideoMapper {

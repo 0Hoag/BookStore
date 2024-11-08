@@ -5,7 +5,12 @@ import { getToken } from "./localStorageService";
 const friendService = {
   createFriendRequest: async (newRequest) => {
     try {
-      const response = await httpClient.post(API.CREATE_FRIEND_REQUEST, newRequest);
+      const token = getToken();
+      const response = await httpClient.post(API.CREATE_FRIEND_REQUEST, newRequest, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data.result;
     }catch (error) {
       throw error;

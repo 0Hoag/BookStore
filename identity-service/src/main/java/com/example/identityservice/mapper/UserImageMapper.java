@@ -1,13 +1,13 @@
 package com.example.identityservice.mapper;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingTarget;
+
 import com.example.identityservice.dto.request.UserImageRequest;
 import com.example.identityservice.dto.request.UserImageUpdateRequest;
 import com.example.identityservice.dto.request.response.UserImageResponse;
 import com.example.identityservice.entity.User;
 import com.example.identityservice.entity.UserImage;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface UserImageMapper {

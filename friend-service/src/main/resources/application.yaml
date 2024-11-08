@@ -8,3 +8,7 @@ spring:
     mongodb:
       port: 27021
       database: friends
+
+app:
+  services:
+    notification: YOU_NOTIFICATION

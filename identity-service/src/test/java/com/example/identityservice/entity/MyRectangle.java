@@ -1,9 +1,6 @@
 package com.example.identityservice.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Data
 public class MyRectangle {
@@ -24,10 +21,8 @@ public class MyRectangle {
     }
 
     public void setWidth(double width) {
-        if(width > 0)
-            this.width = width;
-        else
-            this.width = 0;
+        if (width > 0) this.width = width;
+        else this.width = 0;
     }
 
     public boolean isSquare() {
@@ -83,10 +78,8 @@ public class MyRectangle {
     }
 
     public void setHeight(double height) {
-        if(height > 0)
-            this.height = height;
-        else
-            this.height = 0;
+        if (height > 0) this.height = height;
+        else this.height = 0;
     }
 
     public double getArea() {
@@ -96,5 +89,4 @@ public class MyRectangle {
     public double getPerimeter() {
         return (this.width + this.height) * 2;
     }
-
 }

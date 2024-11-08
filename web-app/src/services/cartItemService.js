@@ -5,7 +5,12 @@ import { getToken } from "./localStorageService";
 const cartItemService = {
   createCartItem: async (newCartItem) => {
     try {
-      const response = await httpClient.post(API.CREATE_CART_ITEM, newCartItem);
+      const token = getToken();
+      const response = await httpClient.post(API.CREATE_CART_ITEM, newCartItem, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      });
       return response.data;
     } catch (error) {
       throw error;

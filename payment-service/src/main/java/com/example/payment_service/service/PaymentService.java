@@ -1,5 +1,11 @@
 package com.example.payment_service.service;
 
+import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
 import com.example.payment_service.dto.request.AuthenticationRequest;
 import com.example.payment_service.dto.request.CreatePaymentRequest;
 import com.example.payment_service.dto.request.UpdatePaymentRequest;
@@ -13,15 +19,11 @@ import com.example.payment_service.repository.PaymentRepository;
 import com.example.payment_service.repository.httpClient.BookClient;
 import com.example.payment_service.repository.httpClient.IdentityClient;
 import com.example.payment_service.repository.httpClient.ProfileClient;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,22 +40,25 @@ public class PaymentService {
         String token = getTokenFromIdentityService();
         var payment = paymentMapper.toPayment(request);
 
-        //if PaymentMethod not COD
+        // if PaymentMethod not COD
         if (payment.getPaymentMethod() != PaymentMethod.COD) {
-            payment.setPaymentDate(LocalDateTime.now()) ;
+            payment.setPaymentDate(LocalDateTime.now());
         }
 
         payment = paymentRepository.save(payment);
 
         OrdersResponse ordersResponse = fetchOrder(payment.getOrderId(), token);
 
-        Set<SelectedProductResponse> selectedProductResponses = ordersResponse.getSelectedProducts()
-                .stream().map(selectedProductResponse -> {
-                    SelectedProductResponse selectedProductResponse1 = fetchSelectedProduct(selectedProductResponse.getSelectedId(), token);
-                    BookResponse bookResponse = fetchBookInformation(selectedProductResponse1.getBookId().getBookId(), token);
+        Set<SelectedProductResponse> selectedProductResponses = ordersResponse.getSelectedProducts().stream()
+                .map(selectedProductResponse -> {
+                    SelectedProductResponse selectedProductResponse1 =
+                            fetchSelectedProduct(selectedProductResponse.getSelectedId(), token);
+                    BookResponse bookResponse = fetchBookInformation(
+                            selectedProductResponse1.getBookId().getBookId(), token);
                     selectedProductResponse1.setBookId(bookResponse);
                     return selectedProductResponse;
-                }).collect(Collectors.toSet());
+                })
+                .collect(Collectors.toSet());
 
         ordersResponse.setSelectedProducts(selectedProductResponses);
 
@@ -65,18 +70,22 @@ public class PaymentService {
 
     public PaymentResponse getPayment(String paymentId) {
         String token = getTokenFromIdentityService();
-        var payment = paymentRepository.findById(paymentId)
+        var payment = paymentRepository
+                .findById(paymentId)
                 .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_EXISTED));
 
         OrdersResponse ordersResponse = fetchOrder(payment.getOrderId(), token);
 
-        Set<SelectedProductResponse> selectedProductResponses = ordersResponse.getSelectedProducts()
-                .stream().map(selectedProductResponse -> {
-                    SelectedProductResponse selectedProductResponse1 = fetchSelectedProduct(selectedProductResponse.getSelectedId(), token);
-                    BookResponse bookResponse = fetchBookInformation(selectedProductResponse1.getBookId().getBookId(), token);
+        Set<SelectedProductResponse> selectedProductResponses = ordersResponse.getSelectedProducts().stream()
+                .map(selectedProductResponse -> {
+                    SelectedProductResponse selectedProductResponse1 =
+                            fetchSelectedProduct(selectedProductResponse.getSelectedId(), token);
+                    BookResponse bookResponse = fetchBookInformation(
+                            selectedProductResponse1.getBookId().getBookId(), token);
                     selectedProductResponse1.setBookId(bookResponse);
                     return selectedProductResponse1;
-                }).collect(Collectors.toSet());
+                })
+                .collect(Collectors.toSet());
 
         ordersResponse.setSelectedProducts(selectedProductResponses);
 
@@ -88,29 +97,37 @@ public class PaymentService {
 
     public Set<PaymentResponse> getAllPayment() {
         String token = getTokenFromIdentityService();
-        return paymentRepository.findAll()
-                .stream().map(payment -> {
+        return paymentRepository.findAll().stream()
+                .map(payment -> {
                     PaymentResponse paymentRespose = paymentMapper.toPaymentResponse(payment);
-                    OrdersResponse ordersResponse = fetchOrder(paymentRespose.getOrderId().getOrderId(), token);
+                    OrdersResponse ordersResponse =
+                            fetchOrder(paymentRespose.getOrderId().getOrderId(), token);
 
-                    Set<SelectedProductResponse> selectedProductResponses = ordersResponse.getSelectedProducts()
-                            .stream().map(selectedProductResponse -> {
-                                SelectedProductResponse selectedProductResponse1 = fetchSelectedProduct(selectedProductResponse.getSelectedId(), token);
-                                BookResponse bookResponse = fetchBookInformation(selectedProductResponse1.getBookId().getBookId(), token);
-                                selectedProductResponse1.setBookId(bookResponse);
-                                return selectedProductResponse1;
-                            }).collect(Collectors.toSet());
+                    Set<SelectedProductResponse> selectedProductResponses =
+                            ordersResponse.getSelectedProducts().stream()
+                                    .map(selectedProductResponse -> {
+                                        SelectedProductResponse selectedProductResponse1 =
+                                                fetchSelectedProduct(selectedProductResponse.getSelectedId(), token);
+                                        BookResponse bookResponse = fetchBookInformation(
+                                                selectedProductResponse1
+                                                        .getBookId()
+                                                        .getBookId(),
+                                                token);
+                                        selectedProductResponse1.setBookId(bookResponse);
+                                        return selectedProductResponse1;
+                                    })
+                                    .collect(Collectors.toSet());
 
                     ordersResponse.setSelectedProducts(selectedProductResponses);
                     paymentRespose.setOrderId(ordersResponse);
                     return paymentRespose;
-                }).collect(Collectors.toSet());
+                })
+                .collect(Collectors.toSet());
     }
 
     public Set<PaymentResponse> getPaymenByUserId(String userId) {
         Set<Payment> payments = paymentRepository.findByUserId(userId);
-        return payments.stream().map(paymentMapper::toPaymentResponse)
-                .collect(Collectors.toSet());
+        return payments.stream().map(paymentMapper::toPaymentResponse).collect(Collectors.toSet());
     }
 
     public void deletePayment(String paymentId) {
@@ -118,7 +135,8 @@ public class PaymentService {
     }
 
     public PaymentResponse updatePayment(String paymentId, UpdatePaymentRequest request) {
-        var payment = paymentRepository.findById(paymentId)
+        var payment = paymentRepository
+                .findById(paymentId)
                 .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_EXISTED));
         paymentMapper.updatePayment(payment, request);
         payment = paymentRepository.save(payment);
@@ -137,7 +155,8 @@ public class PaymentService {
     }
 
     private UserProfileResponse fetchUserProfile(String profileId, String token) {
-        ApiResponse<UserProfileResponse> userProfileResponseApiResponse = profileClient.getProfile(profileId, "Bearer " + token);
+        ApiResponse<UserProfileResponse> userProfileResponseApiResponse =
+                profileClient.getProfile(profileId, "Bearer " + token);
         return userProfileResponseApiResponse.getResult();
     }
 
@@ -152,7 +171,8 @@ public class PaymentService {
     }
 
     private SelectedProductResponse fetchSelectedProduct(String SelectedId, String token) {
-        ApiResponse<SelectedProductResponse> selectedProductResponseApiResponse = identityClient.getSelectedProduct(SelectedId, "Bearer " + token);
+        ApiResponse<SelectedProductResponse> selectedProductResponseApiResponse =
+                identityClient.getSelectedProduct(SelectedId, "Bearer " + token);
         return selectedProductResponseApiResponse.getResult();
     }
 }

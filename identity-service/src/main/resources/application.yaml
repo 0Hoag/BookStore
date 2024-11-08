@@ -1,51 +1,55 @@
-spring:
-  application:
-    name: identity-service
-  datasource:
-    url: ${DBMS_CONNECTION}
-    driverClassName: "com.mysql.cj.jdbc.Driver"
-    username: ${DBMS_USERNAME}
-    password: ${DBMS_PASSWORD}
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-  kafka:
-    bootstrap-servers: YOU_URL
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  spring:
+    application:
+      name: identity-service
+    datasource:
+      url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3306/identity-service}
+      driverClassName: "com.mysql.cj.jdbc.Driver"
+      username: root
+      password: 601748
+    jpa:
+      hibernate:
+        ddl-auto: update
+      show-sql: true
+    kafka:
+      bootstrap-servers: localhost:9094
+      producer:
+        key-serializer: org.apache.kafka.common.serialization.StringSerializer
+        value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
 
-server:
-  port: 7777
-  servlet:
-    context-path: /identity
+  server:
+    port: 7777
+    servlet:
+      context-path: /identity
 
-jwt:
-  signerKey: "YOU_SIGNER_KEY"
-  valid-duration: 6000 # in second
-  refreshtable-duration: 1200 # in seconds
+  jwt:
+    signerKey: "YOU_SIGNER_KEY"
+    valid-duration: 6000 # in second
+    refreshtable-duration: 1200 # in seconds
 
-outbound:
-  identity:
-    client-id: "YOU_CLIENT_ID"
-    client-secret: "YOU_CLIENT_SECRET"
-    redirect-uri: "YOU_REDIRECT_URI"
+  outbound:
+    google:
+      client-id: "YOU_CLIENT_ID"
+      client-secret: "YOU_CLIENT_SECRET"
+      redirect-uri: "http://localhost:3000/authenticate"
+    github:
+      client-id: "YOU_CLIENT_ID"
+      client-secret: "YOU_CLIENT_SECRET"
+      redirect-uri: "http://localhost:3000/login/oauth2/code/github"
 
-app:
-  services:
-    profile: YOU_PROFILE_URL
-    book: YOU_BOOK_URL
-    payment: YOU_PAYMENT_URL
+  app:
+    services:
+      profile: http://localhost:8081/profile
+      book: http://localhost:8084/book
+      payment: http://localhost:8085/payment
+      notification: http://localhost:8082/notification
 
-vnpay:
-  payment-url: "YOU_PAYMENT_URL"
-  tmn-code: "YOU_TMN_CODE"
-  hash-secret: "YOU_HASH_SECRET"
+  vnpay:
+    payment-url: "YOU_URL"
+    tmn-code: "YOU_CODE"
+    hash-secret: "YOU_SECRET_CODE"
 
-cloudinary:
-  cloud-name: "CLOUD_NAME"
-  api-key: "API_KEY"
-  api-secret: "API_SECRET"
-
+  cloudinary:
+    cloud-name: "YOU_CLOUD_NAME"
+    api-key: "YOU_API_KEY"
+    api-secret: "YOU_API_SECRET"
 

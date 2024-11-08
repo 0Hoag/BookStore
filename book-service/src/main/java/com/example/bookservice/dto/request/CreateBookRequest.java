@@ -2,9 +2,6 @@ package com.example.bookservice.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.multipart.MultipartFile;
-
-import org.springframework.web.multipart.MultipartFile;
 
 @Data
 @AllArgsConstructor

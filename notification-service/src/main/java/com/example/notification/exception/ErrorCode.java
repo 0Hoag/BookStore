@@ -1,8 +1,9 @@
 package com.example.notification.exception;
 
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+
+import lombok.Getter;
 
 @Getter
 public enum ErrorCode {
@@ -11,7 +12,8 @@ public enum ErrorCode {
     UNAUTHENTICATED(1002, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1003, "You do not have permission", HttpStatus.FORBIDDEN),
     INVALID_DOB(1004, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
-    CANNOT_SEND_EMAIL(1005, "Cannot send email", HttpStatus.BAD_REQUEST)
+    CANNOT_SEND_EMAIL(1005, "Cannot send email", HttpStatus.BAD_REQUEST),
+    SEND_NOT_EXISTED(1006, "Send not existed", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

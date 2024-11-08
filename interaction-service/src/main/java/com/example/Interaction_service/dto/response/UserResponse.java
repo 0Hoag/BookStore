@@ -2,6 +2,7 @@ package com.example.Interaction_service.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

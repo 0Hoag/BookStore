@@ -16,11 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    private final String[] publicEnpoint = {
-            "/blockList/registration",
-            "/Request/Registration",
-            "/ship/Registration"
-    };
+    private final String[] publicEnpoint = {"/blockList/registration", "/Request/Registration", "/ship/Registration"};
 
     private final CustomJwtDecoder customJwtDecoder;
 

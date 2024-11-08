@@ -1,24 +1,64 @@
-import React, { useEffect, useState } from "react";
-import { Box, Button, Grid, Typography } from "@mui/material";
+import React, { useEffect, useState, useCallback } from "react";
+import { Box, Button, Grid, Typography, CircularProgress } from "@mui/material";
 import bookService from "../../services/bookService";
 import BookCard from "./BookCard";
 import Scene from "../Scene";
 
-const DeleteBook = () => {
+const BookDelete = () => {
   const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [pageNum, setPageNum] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const pageSize = 10;
+
+  const fetchBooks = useCallback(async (pageNum) => {
+    try {
+      setLoading(pageNum === 1);
+      setLoadingMore(pageNum > 1);
+      const response = await bookService.getAllBooks(pageNum, pageSize);
+      if (response.data.result) {
+        setBooks(prevBooks => 
+          pageNum === 1 
+            ? response.data.result.data 
+            : [...prevBooks, ...response.data.result.data]
+        );
+        setTotalPages(response.data.result.totalPages);
+      }
+    } catch (error) {
+      console.error('Error fetching books:', error);
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
+  }, []);
+
+  const loadMoreBooks = () => {
+    if (pageNum < totalPages && !loadingMore) {
+      setPageNum(prev => prev + 1);
+    }
+  };
 
   useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const response = await bookService.getAllBooks();
-        setBooks(response.result.data);
-      } catch (error) {
-        console.error('Error fetching books:', error);
+    fetchBooks(pageNum);
+  }, [pageNum]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+
+      if (scrollTop + windowHeight >= documentHeight - 100) {
+        loadMoreBooks();
       }
     };
 
-    fetchBooks();
-  }, []);
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [loadingMore, pageNum, totalPages]);
 
   const handleDeleteBook = async (bookId) => {
     try {
@@ -36,10 +76,10 @@ const DeleteBook = () => {
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          height: '100vh',
-          bgcolor: '#1e1e1e', // Dark background color
-          color: '#e0e0e0', // Light text color
+          justifyContent: 'flex-start',
+          minHeight: '100vh',
+          bgcolor: '#1e1e1e',
+          color: '#e0e0e0',
           p: 3,
         }}
       >
@@ -49,7 +89,7 @@ const DeleteBook = () => {
         <Grid container spacing={2} justifyContent="center">
           {books.map(book => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={book.bookId}>
-              <BookCard book={book} />
+              <BookCard book={book}/>
               <Button
                 variant="outlined"
                 color="secondary"
@@ -61,9 +101,10 @@ const DeleteBook = () => {
             </Grid>
           ))}
         </Grid>
+        {loadingMore && <CircularProgress />}
       </Box>
     </Scene>
   );
 };
 
-export default DeleteBook;
+export default BookDelete;

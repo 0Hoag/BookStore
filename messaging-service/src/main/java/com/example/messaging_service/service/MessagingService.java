@@ -1,5 +1,17 @@
 package com.example.messaging_service.service;
 
+import java.time.Instant;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+
 import com.example.messaging_service.dto.identity.AuthenticationRequest;
 import com.example.messaging_service.dto.identity.AuthenticationResponse;
 import com.example.messaging_service.dto.identity.UserResponse;
@@ -16,20 +28,11 @@ import com.example.messaging_service.mapper.MessagingMapper;
 import com.example.messaging_service.repository.ConversationRepository;
 import com.example.messaging_service.repository.MessagingRepository;
 import com.example.messaging_service.repository.httpClient.IdentityClient;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -38,10 +41,10 @@ import java.util.stream.Collectors;
 public class MessagingService {
 
     MessagingMapper messagingMapper;
-
     ConversationRepository conversationRepository;
     MessagingRepository messagingRepository;
     IdentityClient identityClient;
+    KafkaTemplate<String, Object> kafkaTemplate;
 
     public MessagingResponse sendMessage(CreateMessagingRequest request) {
 
@@ -54,15 +57,18 @@ public class MessagingService {
         UserResponse user = getUserInformationBasic(request.getSenderId(), token);
         if (user == null) throw new AppException(ErrorCode.USER_NOT_EXISTED);
 
-        conversationRepository.findById(request.getConversationId())
-                .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_EXISTED));
+        messagingRepository.save(mess);
+        MessagingResponse messageResponse = messagingMapper.toMessagingResponse(mess);
 
-        return messagingMapper.toMessagingResponse(messagingRepository.save(mess));
+        //        log.info("Sending message to Kafka topic: messages-notification, payload: {}", messageResponse);
+        //
+        //        kafkaTemplate.send("message-notifications", messageResponse);
+
+        return messageResponse;
     }
 
     public List<MessagingResponse> getAllMessage() {
-        return messagingRepository.findAll()
-                .stream()
+        return messagingRepository.findAll().stream()
                 .map(messagingMapper::toMessagingResponse)
                 .collect(Collectors.toList());
     }
@@ -70,30 +76,31 @@ public class MessagingService {
     public List<ConversationListItem> getUserConversationList(String userId, int limit) {
         // Lấy danh sách cuộc trò chuyện của người dùng
         Page<Conversation> conversationsPage = conversationRepository.findByParticipantIdsContaining(
-                userId,
-                PageRequest.of(0, limit, Sort.by("lastMessageAt").descending()));
+                userId, PageRequest.of(0, limit, Sort.by("lastMessageAt").descending()));
         log.info("conversationsPage {}", conversationsPage);
         // Lấy ID của tất cả cuộc trò chuyện
-        List<String> conversationIds = conversationsPage.stream().map(Conversation::getId).collect(Collectors.toList());
+        List<String> conversationIds =
+                conversationsPage.stream().map(Conversation::getId).collect(Collectors.toList());
         log.info("conversationIds {}", conversationIds);
 
         // Lấy tin nhắn cuối cùng cho tất cả cuộc trò chuyện trong một truy vấn
         List<Message> lastMessages = messagingRepository.findLastMessagesByConversationIdsAggregation(conversationIds);
-        Map<String, Message> lastMessageMap = lastMessages.stream()
-                .collect(Collectors.toMap(Message::getConversationId, Function.identity()));
+        Map<String, Message> lastMessageMap =
+                lastMessages.stream().collect(Collectors.toMap(Message::getConversationId, Function.identity()));
 
         // Tạo danh sách kết quả
-        return conversationsPage.stream().map(conversation -> {
-            Message lastMessage = lastMessageMap.get(conversation.getId());
-            String title = getConversationTitle(conversation, userId, lastMessage);
-            return new ConversationListItem(
-                    conversation.getId(),
-                    title,
-                    lastMessage != null ? lastMessage.getContent() : "",
-                    lastMessage != null ? lastMessage.getTimestamp() : conversation.getCreateAt(),
-                    lastMessage != null ? lastMessage.getSenderId() : null
-            );
-        }).collect(Collectors.toList());
+        return conversationsPage.stream()
+                .map(conversation -> {
+                    Message lastMessage = lastMessageMap.get(conversation.getId());
+                    String title = getConversationTitle(conversation, userId, lastMessage);
+                    return new ConversationListItem(
+                            conversation.getId(),
+                            title,
+                            lastMessage != null ? lastMessage.getContent() : "",
+                            lastMessage != null ? lastMessage.getTimestamp() : conversation.getCreateAt(),
+                            lastMessage != null ? lastMessage.getSenderId() : null);
+                })
+                .collect(Collectors.toList());
     }
 
     private String getConversationTitle(Conversation conversation, String currentUserId, Message firstMessage) {
@@ -124,26 +131,28 @@ public class MessagingService {
                 .pageSize(pageData.getSize())
                 .totalElements(pageData.getTotalElements())
                 .totalPages(pageData.getTotalPages())
-                .data(pageData.getContent()
-                        .stream()
+                .data(pageData.getContent().stream()
                         .map(message -> {
-                                        var messageResponse = messagingMapper.toMessagingResponse(message);
-                                        messagingRepository.findById(messageResponse.getId()).orElseThrow(() -> new AppException(ErrorCode.MESSAGE_NOT_EXISTED));
-                                        conversationRepository.findById(messageResponse.getConversationId()).orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_EXISTED));
-                                        UserResponse userResponse = getUserInformationBasic(message.getSenderId(), generationToken());
-                                        if (userResponse == null) throw new AppException(ErrorCode.USER_NOT_EXISTED);
-                                        return messageResponse;
-                        }).collect(Collectors.toList()))
+                            var messageResponse = messagingMapper.toMessagingResponse(message);
+                            UserResponse userResponse =
+                                    getUserInformationBasic(message.getSenderId(), generationToken());
+                            if (userResponse == null) throw new AppException(ErrorCode.USER_NOT_EXISTED);
+                            return messageResponse;
+                        })
+                        .collect(Collectors.toList()))
                 .build();
     }
 
     public MessagingResponse getLastMessage(String conversationId) {
         Message lastMessage = messagingRepository.findFirstByConversationIdOrderByTimestampDesc(conversationId);
-        return lastMessage != null ? messagingMapper.toMessagingResponse(lastMessage) : new MessagingResponse(); // Return an empty response instead of null
+        return lastMessage != null
+                ? messagingMapper.toMessagingResponse(lastMessage)
+                : new MessagingResponse(); // Return an empty response instead of null
     }
 
     public void addReaction(String messageId, String userId, String reaction) {
-        Message message = messagingRepository.findById(messageId)
+        Message message = messagingRepository
+                .findById(messageId)
                 .orElseThrow(() -> new AppException(ErrorCode.MESSAGE_NOT_EXISTED));
 
         if (message.getReactions() == null) {
@@ -154,7 +163,8 @@ public class MessagingService {
     }
 
     public void removeReaction(String messageId, String userId) {
-        Message message = messagingRepository.findById(messageId)
+        Message message = messagingRepository
+                .findById(messageId)
                 .orElseThrow(() -> new AppException(ErrorCode.MESSAGE_NOT_EXISTED));
 
         if (message.getReactions() != null) {
@@ -168,6 +178,7 @@ public class MessagingService {
         ApiResponse<AuthenticationResponse> getToken = identityClient.getToken(authenticationRequest);
         return getToken.getResult().getToken();
     }
+
     private UserResponse getUserInformationBasic(String userId, String token) {
         ApiResponse<UserResponse> userResponse = identityClient.getUserInformationBasic(userId, "Bearer " + token);
         return userResponse.getResult();

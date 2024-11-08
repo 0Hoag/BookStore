@@ -1,5 +1,10 @@
 package com.example.friend_service.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.example.friend_service.dto.request.FriendShipRequest;
 import com.example.friend_service.dto.response.FriendShipResponse;
 import com.example.friend_service.enums.Condition;
@@ -7,18 +12,13 @@ import com.example.friend_service.enums.RelationShip;
 import com.example.friend_service.exception.AppException;
 import com.example.friend_service.exception.ErrorCode;
 import com.example.friend_service.mapper.FriendShipMapper;
-import com.example.friend_service.repository.FeignClient.IdentityClient;
 import com.example.friend_service.repository.FriendRequestRepository;
 import com.example.friend_service.repository.FriendShipRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
 
 @Service
 @RequiredArgsConstructor
@@ -30,10 +30,12 @@ public class FriendShipService {
     FriendShipMapper friendShipMapper;
 
     public FriendShipResponse createFriendShip(FriendShipRequest request) {
-        var friendRequest = friendRequestRepository.findBySenderIdAndReceiverId(request.getUserId1(), request.getUserId2());
+        var friendRequest =
+                friendRequestRepository.findBySenderIdAndReceiverId(request.getUserId1(), request.getUserId2());
 
         if (friendRequest == null) {
-            friendRequest = friendRequestRepository.findBySenderIdAndReceiverId(request.getUserId2(), request.getUserId1());
+            friendRequest =
+                    friendRequestRepository.findBySenderIdAndReceiverId(request.getUserId2(), request.getUserId1());
         }
 
         if (friendRequest == null || friendRequest.getCondition() != Condition.ACCEPTED) {
@@ -50,7 +52,8 @@ public class FriendShipService {
     }
 
     public FriendShipResponse getFriendShip(String friendshipId) {
-        var friendShip = friendShipRepository.findById(friendshipId)
+        var friendShip = friendShipRepository
+                .findById(friendshipId)
                 .orElseThrow(() -> new AppException(ErrorCode.FRIENDS_SHIP_NOT_EXISTED));
         return friendShipMapper.toFriendResponse(friendShip);
     }
@@ -62,7 +65,9 @@ public class FriendShipService {
     }
 
     public void deleteFriendShip(String friendshipId) {
-        friendShipRepository.findById(friendshipId).orElseThrow(() -> new AppException(ErrorCode.FRIENDS_REQUEST_NOT_EXISTED));
+        friendShipRepository
+                .findById(friendshipId)
+                .orElseThrow(() -> new AppException(ErrorCode.FRIENDS_REQUEST_NOT_EXISTED));
         friendShipRepository.deleteById(friendshipId);
     }
 

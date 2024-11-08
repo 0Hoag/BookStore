@@ -1,12 +1,12 @@
 package com.example.bookservice.controller;
 
 import java.io.IOException;
-import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.bookservice.dto.PageResponse;
 import com.example.bookservice.dto.request.*;
-import org.springframework.web.bind.annotation.*;
-
 import com.example.bookservice.dto.response.ApiResponse;
 import com.example.bookservice.dto.response.BookResponse;
 import com.example.bookservice.service.BookService;
@@ -14,7 +14,6 @@ import com.example.bookservice.service.BookService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,9 +22,7 @@ public class BookController {
     BookService bookService;
 
     @PostMapping("/registration")
-    public ApiResponse<BookResponse> createBook(
-            @RequestBody CreateBookRequest request
-    ) throws IOException {
+    public ApiResponse<BookResponse> createBook(@RequestBody CreateBookRequest request) throws IOException {
         return ApiResponse.<BookResponse>builder()
                 .code(1000)
                 .result(bookService.createBook(request))
@@ -41,7 +38,8 @@ public class BookController {
     }
 
     @PostMapping("/addChapter/{bookId}")
-    public ApiResponse<BookResponse> addChapterWithBook(@PathVariable String bookId, @RequestBody AddChaptersRequest request) {
+    public ApiResponse<BookResponse> addChapterWithBook(
+            @PathVariable String bookId, @RequestBody AddChaptersRequest request) {
         return ApiResponse.<BookResponse>builder()
                 .code(1000)
                 .result(bookService.addChaptertoBook(bookId, request))
@@ -49,9 +47,8 @@ public class BookController {
     }
 
     @PutMapping("/updateImageBook/{bookId}")
-    public ApiResponse<BookResponse> updateBook(
-            @PathVariable String bookId,
-            @RequestPart("image") MultipartFile file) throws IOException {
+    public ApiResponse<BookResponse> updateBook(@PathVariable String bookId, @RequestPart("file") MultipartFile file)
+            throws IOException {
         return ApiResponse.<BookResponse>builder()
                 .code(1000)
                 .result(bookService.updateImageBook(bookId, file))
@@ -59,7 +56,8 @@ public class BookController {
     }
 
     @DeleteMapping("/removeChapter/{bookId}")
-    public ApiResponse<BookResponse> removeChapterWithBook(@PathVariable String bookId, @RequestBody RemoveChapterRequest request) {
+    public ApiResponse<BookResponse> removeChapterWithBook(
+            @PathVariable String bookId, @RequestBody RemoveChapterRequest request) {
         return ApiResponse.<BookResponse>builder()
                 .code(1000)
                 .result(bookService.removeChapterBook(bookId, request))
@@ -67,7 +65,8 @@ public class BookController {
     }
 
     @PutMapping("/update/ManyChapter/{bookId}")
-    public ApiResponse<BookResponse> updateBookWithChapter(@PathVariable String bookId, @RequestBody UpdateBookWithChapterRequest request) {
+    public ApiResponse<BookResponse> updateBookWithChapter(
+            @PathVariable String bookId, @RequestBody UpdateBookWithChapterRequest request) {
         return ApiResponse.<BookResponse>builder()
                 .code(1000)
                 .result(bookService.updateBookWithChapter(bookId, request))
@@ -93,8 +92,7 @@ public class BookController {
     @GetMapping("/getAllBooks")
     ApiResponse<PageResponse<BookResponse>> getAllBook(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "size", required = false, defaultValue = "10") int size
-    ) {
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         return ApiResponse.<PageResponse<BookResponse>>builder()
                 .code(1000)
                 .result(bookService.getAllBook(page, size))

@@ -1,12 +1,14 @@
 package com.example.comment_service.entity;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.neo4j.core.schema.Id;
 
-import java.time.LocalDateTime;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder

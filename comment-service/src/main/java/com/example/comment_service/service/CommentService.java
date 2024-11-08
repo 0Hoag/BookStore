@@ -1,27 +1,26 @@
 package com.example.comment_service.service;
 
-import com.example.comment_service.dto.request.AddCommentToPostRequest;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
 import com.example.comment_service.dto.request.AuthenticationRequest;
 import com.example.comment_service.dto.request.CreateCommentRequest;
 import com.example.comment_service.dto.request.UpdateCommentRequest;
 import com.example.comment_service.dto.response.*;
-import com.example.comment_service.entity.Comment;
 import com.example.comment_service.exception.AppException;
 import com.example.comment_service.exception.ErrorCode;
 import com.example.comment_service.mapper.CommentMapper;
 import com.example.comment_service.repository.CommentRepository;
 import com.example.comment_service.repository.httpClient.IdentityClient;
 import com.example.comment_service.repository.httpClient.PostClient;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,20 +49,20 @@ public class CommentService {
     }
 
     public CommentResponse getComment(String commentId) {
-        var comment = commentRepository.findById(commentId)
+        var comment = commentRepository
+                .findById(commentId)
                 .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_EXISTED));
         return commentMapper.toCommentResponse(comment);
     }
 
     public List<CommentResponse> getAllComment() {
-        return commentRepository.findAll()
-                .stream().map(commentMapper::toCommentResponse)
+        return commentRepository.findAll().stream()
+                .map(commentMapper::toCommentResponse)
                 .collect(Collectors.toList());
     }
 
     public void deleteComment(String commentId) {
-        commentRepository.findById(commentId)
-                        .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_EXISTED));
+        commentRepository.findById(commentId).orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_EXISTED));
         commentRepository.deleteById(commentId);
     }
 
@@ -74,7 +73,8 @@ public class CommentService {
     public CommentResponse updateCommentResponse(String commentId, UpdateCommentRequest request) {
         var user = getUserInformationBasic(request.getUserId(), generationToken());
         if (user == null) throw new AppException(ErrorCode.USER_NOT_EXISTED);
-        var comment = commentRepository.findById(commentId)
+        var comment = commentRepository
+                .findById(commentId)
                 .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_EXISTED));
         comment.setCreatedAt(LocalDateTime.now());
         commentMapper.updateComment(comment, request);
@@ -91,6 +91,7 @@ public class CommentService {
         ApiResponse<AuthenticationResponse> getToken = identityClient.getToken(authenticationRequest);
         return getToken.getResult().getToken();
     }
+
     private UserResponse getUserInformationBasic(String userId, String token) {
         ApiResponse<UserResponse> userResponse = identityClient.getUserInformationBasic(userId, "Bearer " + token);
         return userResponse.getResult();

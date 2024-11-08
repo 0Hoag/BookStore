@@ -1,13 +1,12 @@
 package com.example.post_service.entity;
 
-import jakarta.persistence.Lob;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
+import java.util.Date;
+
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
-import java.sql.Blob;
-import java.util.Date;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @Builder
@@ -18,6 +17,7 @@ import java.util.Date;
 public class Image {
     @MongoId
     String id;
+
     byte[] image;
     Date date = new Date();
 }

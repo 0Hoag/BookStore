@@ -64,3 +64,15 @@ spring:
             - Path=${app.api-prefix}/messaging/**
           filters:
             - StripPrefix=2
+        - id: notification-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=${app.api-prefix}/notification/**
+          filters:
+            - StripPrefix=2
+        - id: notification-websocket
+          uri: ws://localhost:8082
+          predicates:
+            - Path=${app.api-prefix}/notification/ws/**
+          filters:
+            - StripPrefix=2
