@@ -18,6 +18,9 @@ Social Platform is a full-stack application that facilitates online social inter
 - **Database**: MySQL, MongoDB  
 - **Authentication**: JWT (JSON Web Tokens), OAuth 2.0
 - **Real-time Features**: Websocket
+- **Messaging & Event Streaming**: Apache Kafka
+- **Payment Integration**: VNPay
+- **Cloud Storage**: Cloudinary
 
 ## Installation  
 
