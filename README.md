@@ -6,10 +6,13 @@ Social Platform is a full-stack application that facilitates online social inter
 
 ## Features  
 - User authentication with password and multi-platform OAuth 2.0 (Google, GitHub)
-- Create, edit, and delete posts with multimedia uploads (images/videos) 
-- Like, comment, and share functionality  
-- Real-time chat and notifications  
-- Privacy settings and content moderation  
+- Create, edit, and delete posts with multimedia uploads (images/videos)  
+- Like, comment, and share functionality to interact with posts  
+- Real-time chat and notifications using WebSockets  
+- Privacy settings and content moderation to manage posts visibility  
+- Payment gateway integration with VNPay for transactions  
+- Cloud storage for media files via Cloudinary  
+- Event-driven architecture with Apache Kafka for messaging  
 
 
 ## Technologies  
