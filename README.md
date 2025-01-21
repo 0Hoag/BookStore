@@ -27,7 +27,7 @@ Social Platform is a full-stack application that facilitates online social inter
 
 ## HotBook Screenshots
 Home Page:
-
+<img src="https://res.cloudinary.com/ddclol9ih/image/upload/v1737434603/xwk1uaarv5mdyl5snabs.png"/>
 Personal Profile:
 
 Search Books:
