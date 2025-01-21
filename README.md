@@ -1,10 +1,10 @@
-# Social Platform  
+📱 Social Platform  
 A modern web-based platform designed to connect people, enabling seamless interaction and sharing of multimedia content.
 
-## About  
+🚀 About  
 Social Platform is a full-stack application that facilitates online social interaction. It allows users to create posts with images or videos, authenticate via multiple platforms (Google, GitHub), and manage their profiles with ease. Built with a microservices architecture, this project ensures scalability and maintainability for future enhancements.
 
-## Features  
+✨ Features  
 - User authentication with password and multi-platform OAuth 2.0 (Google, GitHub)
 - Create, edit, and delete posts with multimedia uploads (images/videos)  
 - Like, comment, and share functionality to interact with posts  
@@ -15,7 +15,7 @@ Social Platform is a full-stack application that facilitates online social inter
 - Event-driven architecture with Apache Kafka for messaging  
 
 
-## Technologies  
+🛠️ Technologies  
 - **Backend**: Spring boot  
 - **Frontend**: React
 - **Database**: MySQL, MongoDB  
@@ -25,7 +25,20 @@ Social Platform is a full-stack application that facilitates online social inter
 - **Payment Integration**: VNPay
 - **Cloud Storage**: Cloudinary
 
-## HotBook Screenshots
+ 📦 Installation
+- **Clone the repository**:
+git clone https://github.com/yourusername/hotbook.git
+cd hotbook
+- **Backend Setup**:
+cd backend
+./mvnw clean install
+./mvnw spring-boot:run
+- **Frontend Setup**:
+cd frontend
+npm install
+npm start
+
+📸 HotBook Screenshots
 Home Page:
 <img src="https://res.cloudinary.com/ddclol9ih/image/upload/v1737434601/hfufdlgtwrgo5j3dejfh.png"/>
 
@@ -52,7 +65,7 @@ Payment:
 <img src="https://res.cloudinary.com/ddclol9ih/image/upload/v1737434600/u39huoyotkrvcysioukl.png"/>
 <img src="https://res.cloudinary.com/ddclol9ih/image/upload/v1737434599/eocsxxjjhn7fpjtmnqel.png"/>
 
-Admin Page:
+Admin Page: <br>
 User Listing:
 <img src="https://res.cloudinary.com/ddclol9ih/image/upload/v1737434598/eos9qdetmdnsjar0o84i.png"/>
 
