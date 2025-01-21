@@ -38,7 +38,7 @@ cd frontend
 npm install
 npm start
 
-📸 HotBook Screenshots
+📸 HotBook Screenshots <br>
 Home Page:
 <img src="https://res.cloudinary.com/ddclol9ih/image/upload/v1737434601/hfufdlgtwrgo5j3dejfh.png"/>
 
