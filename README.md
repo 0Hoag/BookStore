@@ -27,7 +27,7 @@ Social Platform is a full-stack application that facilitates online social inter
 
  📦 Installation
 - **Clone the repository**:
-git clone https://github.com/yourusername/hotbook.git
+git clone https://github.com/0Hoag/BookStore.git
 cd hotbook
 - **Backend Setup**:
 cd backend
